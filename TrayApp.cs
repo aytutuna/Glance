@@ -22,6 +22,7 @@ class TrayApp : ApplicationContext
     AreaPicker? picker;
     KeyDialog? keyDialog;
     ConnectDialog? connectDialog;
+    OrderDialog? orderDialog;
     KeyHook? keyHook;
     readonly List<string> history = new();
     Conversation? chat;
@@ -256,7 +257,7 @@ class TrayApp : ApplicationContext
         })
         { Checked = settings.PlainAnswer });
         menu.Items.Add(AiMenu());
-        if (settings.Provider == Settings.Claude)
+        if (settings.Chain().Contains(Settings.Claude))
             menu.Items.Add(ModelMenu());
         menu.Items.Add(ModeMenu());
         menu.Items.Add("Identify screens", null, (_, _) => Identify());
@@ -341,19 +342,42 @@ class TrayApp : ApplicationContext
     ToolStripMenuItem AiMenu()
     {
         var item = new ToolStripMenuItem("AI");
-        foreach (var (id, name) in Settings.Providers.Where(p => settings.Configured(p.Id)))
+        var chain = settings.Chain();
+        var names = settings.Options().ToDictionary(o => o.Entry, o => o.Label);
+        for (int i = 0; i < chain.Count; i++)
         {
-            item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
+            string entry = chain[i];
+            // picking one moves it to the top; the rest keep their order behind it
+            item.DropDownItems.Add(new ToolStripMenuItem($"{i + 1}. {names[entry]}", null, (_, _) =>
             {
-                settings.Provider = id;
-                if (!settings.Save())
-                    WarnUnsaved();
+                settings.Order = chain.Where(e => e != entry).Prepend(entry).ToList();
+                SaveLook();
             })
-            { Checked = settings.Provider == id });
+            { Checked = i == 0 });
         }
         item.DropDownItems.Add(new ToolStripSeparator());
+        item.DropDownItems.Add("Change order...", null, (_, _) => ChangeOrder());
         item.DropDownItems.Add("Connect an AI...", null, (_, _) => Connect());
         return item;
+    }
+
+    void ChangeOrder()
+    {
+        if (orderDialog != null)
+        {
+            orderDialog.Activate();
+            return;
+        }
+        var dialog = orderDialog = new OrderDialog(Resolve(null), settings);
+        dialog.FormClosed += (_, _) =>
+        {
+            orderDialog = null;
+            if (dialog.Changed)
+                SaveLook();
+            dialog.Dispose();
+        };
+        dialog.Show();
+        dialog.Activate();
     }
 
     void Connect()
@@ -382,7 +406,7 @@ class TrayApp : ApplicationContext
 
     ToolStripMenuItem ModelMenu()
     {
-        var item = new ToolStripMenuItem("Model");
+        var item = new ToolStripMenuItem("Claude CLI model");
         foreach (var (id, name) in Settings.Models)
         {
             item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>

@@ -2,33 +2,42 @@ namespace Glance;
 
 static class Ai
 {
+    // Each entry in the order has its own limit, so when one runs out the next carries on.
     public static IProvider Create(Settings s)
     {
-        string id = s.Provider;
-        if (id is Settings.Claude or "anthropic")
-            return ClaudeChain(s);
-        var keys = Keys(s, id);
-        string url = BaseOf(id, s.CustomUrl, keys.Length > 0);
-        string model = s.ProviderModels.GetValueOrDefault(id) ?? "";
-        return keys.Length > 1
-            ? new Failover(id, keys.Select(key => (Make(id, url, key), model)).ToArray())
-            : Make(id, url, keys.FirstOrDefault());
-    }
-
-    // The CLI and each API key have separate limits, so when one runs out the next carries on.
-    // The chain stays within Claude: other companies only see screenshots when picked by hand.
-    static IProvider ClaudeChain(Settings s)
-    {
-        string apiModel = s.ProviderModels.GetValueOrDefault("anthropic") ?? Settings.Models[0].Id;
-        var api = s.GetKeys("anthropic").Select(key => ((IProvider)new ClaudeApi(ClaudeApi.DefaultUrl, key), apiModel));
-        var cli = new[] { ((IProvider)new ClaudeCli(), s.Model) };
-        return new Failover(s.Provider, (s.Provider == Settings.Claude ? cli.Concat(api) : api.Concat(cli)).ToArray());
+        var chain = s.Chain();
+        var steps = new List<(IProvider, string)>();
+        foreach (var entry in chain)
+        {
+            if (entry == Settings.Claude)
+            {
+                steps.Add((new ClaudeCli(), s.Model));
+                continue;
+            }
+            string id = entry.Split(':')[0];
+            string? key = entry.Contains(':') ? s.KeyFor(entry) : null;
+            string model = s.ProviderModels.GetValueOrDefault(id) ?? (id == "anthropic" ? Settings.Models[0].Id : "");
+            // an unreadable key or a broken address drops that one entry, not the whole order
+            if (entry.Contains(':') && key == null || model.Length == 0)
+                continue;
+            try
+            {
+                steps.Add((Make(id, BaseOf(id, s.CustomUrl, key != null), key), model));
+            }
+            catch (AiException)
+            {
+            }
+        }
+        if (steps.Count == 0)
+            throw new AiException("None of the AIs in the order can be used. Check them under AI in the tray menu.");
+        return new Failover(string.Join("|", chain), steps.ToArray());
     }
 
     static IProvider Make(string id, string url, string? key)
     {
         return id switch
         {
+            "anthropic" => new ClaudeApi(ClaudeApi.DefaultUrl, key!),
             "gemini" => new GeminiProvider(key!),
             "openai" => new OpenAiProvider("OpenAI", url, key, TimeSpan.FromSeconds(90)),
             _ => new OpenAiProvider(new Uri(url).Host, url, key, TimeSpan.FromMinutes(5)),

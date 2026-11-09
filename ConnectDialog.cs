@@ -252,6 +252,8 @@ class ConnectDialog : Form
             settings.CustomUrl = address;
         settings.ProviderModels[id] = picked;
         settings.Provider = id;
+        if (!settings.HasKey(id))
+            settings.Include(id);
         Changed = true;
         Close();
     }

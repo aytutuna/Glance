@@ -61,6 +61,60 @@ class Settings
     public Dictionary<string, string> ProviderModels { get; set; } = new();
     // DPAPI-encrypted for this Windows account, base64; never stored as plain text
     public Dictionary<string, List<string>> ApiKeys { get; set; } = new();
+    // tried from the top: "claude" is the CLI, provider:tag is one saved key, a bare provider a keyless one
+    public List<string> Order { get; set; } = new();
+
+    // names a saved key without revealing anything about the key itself
+    static string Tag(string stored)
+    {
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(stored)))[..8].ToLowerInvariant();
+    }
+
+    public List<(string Entry, string Label)> Options()
+    {
+        var list = new List<(string, string)> { (Claude, "Claude CLI") };
+        foreach (var (id, name) in Providers.Skip(1))
+        {
+            if (id != "anthropic" && !Configured(id))
+                continue;
+            var stored = ApiKeys.GetValueOrDefault(id) ?? new();
+            if (stored.Count == 0 && id == "custom")
+                list.Add((id, Uri.TryCreate(CustomUrl, UriKind.Absolute, out var u) ? $"Custom ({u.Host})" : "Custom"));
+            foreach (var s in stored)
+            {
+                string? key = Open(s);
+                string end = key == null ? "key can't be read" : key.Length >= 12 ? $"key ending {key[^4..]}" : "key";
+                list.Add(($"{id}:{Tag(s)}", $"{name}, {end}"));
+            }
+        }
+        return list;
+    }
+
+    public List<string> Chain()
+    {
+        var known = Options().Select(o => o.Entry).ToList();
+        var chain = Order.Where(known.Contains).Distinct().ToList();
+        if (chain.Count > 0)
+            return chain;
+        // until an order is saved: the CLI, then each Claude API key
+        return known.Where(e => e == Claude || e.StartsWith("anthropic:")).ToList();
+    }
+
+    // a newly connected AI goes to the end of the order
+    public void Include(string entry)
+    {
+        if (Order.Count == 0)
+            Order = Chain();
+        if (!Order.Contains(entry))
+            Order.Add(entry);
+    }
+
+    public string? KeyFor(string entry)
+    {
+        int at = entry.IndexOf(':');
+        var stored = ApiKeys.GetValueOrDefault(entry[..at])?.FirstOrDefault(s => Tag(s) == entry[(at + 1)..]);
+        return stored == null ? null : Open(stored);
+    }
 
     static string? Open(string stored)
     {
@@ -106,11 +160,14 @@ class Settings
             return;
         if (!ApiKeys.TryGetValue(id, out var keys))
             ApiKeys[id] = keys = new();
-        keys.Add(Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(key), null, DataProtectionScope.CurrentUser)));
+        string stored = Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(key), null, DataProtectionScope.CurrentUser));
+        keys.Add(stored);
+        Include($"{id}:{Tag(stored)}");
     }
 
     public void RemoveKey(string id, int index)
     {
+        Order.Remove($"{id}:{Tag(ApiKeys[id][index])}");
         ApiKeys[id].RemoveAt(index);
         if (ApiKeys[id].Count == 0)
             ApiKeys.Remove(id);
@@ -160,6 +217,7 @@ class Settings
             }
             settings.ApiKeys ??= new();
             settings.ProviderModels ??= new();
+            settings.Order ??= new();
             if (!Providers.Any(p => p.Id == settings.Provider) || !settings.Configured(settings.Provider))
                 settings.Provider = Claude;
             if (migrate)
