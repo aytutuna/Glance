@@ -150,7 +150,7 @@ class ClaudeApi(string url, string key) : IProvider
             return Api.Tidy(message, key);
         try
         {
-            using var doc = JsonDocument.Parse(message[start..]);
+            using var doc = JsonDocument.Parse(message[start..].TrimEnd('\'', ' '));
             return Api.Message(doc.RootElement, key);
         }
         catch (JsonException)
