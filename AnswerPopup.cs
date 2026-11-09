@@ -30,6 +30,7 @@ class AnswerPopup : OverlayForm
     {
         this.text = text;
         this.screen = screen;
+        Look = LookOf(look);
         area = look is { UseArea: true } ? look.AnswerArea : null;
         centered = area == null && look is { CenterAnswer: true };
         plain = look is { PlainAnswer: true };
@@ -209,6 +210,15 @@ class AnswerPopup : OverlayForm
     }
 
     Font TextFont => fit ?? font;
+
+    public string Device => screen.DeviceName;
+
+    public string Look { get; }
+
+    public static string LookOf(Settings? s)
+    {
+        return s == null ? "" : $"{s.PlainAnswer}|{s.UseArea}|{s.CenterAnswer}|{string.Join(",", s.AnswerArea ?? Array.Empty<double>())}";
+    }
 
     static Cursor? blank;
     static Cursor Blank => blank ??= new Cursor(new Bitmap(32, 32).GetHicon());

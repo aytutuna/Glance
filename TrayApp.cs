@@ -592,12 +592,17 @@ class TrayApp : ApplicationContext
 
     async Task Read(int delayMs, bool area, CancellationToken ct)
     {
-        ClosePopup();
+        var screen = Resolve(settings.ReadDevice);
+        // an answer on another screen stays up while the next one is read;
+        // on the screen being read it would end up in the screenshot
+        bool keep = popup is { IsDisposed: false } open && open.Device != screen.DeviceName &&
+            open.Device == Resolve(settings.ShowDevice).DeviceName && open.Look == AnswerPopup.LookOf(settings);
+        if (!keep)
+            ClosePopup();
         CloseLabels();
         var provider = Ai.Create(settings);
         string model = settings.ActiveModel();
         await Task.Delay(delayMs + 150, ct);
-        var screen = Resolve(settings.ReadDevice);
         using var shot = await Task.Run(() => Grabber.Grab(screen), ct);
         ct.ThrowIfCancellationRequested();
         Rectangle? crop = null;
@@ -610,7 +615,19 @@ class TrayApp : ApplicationContext
         var jpeg = await Task.Run(() => Grabber.Encode(shot, crop), ct);
         ct.ThrowIfCancellationRequested();
 
-        var mine = popup = NewPopup("Reading...", true);
+        AnswerPopup mine;
+        if (keep && popup is { IsDisposed: false } kept)
+        {
+            chat = null;
+            thread = shown = "";
+            kept.Busy("Reading...");
+            mine = kept;
+        }
+        else
+        {
+            ClosePopup();
+            mine = popup = NewPopup("Reading...", true);
+        }
         await Reply(new Conversation(jpeg, model, settings.Mode, provider), mine, ct);
     }
 
