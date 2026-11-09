@@ -365,9 +365,14 @@ class TrayApp : ApplicationContext
             var jpeg = await Task.Run(() => Grabber.Encode(shot, crop), ct);
             ct.ThrowIfCancellationRequested();
 
-            popup = NewPopup("Reading...", true);
+            var mine = popup = NewPopup("Reading...", true);
 
-            string answer = (await ClaudeCli.AskAsync(jpeg, ct)).Replace("**", "").Trim();
+            string answer = Clean(await ClaudeCli.AskAsync(jpeg, "claude-opus-5-5", partial =>
+            {
+                partial = Clean(partial);
+                if (partial.Length > 0 && !ct.IsCancellationRequested && popup == mine)
+                    mine.Stream(partial);
+            }, ct));
             ct.ThrowIfCancellationRequested();
             if (answer.Length == 0)
                 throw new ClaudeException("Claude returned no answer.");
@@ -393,6 +398,12 @@ class TrayApp : ApplicationContext
             }
             cts.Dispose();
         }
+    }
+
+    // markers can be split across chunks, so this runs on the whole text
+    static string Clean(string text)
+    {
+        return text.Replace("**", "").Trim();
     }
 
     async Task<Rectangle?> Pick(Screen screen, Bitmap shot, CancellationToken ct)

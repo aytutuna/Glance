@@ -10,7 +10,10 @@ class AnswerPopup : OverlayForm
     readonly Panel bar;
     readonly Label copy, close;
     readonly System.Windows.Forms.Timer reset = new() { Interval = 1500 };
+    readonly System.Windows.Forms.Timer flush = new() { Interval = 50 };
     string text;
+    string? pending;
+    long lastLayout;
     Rectangle target;
 
     public event Action? CloseClicked;
@@ -50,6 +53,13 @@ class AnswerPopup : OverlayForm
             copy.Text = "Copy";
         };
 
+        flush.Tick += (_, _) =>
+        {
+            flush.Stop();
+            if (pending != null)
+                Render(pending);
+        };
+
         Fit(text);
         Bounds = target;
     }
@@ -87,6 +97,28 @@ class AnswerPopup : OverlayForm
     {
         this.text = text;
         SetReading(false);
+        Render(text);
+    }
+
+    // partial text: relayout at most every 50 ms, and Copy stays off until SetText
+    public void Stream(string partial)
+    {
+        if (Environment.TickCount64 - lastLayout >= 50)
+        {
+            Render(partial);
+            return;
+        }
+        pending = partial;
+        flush.Start();
+    }
+
+    void Render(string text)
+    {
+        flush.Stop();
+        pending = null;
+        lastLayout = Environment.TickCount64;
+        var scroll = panel.VerticalScroll;
+        bool follow = scroll.Value + panel.ClientSize.Height >= scroll.Maximum - 2;
         // the monitor may have been unplugged or rescaled since the popup was created
         screen = Screen.AllScreens.FirstOrDefault(s => s.DeviceName == screen.DeviceName) ?? Screen.FromHandle(Handle);
         double now = Native.ScaleFor(screen);
@@ -102,6 +134,8 @@ class AnswerPopup : OverlayForm
         }
         Fit(text);
         EnsureBounds();
+        if (follow)
+            panel.AutoScrollPosition = new Point(0, panel.DisplayRectangle.Height);
     }
 
     Font NewFont()
@@ -163,6 +197,7 @@ class AnswerPopup : OverlayForm
         if (disposing)
         {
             reset.Dispose();
+            flush.Dispose();
             font.Dispose();
         }
         base.Dispose(disposing);

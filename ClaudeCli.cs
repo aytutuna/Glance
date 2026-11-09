@@ -21,12 +21,12 @@ static class ClaudeCli
     static readonly UTF8Encoding Utf8 = new(false);
     static bool? supportsEffort;
 
-    public static async Task<string> AskAsync(byte[] jpeg, CancellationToken ct)
+    public static async Task<string> AskAsync(byte[] jpeg, string model, Action<string> onText, CancellationToken ct)
     {
         var args = new List<string>
         {
             "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
-            "--model", "claude-opus-5-5", "--tools=", "--no-session-persistence", "--strict-mcp-config",
+            "--include-partial-messages", "--model", model, "--tools=", "--no-session-persistence", "--strict-mcp-config",
             "--setting-sources=", "--disable-slash-commands", "--system-prompt", Prompt,
         };
 
@@ -61,7 +61,7 @@ static class ClaudeCli
         });
 
         var write = WriteInput(proc, message);
-        var read = ReadResult(proc.StandardOutput);
+        var read = ReadResult(proc.StandardOutput, onText);
         var errors = proc.StandardError.ReadToEndAsync();
 
         try
@@ -119,10 +119,11 @@ static class ClaudeCli
         }
     }
 
-    static async Task<(string? Answer, bool Failed)> ReadResult(StreamReader stdout)
+    static async Task<(string? Answer, bool Failed)> ReadResult(StreamReader stdout, Action<string> onText)
     {
         string? answer = null;
         bool failed = false;
+        var streamed = new StringBuilder();
         string? line;
         while ((line = await stdout.ReadLineAsync()) != null)
         {
@@ -131,8 +132,18 @@ static class ClaudeCli
                 using var doc = JsonDocument.Parse(line);
                 var root = doc.RootElement;
                 if (root.ValueKind != JsonValueKind.Object ||
-                    !root.TryGetProperty("type", out var type) || type.ValueKind != JsonValueKind.String ||
-                    type.GetString() != "result")
+                    !root.TryGetProperty("type", out var type) || type.ValueKind != JsonValueKind.String)
+                    continue;
+                if (type.GetString() == "stream_event")
+                {
+                    if (TextDelta(root) is string chunk)
+                    {
+                        streamed.Append(chunk);
+                        onText(streamed.ToString());
+                    }
+                    continue;
+                }
+                if (type.GetString() != "result")
                     continue;
                 answer = root.TryGetProperty("result", out var r) && r.ValueKind == JsonValueKind.String ? r.GetString()! : "";
                 failed = root.TryGetProperty("is_error", out var e) && e.ValueKind == JsonValueKind.True;
@@ -142,6 +153,18 @@ static class ClaudeCli
             }
         }
         return (answer, failed);
+    }
+
+    static string? TextDelta(JsonElement root)
+    {
+        if (root.TryGetProperty("parent_tool_use_id", out var parent) && parent.ValueKind == JsonValueKind.String)
+            return null;
+        if (!root.TryGetProperty("event", out var ev) || ev.ValueKind != JsonValueKind.Object ||
+            !ev.TryGetProperty("delta", out var delta) || delta.ValueKind != JsonValueKind.Object ||
+            !delta.TryGetProperty("type", out var dt) || dt.GetString() != "text_delta" ||
+            !delta.TryGetProperty("text", out var text) || text.ValueKind != JsonValueKind.String)
+            return null;
+        return text.GetString();
     }
 
     // null when the probe did not finish, so the next read tries again
