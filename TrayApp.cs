@@ -476,7 +476,7 @@ class TrayApp : ApplicationContext
 
     async Task Reply(Conversation c, AnswerPopup mine, CancellationToken ct)
     {
-        string answer = Clean(await new ClaudeCli().AskAsync(c, partial =>
+        string answer = Clean(await c.Provider.AskAsync(c, partial =>
         {
             partial = Clean(partial);
             if (partial.Length > 0 && !ct.IsCancellationRequested && popup == mine)
