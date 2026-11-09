@@ -2,12 +2,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Glance;
 
 class ClaudeCli : IProvider
 {
-    const string NotFound = "The claude command was not found. Install the CLI and sign in, then try again.";
+    const string NotFound = "Glance can't find the claude command. Install the Claude CLI, run claude once to sign in, then try again.";
 
     const string TimedOut = "Claude took too long to answer.";
 
@@ -199,40 +200,89 @@ class ClaudeCli : IProvider
         }
     }
 
+    static (string Program, string? Script)? found;
+
     static Process? Launch(IEnumerable<string> args)
     {
         var workDir = Path.Combine(Path.GetTempPath(), "Glance");
         Directory.CreateDirectory(workDir);
 
-        var fallback = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "bin", "claude.exe");
-
-        foreach (var file in new[] { "claude", fallback })
+        // not cached while missing, so installing the CLI works without restarting Glance
+        found ??= Find();
+        if (found is not var (program, script))
+            return null;
+        var psi = new ProcessStartInfo(program)
         {
-            var psi = new ProcessStartInfo(file)
-            {
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                StandardInputEncoding = Utf8,
-                StandardOutputEncoding = Utf8,
-                StandardErrorEncoding = Utf8,
-                WorkingDirectory = workDir,
-            };
-            foreach (var a in args)
-                psi.ArgumentList.Add(a);
+            CreateNoWindow = true,
+            UseShellExecute = false,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            StandardInputEncoding = Utf8,
+            StandardOutputEncoding = Utf8,
+            StandardErrorEncoding = Utf8,
+            WorkingDirectory = workDir,
+        };
+        if (script != null)
+            psi.ArgumentList.Add(script);
+        foreach (var a in args)
+            psi.ArgumentList.Add(a);
 
-            try
-            {
-                return Process.Start(psi);
-            }
-            catch (Win32Exception)
-            {
-            }
+        try
+        {
+            return Process.Start(psi);
+        }
+        catch (Win32Exception)
+        {
+            found = null;
+            return null;
+        }
+    }
+
+    // PATH is read fresh from the registry too, since Glance may have started before the CLI was installed
+    static IEnumerable<string> Dirs()
+    {
+        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        string roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        return new[] { EnvironmentVariableTarget.Process, EnvironmentVariableTarget.User, EnvironmentVariableTarget.Machine }
+            .SelectMany(t => (Environment.GetEnvironmentVariable("PATH", t) ?? "").Split(';'))
+            .Select(d => Environment.ExpandEnvironmentVariables(d.Trim().Trim('"')))
+            .Append(Path.Combine(home, ".local", "bin"))
+            .Append(Path.Combine(roaming, "npm"))
+            .Where(d => d.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static (string Program, string? Script)? Find()
+    {
+        foreach (var dir in Dirs())
+        {
+            var exe = Path.Combine(dir, "claude.exe");
+            if (File.Exists(exe))
+                return (exe, null);
+            var shim = Path.Combine(dir, "claude.cmd");
+            if (File.Exists(shim) && Shim(shim) is { } target)
+                return target;
         }
         return null;
+    }
+
+    // An npm install leaves a batch file. Running what it points to directly keeps cmd.exe
+    // from reinterpreting the arguments.
+    public static (string Program, string? Script)? Shim(string path)
+    {
+        // the last quoted path is the one it runs; earlier ones check for a node.exe beside it
+        var m = Regex.Matches(File.ReadAllText(path), @"%~?dp0%?\\([^""%]+?\.(exe|js))""", RegexOptions.IgnoreCase).LastOrDefault();
+        if (m == null)
+            return null;
+        string dir = Path.GetDirectoryName(path)!;
+        string target = Path.GetFullPath(Path.Combine(dir, m.Groups[1].Value));
+        if (!File.Exists(target))
+            return null;
+        if (m.Groups[2].Value.Equals("exe", StringComparison.OrdinalIgnoreCase))
+            return (target, null);
+        var node = Dirs().Prepend(dir).Select(d => Path.Combine(d, "node.exe")).FirstOrDefault(File.Exists);
+        return node == null ? null : (node, target);
     }
 
     static void Kill(Process proc)
