@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
 namespace Glance;
@@ -21,7 +22,7 @@ class TrayApp : ApplicationContext
     AreaPicker? picker;
     KeyDialog? keyDialog;
     KeyHook? keyHook;
-    string? lastAnswer;
+    readonly List<string> history = new();
 
     public TrayApp()
     {
@@ -230,17 +231,20 @@ class TrayApp : ApplicationContext
             Checked = autostart,
         });
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add(new ToolStripMenuItem("Copy last answer", null, (_, _) => CopyLast())
-        {
-            Enabled = lastAnswer != null,
-        });
+        var recent = new ToolStripMenuItem("Recent answers") { Enabled = history.Count > 0 };
+        foreach (var answer in history)
+            recent.DropDownItems.Add(Preview(answer), null, (_, _) => Copy(answer));
+        menu.Items.Add(recent);
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Exit", null, (_, _) => Quit());
     }
 
-    void CopyLast()
+    static string Preview(string answer)
     {
-        Copy(lastAnswer!);
+        string line = Regex.Replace(answer, @"\s+", " ");
+        if (line.Length > 60)
+            line = line[..57] + "...";
+        return line.Replace("&", "&&");
     }
 
     public static bool Copy(string text)
@@ -367,7 +371,9 @@ class TrayApp : ApplicationContext
             ct.ThrowIfCancellationRequested();
             if (answer.Length == 0)
                 throw new ClaudeException("Claude returned no answer.");
-            lastAnswer = answer;
+            history.Insert(0, answer);
+            if (history.Count > 10)
+                history.RemoveAt(10);
             ShowText(answer);
         }
         catch (OperationCanceledException)
