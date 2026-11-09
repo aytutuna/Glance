@@ -7,12 +7,17 @@ class KeyHook : IDisposable
     readonly Native.HookProc proc;
     readonly SynchronizationContext ui = SynchronizationContext.Current!;
     readonly HashSet<Keys> held = new();
-    readonly HashSet<Keys> swallowedDown = new();
+    readonly Dictionary<Keys, long> swallowedDown = new();
     IntPtr hook;
     Keys lone;
     long loneStart;
     bool fakeCtrl;
     bool away;
+
+    // a repeat gap longer than this means the key went up unseen
+    const long RepeatGap = 1500;
+
+    public long LastSwallow { get; private set; }
 
     public Func<bool>? Swallow { get; init; }
     public Func<Keys, bool>? Bound { get; init; }
@@ -82,12 +87,19 @@ class KeyHook : IDisposable
         bool down = msg is Native.WM_KEYDOWN or Native.WM_SYSKEYDOWN;
         bool inDialog = Swallow?.Invoke() == true;
         Refocus(inDialog);
+        long now = Environment.TickCount64;
+        if (down && swallowedDown.TryGetValue(key, out long last) && now - last > RepeatGap)
+        {
+            swallowedDown.Remove(key);
+            held.Remove(key);
+        }
+        Prune(Keys.None);
         bool swallow;
         if (down)
         {
             bool first = !held.Contains(key);
             // a repeat of a key whose first down got through must get through too
-            swallow = swallowedDown.Contains(key) || (inDialog && first);
+            swallow = swallowedDown.ContainsKey(key) || (inDialog && first);
             if (!swallow && first && key == Keys.PrintScreen && Bound != null && Bound(Compose(key)))
             {
                 swallow = true;
@@ -95,7 +107,10 @@ class KeyHook : IDisposable
                     Native.TapUnassigned();
             }
             if (swallow)
-                swallowedDown.Add(key);
+            {
+                swallowedDown[key] = now;
+                LastSwallow = now;
+            }
         }
         else
         {
@@ -121,7 +136,7 @@ class KeyHook : IDisposable
         if (!inDialog && !away)
         {
             away = true;
-            held.ExceptWith(swallowedDown);
+            held.ExceptWith(swallowedDown.Keys);
         }
         else if (inDialog && away)
         {
@@ -132,7 +147,7 @@ class KeyHook : IDisposable
 
     void Prune(Keys except)
     {
-        held.RemoveWhere(k => k != except && !swallowedDown.Contains(k) && (Native.GetAsyncKeyState((int)k) & 0x8000) == 0);
+        held.RemoveWhere(k => k != except && !swallowedDown.ContainsKey(k) && (Native.GetAsyncKeyState((int)k) & 0x8000) == 0);
     }
 
     Keys Compose(Keys key)
@@ -176,7 +191,7 @@ class KeyHook : IDisposable
         Prune(key);
 
         bool modifier = ModifierFlag(key) != Keys.None;
-        if (held.Count == 1 && modifier)
+        if (active && held.Count == 1 && modifier)
         {
             lone = key;
             loneStart = Environment.TickCount64;

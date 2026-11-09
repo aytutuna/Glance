@@ -52,7 +52,7 @@ class AnswerPopup : OverlayForm
             old.Dispose();
         }
         Fit(text);
-        Bounds = target;
+        EnsureBounds();
     }
 
     Font NewFont()

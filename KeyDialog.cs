@@ -129,7 +129,7 @@ class KeyDialog : Form
         tick.Tick += (_, _) =>
         {
             hook?.Poll();
-            if (closeAt != 0 && Environment.TickCount64 >= closeAt)
+            if (closeAt != 0 && Environment.TickCount64 >= Math.Max(closeAt, (hook?.LastSwallow ?? 0) + 1500))
                 Close();
         };
         tick.Start();
