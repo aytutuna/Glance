@@ -27,9 +27,11 @@ class Settings
         ("summarize", "Summarize"),
     };
 
+    public const string Claude = "claude";
+
     public static readonly (string Id, string Name)[] Providers =
     {
-        ("claude", "Claude"),
+        (Claude, "Claude"),
         ("openai", "OpenAI"),
         ("gemini", "Gemini"),
         ("custom", "Custom"),
@@ -42,7 +44,7 @@ class Settings
     public Keys RegionKey { get; set; } = Keys.Control | Keys.Shift | Keys.D;
     public string Model { get; set; } = Models[0].Id;
     public string Mode { get; set; } = Modes[0].Id;
-    public string Provider { get; set; } = Providers[0].Id;
+    public string Provider { get; set; } = Claude;
     public string? CustomUrl { get; set; }
     public Dictionary<string, string> ProviderModels { get; set; } = new();
     // DPAPI-encrypted for this Windows account, base64; never stored as plain text
@@ -76,17 +78,17 @@ class Settings
     {
         ApiKeys.Remove(id);
         if (!Configured(Provider))
-            Provider = Providers[0].Id;
+            Provider = Claude;
     }
 
     public string ActiveModel()
     {
-        return Provider == Providers[0].Id ? Model : ProviderModels.GetValueOrDefault(Provider) ?? "";
+        return Provider == Claude ? Model : ProviderModels.GetValueOrDefault(Provider) ?? "";
     }
 
     public bool Configured(string id)
     {
-        if (id == Providers[0].Id)
+        if (id == Claude)
             return true;
         if (!ProviderModels.TryGetValue(id, out var model) || model.Length == 0)
             return false;
@@ -110,7 +112,7 @@ class Settings
             settings.ApiKeys ??= new();
             settings.ProviderModels ??= new();
             if (!Providers.Any(p => p.Id == settings.Provider) || !settings.Configured(settings.Provider))
-                settings.Provider = Providers[0].Id;
+                settings.Provider = Claude;
             if (migrate)
                 settings.Save();
             return settings;

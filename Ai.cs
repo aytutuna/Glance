@@ -5,7 +5,7 @@ static class Ai
     public static IProvider Create(Settings s)
     {
         string id = s.Provider;
-        if (id == "claude")
+        if (id == Settings.Claude)
             return new ClaudeCli();
         string? key = Key(s, id);
         string url = BaseOf(id, s.CustomUrl, key != null);

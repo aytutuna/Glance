@@ -21,6 +21,7 @@ class TrayApp : ApplicationContext
     AnswerPopup? popup;
     AreaPicker? picker;
     KeyDialog? keyDialog;
+    ConnectDialog? connectDialog;
     KeyHook? keyHook;
     readonly List<string> history = new();
     Conversation? chat;
@@ -223,7 +224,9 @@ class TrayApp : ApplicationContext
         menu.Items.Add("Read an area", null, (_, _) => Trigger(300, true));
         menu.Items.Add(ScreenMenu("Read from", settings.ReadDevice, d => settings.ReadDevice = d));
         menu.Items.Add(ScreenMenu("Show answer on", settings.ShowDevice, d => settings.ShowDevice = d));
-        menu.Items.Add(ModelMenu());
+        menu.Items.Add(AiMenu());
+        if (settings.Provider == Settings.Claude)
+            menu.Items.Add(ModelMenu());
         menu.Items.Add(ModeMenu());
         menu.Items.Add("Identify screens", null, (_, _) => Identify());
         menu.Items.Add($"Read key ({KeyDialog.KeyName(settings.Hotkey)})...", null, (_, _) => ChangeKey(KeyJob.Read));
@@ -241,6 +244,43 @@ class TrayApp : ApplicationContext
         menu.Items.Add(recent);
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Exit", null, (_, _) => Quit());
+    }
+
+    ToolStripMenuItem AiMenu()
+    {
+        var item = new ToolStripMenuItem("AI");
+        foreach (var (id, name) in Settings.Providers.Where(p => settings.Configured(p.Id)))
+        {
+            item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
+            {
+                settings.Provider = id;
+                if (!settings.Save())
+                    WarnUnsaved();
+            })
+            { Checked = settings.Provider == id });
+        }
+        item.DropDownItems.Add(new ToolStripSeparator());
+        item.DropDownItems.Add("Connect an AI...", null, (_, _) => Connect());
+        return item;
+    }
+
+    void Connect()
+    {
+        if (connectDialog != null)
+        {
+            connectDialog.Activate();
+            return;
+        }
+        var dialog = connectDialog = new ConnectDialog(Resolve(null), settings);
+        dialog.FormClosed += (_, _) =>
+        {
+            connectDialog = null;
+            if (dialog.Changed && !settings.Save())
+                WarnUnsaved();
+            dialog.Dispose();
+        };
+        dialog.Show();
+        dialog.Activate();
     }
 
     ToolStripMenuItem ModelMenu()
@@ -523,6 +563,7 @@ class TrayApp : ApplicationContext
         picker?.Close();
         ClosePopup();
         keyDialog?.Close();
+        connectDialog?.Close();
         keyHook?.Dispose();
         hotkeyWindow.Dispose();
         tray.Visible = false;
