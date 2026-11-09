@@ -89,7 +89,6 @@ class TrayApp : ApplicationContext
         if (KeyDialog.UsesHook(settings.Hotkey) || KeyDialog.UsesHook(settings.CloseKey))
         {
             keyHook = new KeyHook { Bound = keys => keys == settings.Hotkey || keys == settings.CloseKey };
-            // TODO: a Ctrl+click still counts as a lone press; ruling it out needs a mouse hook
             keyHook.Lone += (key, ms) =>
             {
                 if (ms < 500)

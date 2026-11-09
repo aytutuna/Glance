@@ -8,7 +8,9 @@ class KeyHook : IDisposable
     readonly SynchronizationContext ui = SynchronizationContext.Current!;
     readonly HashSet<Keys> held = new();
     readonly Dictionary<Keys, long> swallowedDown = new();
+    readonly Native.HookProc mouseProc;
     IntPtr hook;
+    IntPtr mouseHook;
     Keys lone;
     long loneStart;
     bool fakeCtrl;
@@ -45,6 +47,7 @@ class KeyHook : IDisposable
     public KeyHook()
     {
         proc = Callback;
+        mouseProc = MouseCallback;
         for (int vk = 7; vk < 255; vk++)
         {
             if (vk is 0x10 or 0x11 or 0x12)
@@ -53,6 +56,16 @@ class KeyHook : IDisposable
                 held.Add((Keys)vk);
         }
         hook = Native.SetWindowsHookEx(Native.WH_KEYBOARD_LL, proc, Native.GetModuleHandle(null), 0);
+        mouseHook = Native.SetWindowsHookEx(Native.WH_MOUSE_LL, mouseProc, Native.GetModuleHandle(null), 0);
+    }
+
+    // a click or scroll with a modifier held is a chord, not a lone press
+    IntPtr MouseCallback(int code, IntPtr wParam, IntPtr lParam)
+    {
+        if (code >= 0 && (int)wParam is Native.WM_LBUTTONDOWN or Native.WM_RBUTTONDOWN or Native.WM_MBUTTONDOWN
+            or Native.WM_XBUTTONDOWN or Native.WM_MOUSEWHEEL)
+            lone = Keys.None;
+        return Native.CallNextHookEx(IntPtr.Zero, code, wParam, lParam);
     }
 
     public static Keys ModifierFlag(Keys key)
@@ -214,6 +227,9 @@ class KeyHook : IDisposable
         if (hook != IntPtr.Zero)
             Native.UnhookWindowsHookEx(hook);
         hook = IntPtr.Zero;
+        if (mouseHook != IntPtr.Zero)
+            Native.UnhookWindowsHookEx(mouseHook);
+        mouseHook = IntPtr.Zero;
         Combo = null;
         Lone = null;
         Released = null;
