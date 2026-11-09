@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Glance;
 
-static class ClaudeCli
+class ClaudeCli : IProvider
 {
     const string NotFound = "The claude command was not found. Install the CLI and sign in, then try again.";
 
@@ -14,7 +14,7 @@ static class ClaudeCli
     static readonly UTF8Encoding Utf8 = new(false);
     static bool? supportsEffort;
 
-    public static async Task<string> AskAsync(Conversation chat, Action<string> onText, CancellationToken ct)
+    public async Task<string> AskAsync(Conversation chat, Action<string> onText, CancellationToken ct)
     {
         var args = new List<string>
         {
@@ -33,7 +33,7 @@ static class ClaudeCli
 
         using var proc = Launch(args);
         if (proc == null)
-            throw new ClaudeException(NotFound);
+            throw new AiException(NotFound);
 
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(ct);
         limit.CancelAfter(TimeSpan.FromSeconds(90));
@@ -70,17 +70,17 @@ static class ClaudeCli
                 // so the kill registration may already be disposed by the time it would run
                 Kill(proc);
                 ct.ThrowIfCancellationRequested();
-                throw new ClaudeException(TimedOut);
+                throw new AiException(TimedOut);
             }
 
             // the kill closes the pipes, so the awaits above can finish normally after a timeout
             ct.ThrowIfCancellationRequested();
             if (limit.IsCancellationRequested)
-                throw new ClaudeException(TimedOut);
+                throw new AiException(TimedOut);
 
             var (result, failed) = read.Result;
             if (failed)
-                throw new ClaudeException(string.IsNullOrEmpty(result) ? "Claude reported an error." : result);
+                throw new AiException(string.IsNullOrEmpty(result) ? "Claude reported an error." : result);
             if (!string.IsNullOrEmpty(result))
                 return result;
 
@@ -89,9 +89,9 @@ static class ClaudeCli
                 var tail = string.Join('\n', errors.Result.Trim().Split('\n').TakeLast(5)).Trim();
                 if (tail.Length > 600)
                     tail = tail[^600..];
-                throw new ClaudeException(tail.Length > 0 ? tail : $"Claude exited with code {proc.ExitCode}.");
+                throw new AiException(tail.Length > 0 ? tail : $"Claude exited with code {proc.ExitCode}.");
             }
-            throw new ClaudeException("Claude returned no answer.");
+            throw new AiException("Claude returned no answer.");
         }
         finally
         {
@@ -232,5 +232,3 @@ static class ClaudeCli
         }
     }
 }
-
-class ClaudeException(string message) : Exception(message);

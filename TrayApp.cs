@@ -430,12 +430,12 @@ class TrayApp : ApplicationContext
         ct.ThrowIfCancellationRequested();
 
         var mine = popup = NewPopup("Reading...", true);
-        await Reply(new Conversation(jpeg, settings.Model, settings.Mode), mine, ct);
+        await Reply(new Conversation(jpeg, settings.Model, settings.Mode, new ClaudeCli()), mine, ct);
     }
 
     async Task Reply(Conversation c, AnswerPopup mine, CancellationToken ct)
     {
-        string answer = Clean(await ClaudeCli.AskAsync(c, partial =>
+        string answer = Clean(await new ClaudeCli().AskAsync(c, partial =>
         {
             partial = Clean(partial);
             if (partial.Length > 0 && !ct.IsCancellationRequested && popup == mine)
@@ -443,7 +443,7 @@ class TrayApp : ApplicationContext
         }, ct));
         ct.ThrowIfCancellationRequested();
         if (answer.Length == 0)
-            throw new ClaudeException("Claude returned no answer.");
+            throw new AiException("The answer was empty.");
         c.Complete(answer);
         chat = c;
         history.Insert(0, answer);
