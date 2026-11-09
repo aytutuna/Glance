@@ -6,7 +6,7 @@ namespace Glance;
 
 class TrayApp : ApplicationContext
 {
-    const int ReadId = 1, CloseId = 2, RegionId = 3;
+    const int ReadId = 1, CloseId = 2, RegionId = 3, HideId = 4;
     const string MouseScreen = "Screen with the mouse";
 
     readonly Settings settings = Settings.Load();
@@ -50,6 +50,8 @@ class TrayApp : ApplicationContext
                 Trigger(0);
             else if (id == RegionId)
                 Trigger(0, true);
+            else if (id == HideId)
+                HideAnswer();
             else
                 CloseAnswer();
         };
@@ -105,6 +107,8 @@ class TrayApp : ApplicationContext
             Trigger(0, true);
         else if (key == settings.CloseKey)
             CloseAnswer();
+        else if (key == settings.HideKey)
+            HideAnswer();
     }
 
     bool Register(int id, Keys keys)
@@ -133,10 +137,13 @@ class TrayApp : ApplicationContext
             failed.Add($"{KeyDialog.KeyName(settings.RegionKey)} (reads an area)");
         if (!Register(CloseId, settings.CloseKey))
             failed.Add($"{KeyDialog.KeyName(settings.CloseKey)} (closes the answer)");
+        if (!Register(HideId, settings.HideKey))
+            failed.Add($"{KeyDialog.KeyName(settings.HideKey)} (hides the answer text)");
 
-        if (KeyDialog.UsesHook(settings.Hotkey) || KeyDialog.UsesHook(settings.RegionKey) || KeyDialog.UsesHook(settings.CloseKey))
+        var all = new[] { settings.Hotkey, settings.RegionKey, settings.CloseKey, settings.HideKey };
+        if (all.Any(KeyDialog.UsesHook))
         {
-            keyHook = new KeyHook { Bound = keys => keys == settings.Hotkey || keys == settings.RegionKey || keys == settings.CloseKey };
+            keyHook = new KeyHook { Bound = keys => all.Contains(keys) };
             keyHook.Lone += (key, ms) =>
             {
                 if (ms < 500)
@@ -168,7 +175,7 @@ class TrayApp : ApplicationContext
             return;
         }
         Unbind();
-        int id = job switch { KeyJob.Read => ReadId, KeyJob.Close => CloseId, _ => RegionId };
+        int id = job switch { KeyJob.Read => ReadId, KeyJob.Close => CloseId, KeyJob.Hide => HideId, _ => RegionId };
         var taken = new Dictionary<Keys, KeyJob>();
         foreach (var other in Enum.GetValues<KeyJob>())
         {
@@ -185,6 +192,8 @@ class TrayApp : ApplicationContext
                     settings.Hotkey = chosen;
                 else if (job == KeyJob.Region)
                     settings.RegionKey = chosen;
+                else if (job == KeyJob.Hide)
+                    settings.HideKey = chosen;
                 else
                     settings.CloseKey = chosen;
                 bool saved = settings.Save();
@@ -203,7 +212,21 @@ class TrayApp : ApplicationContext
 
     Keys KeyOf(KeyJob job)
     {
-        return job switch { KeyJob.Read => settings.Hotkey, KeyJob.Close => settings.CloseKey, _ => settings.RegionKey };
+        return job switch { KeyJob.Read => settings.Hotkey, KeyJob.Close => settings.CloseKey, KeyJob.Hide => settings.HideKey, _ => settings.RegionKey };
+    }
+
+    // stops any answer and leaves the answer screen up, black and empty
+    void HideAnswer()
+    {
+        current?.Cancel();
+        current = null;
+        SetBusy(false);
+        chat = null;
+        thread = shown = "";
+        if (popup != null && !popup.IsDisposed)
+            popup.SetText("");
+        else if (settings.PlainAnswer)
+            popup = NewPopup("", false);
     }
 
     void CloseAnswer()
@@ -222,6 +245,7 @@ class TrayApp : ApplicationContext
             item.Dispose();
         menu.Items.Add("Read screen now", null, (_, _) => Trigger(300));
         menu.Items.Add("Read an area", null, (_, _) => Trigger(300, true));
+        menu.Items.Add("Hide answer text", null, (_, _) => HideAnswer());
         menu.Items.Add(ScreenMenu("Read from", settings.ReadDevice, d => settings.ReadDevice = d));
         menu.Items.Add(ScreenMenu("Show answer on", settings.ShowDevice, d => settings.ShowDevice = d));
         menu.Items.Add(PositionMenu());
@@ -239,6 +263,7 @@ class TrayApp : ApplicationContext
         menu.Items.Add($"Read key ({KeyDialog.KeyName(settings.Hotkey)})...", null, (_, _) => ChangeKey(KeyJob.Read));
         menu.Items.Add($"Area key ({KeyDialog.KeyName(settings.RegionKey)})...", null, (_, _) => ChangeKey(KeyJob.Region));
         menu.Items.Add($"Close key ({KeyDialog.KeyName(settings.CloseKey)})...", null, (_, _) => ChangeKey(KeyJob.Close));
+        menu.Items.Add($"Hide key ({KeyDialog.KeyName(settings.HideKey)})...", null, (_, _) => ChangeKey(KeyJob.Hide));
         bool autostart = StartValue() != null;
         menu.Items.Add(new ToolStripMenuItem("Start with Windows", null, (_, _) => SetStartWithWindows(!autostart))
         {

@@ -1,6 +1,6 @@
 namespace Glance;
 
-enum KeyJob { Read, Close, Region }
+enum KeyJob { Read, Close, Region, Hide }
 
 class KeyDialog : Form
 {
@@ -85,6 +85,7 @@ class KeyDialog : Form
         {
             KeyJob.Read => "Read the screen",
             KeyJob.Close => "Close the answer",
+            KeyJob.Hide => "Hide the answer text, keep the screen black",
             _ => "Read an area",
         };
     }

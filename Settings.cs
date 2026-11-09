@@ -53,6 +53,7 @@ class Settings
     public Keys Hotkey { get; set; } = Keys.Control | Keys.Shift | Keys.Q;
     public Keys CloseKey { get; set; } = Keys.Control | Keys.Shift | Keys.X;
     public Keys RegionKey { get; set; } = Keys.Control | Keys.Shift | Keys.D;
+    public Keys HideKey { get; set; } = Keys.Control | Keys.Shift | Keys.B;
     public string Model { get; set; } = Models[0].Id;
     public string Mode { get; set; } = Modes[0].Id;
     public string Provider { get; set; } = Claude;
@@ -147,6 +148,7 @@ class Settings
                 settings.Hotkey = new Settings().Hotkey;
             settings.CloseKey = Distinct(settings.CloseKey, settings.Hotkey);
             settings.RegionKey = Distinct(settings.RegionKey, settings.Hotkey, settings.CloseKey);
+            settings.HideKey = Distinct(settings.HideKey, settings.Hotkey, settings.CloseKey, settings.RegionKey);
             if (!Models.Any(m => m.Id == settings.Model))
                 settings.Model = Models[0].Id;
             if (!Modes.Any(m => m.Id == settings.Mode))
