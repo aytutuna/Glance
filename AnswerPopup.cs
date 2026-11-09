@@ -35,7 +35,7 @@ class AnswerPopup : OverlayForm
         plain = look is { PlainAnswer: true };
         scale = Native.ScaleFor(screen);
         font = NewFont();
-        if (area != null)
+        if (area != null || plain)
             fit = LargestFit();
 
         BackColor = plain ? Color.Black : Color.FromArgb(32, 32, 32);
@@ -212,7 +212,7 @@ class AnswerPopup : OverlayForm
 
     Font LargestFit()
     {
-        return new Font("Segoe UI", (float)(72 * scale), GraphicsUnit.Pixel);
+        return new Font("Segoe UI", (float)((plain ? 120 : 72) * scale), GraphicsUnit.Pixel);
     }
 
     void ResetFit()
@@ -319,19 +319,22 @@ class AnswerPopup : OverlayForm
     void Fit(string text)
     {
         var wa = screen.WorkingArea;
+        var b = screen.Bounds;
         var drawn = Drawn();
-        int margin = (int)(16 * scale), pad = (int)(14 * Unit);
-        int width = drawn?.Width ?? Math.Min((int)(420 * Unit), wa.Width - 2 * margin);
-        int maxHeight = drawn?.Height ?? (int)(wa.Height * (centered ? 0.85 : 0.6));
+        // plain blacks out the whole screen; the text goes in the drawn area, or across all of it
+        Rectangle? room = plain ? drawn ?? b : drawn;
+        int margin = (int)(16 * scale), pad = (int)((plain && drawn == null ? 32 : 14) * Unit);
+        int width = room?.Width ?? Math.Min((int)(420 * Unit), wa.Width - 2 * margin);
+        int maxHeight = room?.Height ?? (int)(wa.Height * (centered ? 0.85 : 0.6));
         int inner = width - 2 * pad;
 
         int barHeight = plain ? 0 : (int)(28 * Unit);
         int inputHeight = ask ? (int)(38 * Unit) : 0;
         int chrome = 2 * pad + barHeight + inputHeight;
-        if (drawn != null)
+        if (room != null)
             Shrink(text, inner, maxHeight - chrome);
         int textHeight = Measure(text, inner);
-        int height = drawn?.Height ?? textHeight + chrome;
+        int height = room?.Height ?? textHeight + chrome;
         if (textHeight + chrome > maxHeight)
         {
             inner -= (int)(20 * scale);
@@ -348,11 +351,11 @@ class AnswerPopup : OverlayForm
         copy.SetBounds(close.Left - copyWidth, 0, copyWidth, barHeight);
 
         label.Text = text;
-        label.SetBounds(pad, pad, inner, textHeight);
-        panel.AutoScrollMinSize = new Size(0, textHeight + 2 * pad);
+        var at = plain ? new Point(room!.Value.X - b.X, room.Value.Y - b.Y) : Point.Empty;
+        label.SetBounds(at.X + pad, at.Y + pad, inner, textHeight);
+        panel.AutoScrollMinSize = new Size(0, at.Y + textHeight + 2 * pad);
 
-        var b = screen.Bounds;
-        target = drawn
+        target = plain ? b : drawn
             ?? (centered
                 ? new Rectangle(b.X + (b.Width - width) / 2, b.Y + (b.Height - height) / 2, width, height)
                 : new Rectangle(wa.Right - width - margin, wa.Bottom - height - margin, width, height));
