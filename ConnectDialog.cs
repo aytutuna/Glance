@@ -2,14 +2,15 @@ namespace Glance;
 
 class ConnectDialog : Form
 {
-    static readonly string[] Ids = { "openai", "gemini", "custom" };
+    static readonly string[] Ids = { "anthropic", "openai", "gemini", "custom" };
     const int Wide = 388, Narrow = 276;
 
     readonly Settings settings;
     readonly double scale;
     readonly Font font;
-    readonly Label providerLabel, keyLabel, urlLabel, modelLabel, note, status;
+    readonly Label providerLabel, savedLabel, keyLabel, urlLabel, modelLabel, note, status;
     readonly ComboBox provider = new() { DropDownStyle = ComboBoxStyle.DropDownList };
+    readonly ComboBox saved = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     readonly ComboBox model = new();
     readonly TextBox key = new() { UseSystemPasswordChar = true };
     readonly TextBox url = new();
@@ -37,6 +38,7 @@ class ConnectDialog : Form
         Font = font;
 
         providerLabel = Caption("AI");
+        savedLabel = Caption("Saved keys, tried in turn when one runs out");
         keyLabel = Caption("API key");
         urlLabel = Caption("Base URL");
         modelLabel = Caption("Model");
@@ -60,7 +62,7 @@ class ConnectDialog : Form
         provider.SelectedIndex = Math.Max(start, 0);
         provider.SelectedIndexChanged += (_, _) => Pick();
 
-        Controls.AddRange(new Control[] { providerLabel, provider, keyLabel, key, remove, urlLabel, url, modelLabel, model, load, note, status, save, cancel });
+        Controls.AddRange(new Control[] { providerLabel, provider, savedLabel, saved, remove, keyLabel, key, urlLabel, url, modelLabel, model, load, note, status, save, cancel });
         Pick();
         var area = screen.WorkingArea;
         Location = new Point(area.X + (area.Width - Width) / 2, area.Y + (area.Height - Height) / 2);
@@ -86,25 +88,42 @@ class ConnectDialog : Form
         loading?.Cancel();
         loading = null;
         load.Enabled = true;
-        bool stored = settings.HasKey(id);
         key.Text = "";
-        key.PlaceholderText = !stored ? (id == "custom" ? "Optional" : "Paste the API key")
-            : settings.GetKey(id) == null ? "The saved key can't be read" : "Saved key kept";
-        keyLabel.Text = id == "custom" ? "API key (optional)" : "API key";
-        remove.Visible = stored;
+        ShowKeys();
         url.Text = settings.CustomUrl ?? "";
         model.Items.Clear();
         model.Text = settings.ProviderModels.GetValueOrDefault(id) ?? "";
+        if (id == "anthropic")
+        {
+            model.Items.AddRange(Settings.Models.Select(m => (object)m.Id).ToArray());
+            if (model.Text.Length == 0)
+                model.Text = Settings.Models[0].Id;
+        }
         Say("", false);
         Arrange();
+    }
+
+    void ShowKeys()
+    {
+        string id = Id;
+        bool stored = settings.HasKey(id);
+        saved.Items.Clear();
+        saved.Items.AddRange(settings.KeyNames(id).Cast<object>().ToArray());
+        if (stored)
+            saved.SelectedIndex = 0;
+        key.PlaceholderText = stored ? "Paste another key to add it" : id == "custom" ? "Optional" : "Paste the API key";
+        keyLabel.Text = stored ? "Add a key" : id == "custom" ? "API key (optional)" : "API key";
     }
 
     void Arrange()
     {
         int y = Px(14);
         y = Row(providerLabel, provider, y, Wide, true);
-        y = Row(keyLabel, key, y, Narrow, true);
-        remove.Bounds = new Rectangle(Px(16 + Narrow + 12), key.Top - Px(1), Px(Wide - Narrow - 12), Px(26));
+        bool stored = settings.HasKey(Id);
+        y = Row(savedLabel, saved, y, Narrow, stored);
+        remove.Visible = stored;
+        remove.Bounds = new Rectangle(Px(16 + Narrow + 12), saved.Top - Px(1), Px(Wide - Narrow - 12), Px(26));
+        y = Row(keyLabel, key, y, Wide, true);
         y = Row(urlLabel, url, y, Wide, Id == "custom");
         y = Row(modelLabel, model, y, Narrow, true);
         load.Bounds = new Rectangle(Px(16 + Narrow + 12), model.Top - Px(1), Px(Wide - Narrow - 12), Px(26));
@@ -135,9 +154,12 @@ class ConnectDialog : Form
 
     void Remove()
     {
-        settings.RemoveKey(Id);
+        if (saved.SelectedIndex < 0)
+            return;
+        settings.RemoveKey(Id, saved.SelectedIndex);
         Changed = true;
-        Close();
+        ShowKeys();
+        Arrange();
     }
 
     async Task LoadModels()
@@ -192,9 +214,9 @@ class ConnectDialog : Form
             Say(bad, true);
             return;
         }
-        if (typed.Length == 0 && settings.HasKey(id) && settings.GetKey(id) == null)
+        if (typed.Length == 0 && settings.HasKey(id) && settings.GetKeys(id).Length == 0)
         {
-            Say("The saved key can't be read. Enter it again, or remove it.", true);
+            Say("The saved keys can't be read. Enter a new one, or remove them.", true);
             return;
         }
         bool hasKey = typed.Length > 0 || settings.HasKey(id);
@@ -221,7 +243,7 @@ class ConnectDialog : Form
             address = normal;
         }
         if (typed.Length > 0)
-            settings.SetKey(id, typed);
+            settings.AddKey(id, typed);
         if (address != null)
             settings.CustomUrl = address;
         settings.ProviderModels[id] = picked;

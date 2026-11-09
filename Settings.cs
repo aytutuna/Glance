@@ -31,7 +31,8 @@ class Settings
 
     public static readonly (string Id, string Name)[] Providers =
     {
-        (Claude, "Claude"),
+        (Claude, "Claude CLI"),
+        ("anthropic", "Claude API"),
         ("openai", "OpenAI"),
         ("gemini", "Gemini"),
         ("custom", "Custom"),
@@ -48,12 +49,10 @@ class Settings
     public string? CustomUrl { get; set; }
     public Dictionary<string, string> ProviderModels { get; set; } = new();
     // DPAPI-encrypted for this Windows account, base64; never stored as plain text
-    public Dictionary<string, string> ApiKeys { get; set; } = new();
+    public Dictionary<string, List<string>> ApiKeys { get; set; } = new();
 
-    public string? GetKey(string id)
+    static string? Open(string stored)
     {
-        if (!ApiKeys.TryGetValue(id, out var stored))
-            return null;
         try
         {
             return Encoding.UTF8.GetString(ProtectedData.Unprotect(Convert.FromBase64String(stored), null, DataProtectionScope.CurrentUser));
@@ -64,19 +63,41 @@ class Settings
         }
     }
 
+    public string[] GetKeys(string id)
+    {
+        return ApiKeys.GetValueOrDefault(id)?.Select(Open).OfType<string>().ToArray() ?? Array.Empty<string>();
+    }
+
     public bool HasKey(string id)
     {
-        return ApiKeys.ContainsKey(id);
+        return ApiKeys.GetValueOrDefault(id)?.Count > 0;
     }
 
-    public void SetKey(string id, string key)
+    public string[] KeyNames(string id)
     {
-        ApiKeys[id] = Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(key), null, DataProtectionScope.CurrentUser));
+        return (ApiKeys.GetValueOrDefault(id) ?? new()).Select((stored, i) =>
+        {
+            string? key = Open(stored);
+            if (key == null)
+                return $"Key {i + 1} (can't be read)";
+            return key.Length >= 12 ? $"Key {i + 1} (ending {key[^4..]})" : $"Key {i + 1}";
+        }).ToArray();
     }
 
-    public void RemoveKey(string id)
+    public void AddKey(string id, string key)
     {
-        ApiKeys.Remove(id);
+        if (GetKeys(id).Contains(key))
+            return;
+        if (!ApiKeys.TryGetValue(id, out var keys))
+            ApiKeys[id] = keys = new();
+        keys.Add(Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(key), null, DataProtectionScope.CurrentUser)));
+    }
+
+    public void RemoveKey(string id, int index)
+    {
+        ApiKeys[id].RemoveAt(index);
+        if (ApiKeys[id].Count == 0)
+            ApiKeys.Remove(id);
         if (!Configured(Provider))
             Provider = Claude;
     }

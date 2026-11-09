@@ -10,12 +10,46 @@ interface IProvider
     Task<string> AskAsync(Conversation chat, Action<string> onText, CancellationToken ct);
 }
 
-class AiException(string message) : Exception(message);
+class AiException(string message) : Exception(message)
+{
+    public bool KeyProblem { get; init; }
+}
+
+class KeyRing(string id, string[] keys, Func<string, IProvider> make) : IProvider
+{
+    // start from the key that last worked, so a spent key isn't retried on every read
+    static readonly Dictionary<string, int> Last = new();
+
+    public async Task<string> AskAsync(Conversation chat, Action<string> onText, CancellationToken ct)
+    {
+        int start = Last.GetValueOrDefault(id) % keys.Length;
+        for (int i = 0; ; i++)
+        {
+            int at = (start + i) % keys.Length;
+            bool wrote = false;
+            try
+            {
+                string answer = await make(keys[at]).AskAsync(chat, text =>
+                {
+                    wrote = true;
+                    onText(text);
+                }, ct);
+                Last[id] = at;
+                return answer;
+            }
+            catch (AiException ex) when (ex.KeyProblem && !wrote)
+            {
+                if (i + 1 == keys.Length)
+                    throw new AiException($"All {keys.Length} saved keys failed. {ex.Message}");
+            }
+        }
+    }
+}
 
 static class Api
 {
     // .NET keeps custom headers such as x-goog-api-key on a redirect, so redirects are never followed
-    static readonly HttpClient Http = new(new HttpClientHandler { AllowAutoRedirect = false })
+    public static readonly HttpClient Http = new(new HttpClientHandler { AllowAutoRedirect = false })
     {
         Timeout = Timeout.InfiniteTimeSpan,
     };
@@ -34,7 +68,17 @@ static class Api
         if (resp.IsSuccessStatusCode)
             return resp;
         using (resp)
-            throw new AiException(await Failure(resp, name, key, ct));
+        {
+            string text = await Failure(resp, name, key, ct);
+            throw new AiException(text) { KeyProblem = Spent((int)resp.StatusCode, text) };
+        }
+    }
+
+    // out of credit, rate limited or dead: another key may still work
+    public static bool Spent(int code, string text)
+    {
+        return code is 401 or 402 or 403 or 429 ||
+            code == 400 && (text.Contains("credit", StringComparison.OrdinalIgnoreCase) || text.Contains("api key", StringComparison.OrdinalIgnoreCase));
     }
 
     static async Task<string> Failure(HttpResponseMessage resp, string name, string? key, CancellationToken ct)
