@@ -42,6 +42,7 @@ class Settings
     public string? ShowDevice { get; set; }
     public bool CenterAnswer { get; set; }
     public bool PlainAnswer { get; set; }
+    public int TextOpacity { get; set; } = 100;
     public bool UseArea { get; set; }
     // left, top, width, height as fractions of the screen, so it survives a resolution change
     public double[]? AnswerArea { get; set; }
@@ -218,6 +219,7 @@ class Settings
             settings.ApiKeys ??= new();
             settings.ProviderModels ??= new();
             settings.Order ??= new();
+            settings.TextOpacity = Math.Clamp(settings.TextOpacity, 10, 100);
             if (!Providers.Any(p => p.Id == settings.Provider) || !settings.Configured(settings.Provider))
                 settings.Provider = Claude;
             if (migrate)

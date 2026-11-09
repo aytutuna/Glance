@@ -256,6 +256,7 @@ class TrayApp : ApplicationContext
             SaveLook();
         })
         { Checked = settings.PlainAnswer });
+        menu.Items.Add(OpacityMenu());
         menu.Items.Add(AiMenu());
         if (settings.Chain().Contains(Settings.Claude))
             menu.Items.Add(ModelMenu());
@@ -303,6 +304,23 @@ class TrayApp : ApplicationContext
         }
         item.DropDownItems.Add(new ToolStripSeparator());
         item.DropDownItems.Add("Draw answer area...", null, (_, _) => DrawArea());
+        return item;
+    }
+
+    ToolStripMenuItem OpacityMenu()
+    {
+        var item = new ToolStripMenuItem("Text opacity");
+        foreach (int percent in new[] { 100, 80, 60, 40, 20 })
+        {
+            item.DropDownItems.Add(new ToolStripMenuItem($"{percent}%", null, (_, _) =>
+            {
+                settings.TextOpacity = percent;
+                if (popup != null && !popup.IsDisposed)
+                    popup.SetTextOpacity(percent);
+                SaveLook();
+            })
+            { Checked = settings.TextOpacity == percent });
+        }
         return item;
     }
 

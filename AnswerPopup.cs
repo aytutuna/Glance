@@ -20,7 +20,7 @@ class AnswerPopup : OverlayForm
     bool ask, activatable;
     readonly bool centered, plain;
     readonly double[]? area;
-    Font? fit, glyph;
+    Font? fit;
     IntPtr previous;
 
     public event Action? CloseClicked;
@@ -40,10 +40,11 @@ class AnswerPopup : OverlayForm
 
         BackColor = plain ? Color.Black : Color.FromArgb(32, 32, 32);
 
+        ink = plain ? Color.White : Color.FromArgb(240, 240, 240);
         label = new Label
         {
             Font = TextFont,
-            ForeColor = plain ? Color.White : Color.FromArgb(240, 240, 240),
+            ForeColor = Fade(ink, BackColor, look?.TextOpacity ?? 100),
             BackColor = BackColor,
             AutoSize = false,
             UseMnemonic = false,
@@ -74,14 +75,10 @@ class AnswerPopup : OverlayForm
         Controls.Add(bar);
         if (plain)
         {
-            // a touch screen takes stray taps, so only this button closes the black screen
+            // nothing but text on black: no buttons, scrollbar or pointer; the close key or the tray closes it
             bar.Visible = false;
-            bar.Controls.Remove(close);
-            Controls.Add(close);
-            close.BringToFront();
-            close.ForeColor = Color.FromArgb(110, 110, 110);
-            glyph = NewGlyph();
-            close.Font = glyph;
+            panel.AutoScroll = false;
+            Cursor = panel.Cursor = label.Cursor = Blank;
         }
         SetReading(reading);
         reset.Tick += (_, _) =>
@@ -213,9 +210,21 @@ class AnswerPopup : OverlayForm
 
     Font TextFont => fit ?? font;
 
-    Font NewGlyph()
+    static Cursor? blank;
+    static Cursor Blank => blank ??= new Cursor(new Bitmap(32, 32).GetHicon());
+
+    readonly Color ink;
+
+    // the background is one solid colour, so mixing towards it looks the same as real transparency
+    static Color Fade(Color text, Color back, int percent)
     {
-        return new Font("Segoe UI", (float)(30 * scale), GraphicsUnit.Pixel);
+        double a = Math.Clamp(percent, 0, 100) / 100.0;
+        return Color.FromArgb((int)Math.Round(back.R + (text.R - back.R) * a), (int)Math.Round(back.G + (text.G - back.G) * a), (int)Math.Round(back.B + (text.B - back.B) * a));
+    }
+
+    public void SetTextOpacity(int percent)
+    {
+        label.ForeColor = Fade(ink, BackColor, percent);
     }
 
     Font LargestFit()
@@ -243,7 +252,7 @@ class AnswerPopup : OverlayForm
     // shrinks only, so text streaming in doesn't make the size jump back up
     void Shrink(string text, int width, int height)
     {
-        float floor = (float)(12 * scale);
+        float floor = (float)((plain ? 8 : 12) * scale);
         while (fit!.Size > floor && Measure(text, width) > height)
         {
             var old = fit;
@@ -292,13 +301,6 @@ class AnswerPopup : OverlayForm
             font = NewFont();
             copy.Font = font;
             close.Font = font;
-            if (glyph != null)
-            {
-                var oldGlyph = glyph;
-                glyph = NewGlyph();
-                close.Font = glyph;
-                oldGlyph.Dispose();
-            }
             box.Font = font;
             old.Dispose();
             ResetFit();
@@ -350,7 +352,12 @@ class AnswerPopup : OverlayForm
             Shrink(text, inner, maxHeight - chrome);
         int textHeight = Measure(text, inner);
         int height = room?.Height ?? textHeight + chrome;
-        if (textHeight + chrome > maxHeight)
+        // the black screen has no scrollbar, so text that still doesn't fit is cut off
+        if (textHeight + chrome > maxHeight && plain)
+        {
+            textHeight = maxHeight - chrome;
+        }
+        else if (textHeight + chrome > maxHeight)
         {
             inner -= (int)(20 * scale);
             textHeight = Measure(text, inner);
@@ -364,16 +371,13 @@ class AnswerPopup : OverlayForm
         int closeWidth = (int)(30 * Unit), copyWidth = (int)(90 * Unit);
         close.SetBounds(width - pad - closeWidth, 0, closeWidth, barHeight);
         copy.SetBounds(close.Left - copyWidth, 0, copyWidth, barHeight);
-        if (plain)
-        {
-            int size = (int)(48 * scale);
-            close.SetBounds(b.Width - size - margin, margin, size, size);
-        }
 
         label.Text = text;
         var at = plain ? new Point(room!.Value.X - b.X, room.Value.Y - b.Y) : Point.Empty;
         label.SetBounds(at.X + pad, at.Y + pad, inner, textHeight);
-        panel.AutoScrollMinSize = new Size(0, at.Y + textHeight + 2 * pad);
+        // setting this turns scrolling back on
+        if (!plain)
+            panel.AutoScrollMinSize = new Size(0, at.Y + textHeight + 2 * pad);
 
         target = plain ? b : drawn
             ?? (centered
@@ -395,7 +399,6 @@ class AnswerPopup : OverlayForm
             flush.Dispose();
             font.Dispose();
             fit?.Dispose();
-            glyph?.Dispose();
         }
         base.Dispose(disposing);
     }
