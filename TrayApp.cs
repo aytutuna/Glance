@@ -23,6 +23,8 @@ class TrayApp : ApplicationContext
     KeyDialog? keyDialog;
     KeyHook? keyHook;
     readonly List<string> history = new();
+    Conversation? chat;
+    string thread = "", shown = "";
 
     public TrayApp()
     {
@@ -372,48 +374,23 @@ class TrayApp : ApplicationContext
             picker.Activate();
             return;
         }
-        current?.Cancel();
-        var cts = current = new CancellationTokenSource();
-        _ = Read(delayMs, area, cts);
+        Start(ct => Read(delayMs, area, ct));
     }
 
-    async Task Read(int delayMs, bool area, CancellationTokenSource cts)
+    void Start(Func<CancellationToken, Task> job)
+    {
+        current?.Cancel();
+        var cts = current = new CancellationTokenSource();
+        _ = Run(cts, job);
+    }
+
+    async Task Run(CancellationTokenSource cts, Func<CancellationToken, Task> job)
     {
         var ct = cts.Token;
         SetBusy(true);
-        ClosePopup();
-        CloseLabels();
         try
         {
-            await Task.Delay(delayMs + 150, ct);
-            var screen = Resolve(settings.ReadDevice);
-            using var shot = await Task.Run(() => Grabber.Grab(screen), ct);
-            ct.ThrowIfCancellationRequested();
-            Rectangle? crop = null;
-            if (area)
-            {
-                crop = await Pick(screen, shot, ct);
-                if (crop == null)
-                    return;
-            }
-            var jpeg = await Task.Run(() => Grabber.Encode(shot, crop), ct);
-            ct.ThrowIfCancellationRequested();
-
-            var mine = popup = NewPopup("Reading...", true);
-
-            string answer = Clean(await ClaudeCli.AskAsync(jpeg, settings.Model, settings.Mode, partial =>
-            {
-                partial = Clean(partial);
-                if (partial.Length > 0 && !ct.IsCancellationRequested && popup == mine)
-                    mine.Stream(partial);
-            }, ct));
-            ct.ThrowIfCancellationRequested();
-            if (answer.Length == 0)
-                throw new ClaudeException("Claude returned no answer.");
-            history.Insert(0, answer);
-            if (history.Count > 10)
-                history.RemoveAt(10);
-            ShowText(answer);
+            await job(ct);
         }
         catch (OperationCanceledException)
         {
@@ -421,7 +398,7 @@ class TrayApp : ApplicationContext
         catch (Exception ex)
         {
             if (!ct.IsCancellationRequested)
-                ShowText(ex.Message);
+                ShowText(thread + ex.Message, ex.Message, thread.Length > 0);
         }
         finally
         {
@@ -432,6 +409,59 @@ class TrayApp : ApplicationContext
             }
             cts.Dispose();
         }
+    }
+
+    async Task Read(int delayMs, bool area, CancellationToken ct)
+    {
+        ClosePopup();
+        CloseLabels();
+        await Task.Delay(delayMs + 150, ct);
+        var screen = Resolve(settings.ReadDevice);
+        using var shot = await Task.Run(() => Grabber.Grab(screen), ct);
+        ct.ThrowIfCancellationRequested();
+        Rectangle? crop = null;
+        if (area)
+        {
+            crop = await Pick(screen, shot, ct);
+            if (crop == null)
+                return;
+        }
+        var jpeg = await Task.Run(() => Grabber.Encode(shot, crop), ct);
+        ct.ThrowIfCancellationRequested();
+
+        var mine = popup = NewPopup("Reading...", true);
+        await Reply(new Conversation(jpeg, settings.Model, settings.Mode), mine, ct);
+    }
+
+    async Task Reply(Conversation c, AnswerPopup mine, CancellationToken ct)
+    {
+        string answer = Clean(await ClaudeCli.AskAsync(c, partial =>
+        {
+            partial = Clean(partial);
+            if (partial.Length > 0 && !ct.IsCancellationRequested && popup == mine)
+                mine.Stream(thread + partial);
+        }, ct));
+        ct.ThrowIfCancellationRequested();
+        if (answer.Length == 0)
+            throw new ClaudeException("Claude returned no answer.");
+        c.Complete(answer);
+        chat = c;
+        history.Insert(0, answer);
+        if (history.Count > 10)
+            history.RemoveAt(10);
+        ShowText(thread + answer, answer, true);
+    }
+
+    void Follow(string question)
+    {
+        var c = chat;
+        var mine = popup;
+        if (c == null || mine == null)
+            return;
+        thread = shown + "\n\nQ: " + question + "\n\n";
+        c.Ask(question);
+        mine.Busy(thread + "Reading...");
+        Start(ct => Reply(c, mine, ct));
     }
 
     // markers can be split across chunks, so this runs on the whole text
@@ -456,30 +486,29 @@ class TrayApp : ApplicationContext
         return picked;
     }
 
-    void ShowText(string text)
+    void ShowText(string text, string? copy = null, bool ask = false)
     {
+        shown = text;
         if (popup == null || popup.IsDisposed)
-        {
             popup = NewPopup(text, false);
-        }
-        else
-        {
-            popup.SetText(text);
-        }
+        popup.SetText(text, copy, ask);
     }
 
     AnswerPopup NewPopup(string text, bool reading)
     {
-        var shown = new AnswerPopup(Resolve(settings.ShowDevice), text, reading);
-        shown.CloseClicked += CloseAnswer;
-        shown.Show();
-        return shown;
+        var made = new AnswerPopup(Resolve(settings.ShowDevice), text, reading);
+        made.CloseClicked += CloseAnswer;
+        made.Asked += Follow;
+        made.Show();
+        return made;
     }
 
     void ClosePopup()
     {
         popup?.Close();
         popup = null;
+        chat = null;
+        thread = shown = "";
     }
 
     void SetBusy(bool busy)

@@ -9,14 +9,19 @@ class AnswerPopup : OverlayForm
     readonly Label label;
     readonly Panel bar;
     readonly Label copy, close;
+    readonly Panel inputBar;
+    readonly TextBox box;
     readonly System.Windows.Forms.Timer reset = new() { Interval = 1500 };
     readonly System.Windows.Forms.Timer flush = new() { Interval = 50 };
     string text;
     string? pending;
     long lastLayout;
     Rectangle target;
+    bool ask, activatable;
+    IntPtr previous;
 
     public event Action? CloseClicked;
+    public event Action<string>? Asked;
 
     public AnswerPopup(Screen screen, string text, bool reading = false)
     {
@@ -44,7 +49,20 @@ class AnswerPopup : OverlayForm
         close.Click += (_, _) => CloseClicked?.Invoke();
         bar.Controls.Add(copy);
         bar.Controls.Add(close);
+        inputBar = new Panel { Dock = DockStyle.Bottom, BackColor = BackColor, Visible = false };
+        box = new TextBox
+        {
+            Font = font,
+            ForeColor = Color.FromArgb(240, 240, 240),
+            BackColor = Color.FromArgb(52, 52, 52),
+            BorderStyle = BorderStyle.FixedSingle,
+            PlaceholderText = "Ask a follow-up",
+        };
+        box.MouseDown += (_, _) => TakeFocus();
+        box.KeyDown += BoxKeyDown;
+        inputBar.Controls.Add(box);
         Controls.Add(panel);
+        Controls.Add(inputBar);
         Controls.Add(bar);
         SetReading(reading);
         reset.Tick += (_, _) =>
@@ -86,6 +104,68 @@ class AnswerPopup : OverlayForm
         copy.Cursor = reading ? Cursors.Default : Cursors.Hand;
     }
 
+    void TakeFocus()
+    {
+        if (activatable)
+            return;
+        activatable = true;
+        previous = Native.GetForegroundWindow();
+        SetActivatable(true);
+        Activate();
+        box.Focus();
+    }
+
+    // hands the foreground back to the window the user was in before the click
+    void Release()
+    {
+        if (!activatable)
+            return;
+        var back = previous;
+        activatable = false;
+        previous = IntPtr.Zero;
+        SetActivatable(false);
+        if (Native.IsWindow(back))
+            Native.SetForegroundWindow(back);
+    }
+
+    void BoxKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Enter)
+        {
+            e.SuppressKeyPress = true;
+            var question = box.Text.Trim();
+            if (question.Length == 0)
+                return;
+            box.Clear();
+            Asked?.Invoke(question);
+        }
+        else if (e.KeyCode == Keys.Escape)
+        {
+            e.SuppressKeyPress = true;
+            if (box.Text.Length > 0)
+                box.Clear();
+            else
+                CloseClicked?.Invoke();
+        }
+    }
+
+    protected override void OnDeactivate(EventArgs e)
+    {
+        base.OnDeactivate(e);
+        if (activatable)
+        {
+            activatable = false;
+            previous = IntPtr.Zero;
+            SetActivatable(false);
+        }
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        Release();
+        base.OnFormClosing(e);
+    }
+
     void CopyText()
     {
         copy.Text = TrayApp.Copy(text) ? "Copied" : "Failed";
@@ -93,10 +173,20 @@ class AnswerPopup : OverlayForm
         reset.Start();
     }
 
-    public void SetText(string text)
+    // copy is what the Copy button takes when the shown text is more than the answer
+    public void SetText(string text, string? copy = null, bool ask = false)
     {
-        this.text = text;
+        this.text = copy ?? text;
+        this.ask = ask;
         SetReading(false);
+        Render(text);
+    }
+
+    public void Busy(string text)
+    {
+        Release();
+        ask = false;
+        SetReading(true);
         Render(text);
     }
 
@@ -130,6 +220,7 @@ class AnswerPopup : OverlayForm
             label.Font = font;
             copy.Font = font;
             close.Font = font;
+            box.Font = font;
             old.Dispose();
         }
         Fit(text);
@@ -166,7 +257,8 @@ class AnswerPopup : OverlayForm
 
         int textHeight = Measure(text, inner);
         int barHeight = (int)(28 * scale);
-        int height = textHeight + 2 * pad + barHeight;
+        int inputHeight = ask ? (int)(38 * scale) : 0;
+        int height = textHeight + 2 * pad + barHeight + inputHeight;
         if (height > maxHeight)
         {
             inner -= (int)(20 * scale);
@@ -175,6 +267,9 @@ class AnswerPopup : OverlayForm
         }
 
         bar.Height = barHeight;
+        inputBar.Visible = ask;
+        inputBar.Height = inputHeight;
+        box.SetBounds(pad, (inputHeight - box.Height) / 2, width - 2 * pad, box.Height);
         int closeWidth = (int)(30 * scale), copyWidth = (int)(90 * scale);
         close.SetBounds(width - pad - closeWidth, 0, closeWidth, barHeight);
         copy.SetBounds(close.Left - copyWidth, 0, copyWidth, barHeight);

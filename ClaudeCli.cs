@@ -14,13 +14,13 @@ static class ClaudeCli
     static readonly UTF8Encoding Utf8 = new(false);
     static bool? supportsEffort;
 
-    public static async Task<string> AskAsync(byte[] jpeg, string model, string mode, Action<string> onText, CancellationToken ct)
+    public static async Task<string> AskAsync(Conversation chat, Action<string> onText, CancellationToken ct)
     {
         var args = new List<string>
         {
             "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
-            "--include-partial-messages", "--model", model, "--tools=", "--no-session-persistence", "--strict-mcp-config",
-            "--setting-sources=", "--disable-slash-commands", "--system-prompt", Prompts.System(mode),
+            "--include-partial-messages", "--model", chat.Model, "--tools=", "--no-session-persistence", "--strict-mcp-config",
+            "--setting-sources=", "--disable-slash-commands", "--system-prompt", Prompts.System(chat),
         };
 
         supportsEffort ??= await HelpMentionsEffort(ct);
@@ -47,8 +47,8 @@ static class ClaudeCli
                 role = "user",
                 content = new object[]
                 {
-                    new { type = "image", source = new { type = "base64", media_type = "image/jpeg", data = Convert.ToBase64String(jpeg) } },
-                    new { type = "text", text = Prompts.First(mode) },
+                    new { type = "image", source = new { type = "base64", media_type = "image/jpeg", data = Convert.ToBase64String(chat.Jpeg) } },
+                    new { type = "text", text = Prompts.Message(chat) },
                 },
             },
         });

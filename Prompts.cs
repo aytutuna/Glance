@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 
 namespace Glance;
 
@@ -21,7 +22,27 @@ static class Prompts
         "or a short list of lines if it is a list. " + Tail +
         "If there is no text to summarize, say so in one line." + Plain;
 
-    public static string System(string mode)
+    const string FollowUp = " Later messages are follow-up questions about the same screenshot. " +
+        "Answer the latest message directly and briefly, even if the screenshot holds no question.";
+
+    public static string System(Conversation chat)
+    {
+        return Base(chat.Mode) + (chat.Done.Count > 0 ? FollowUp : "");
+    }
+
+    // the model sees one message each time, so earlier turns go in as delimited context
+    public static string Message(Conversation chat)
+    {
+        if (chat.Done.Count == 0)
+            return chat.Pending;
+        var text = new StringBuilder("Earlier turns of this conversation, for context only:\n<transcript>\n");
+        foreach (var (question, answer) in chat.Done)
+            text.Append("User: ").Append(question).Append("\nAssistant: ").Append(answer).Append("\n\n");
+        text.Append("</transcript>\nLatest message, to answer now: ").Append(chat.Pending);
+        return text.ToString();
+    }
+
+    static string Base(string mode)
     {
         return mode switch
         {

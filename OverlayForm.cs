@@ -13,6 +13,14 @@ class OverlayForm : Form
         StartPosition = FormStartPosition.Manual;
     }
 
+    // the popup only takes focus when the user clicks its text box
+    protected void SetActivatable(bool on)
+    {
+        const int GWL_EXSTYLE = -20;
+        var style = Native.GetWindowLongPtr(Handle, GWL_EXSTYLE);
+        Native.SetWindowLongPtr(Handle, GWL_EXSTYLE, on ? style & ~WS_EX_NOACTIVATE : style | WS_EX_NOACTIVATE);
+    }
+
     protected override bool ShowWithoutActivation => true;
 
     protected override CreateParams CreateParams
