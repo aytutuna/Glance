@@ -7,26 +7,36 @@ static class Grabber
 {
     const int MaxEdge = 2000;
 
-    public static byte[] Capture(Screen screen)
+    public static Bitmap Grab(Screen screen)
     {
         var area = screen.Bounds;
-        using var full = new Bitmap(area.Width, area.Height, PixelFormat.Format24bppRgb);
-        using (var g = Graphics.FromImage(full))
-            g.CopyFromScreen(area.Location, Point.Empty, area.Size);
+        var full = new Bitmap(area.Width, area.Height, PixelFormat.Format24bppRgb);
+        using var g = Graphics.FromImage(full);
+        g.CopyFromScreen(area.Location, Point.Empty, area.Size);
+        return full;
+    }
 
-        double scale = Math.Min(1.0, (double)MaxEdge / Math.Max(area.Width, area.Height));
+    public static byte[] Encode(Bitmap full, Rectangle? crop)
+    {
+        var part = crop ?? new Rectangle(Point.Empty, full.Size);
+        double scale = Math.Min(1.0, (double)MaxEdge / Math.Max(part.Width, part.Height));
         using var ms = new MemoryStream();
         if (scale < 1.0)
         {
-            int w = (int)Math.Round(area.Width * scale), h = (int)Math.Round(area.Height * scale);
+            int w = Math.Max(1, (int)Math.Round(part.Width * scale)), h = Math.Max(1, (int)Math.Round(part.Height * scale));
             using var small = new Bitmap(w, h, PixelFormat.Format24bppRgb);
             using (var g = Graphics.FromImage(small))
             {
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                g.DrawImage(full, 0, 0, w, h);
+                g.DrawImage(full, new Rectangle(0, 0, w, h), part, GraphicsUnit.Pixel);
             }
             SaveJpeg(small, ms);
+        }
+        else if (crop != null)
+        {
+            using var cut = full.Clone(part, PixelFormat.Format24bppRgb);
+            SaveJpeg(cut, ms);
         }
         else
         {

@@ -1,13 +1,13 @@
 namespace Glance;
 
-enum KeyJob { Read, Close }
+enum KeyJob { Read, Close, Region }
 
 class KeyDialog : Form
 {
     public const Keys Win = (Keys)0x80000;
 
     readonly KeyJob job;
-    readonly Keys other;
+    readonly Dictionary<Keys, KeyJob> taken;
     readonly Func<Keys, bool> register;
     readonly Label status;
     readonly System.Windows.Forms.Timer tick = new() { Interval = 100 };
@@ -16,10 +16,10 @@ class KeyDialog : Form
 
     public Keys? Chosen { get; private set; }
 
-    public KeyDialog(Screen screen, KeyJob job, Keys other, Func<Keys, bool> register)
+    public KeyDialog(Screen screen, KeyJob job, Dictionary<Keys, KeyJob> taken, Func<Keys, bool> register)
     {
         this.job = job;
-        this.other = other;
+        this.taken = taken;
         this.register = register;
         double scale = Native.ScaleFor(screen);
         int Px(int v) => (int)Math.Round(v * scale);
@@ -30,7 +30,7 @@ class KeyDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
-        Text = job == KeyJob.Read ? "Read key" : "Close key";
+        Text = JobName(job) + " key";
         StartPosition = FormStartPosition.Manual;
         ClientSize = new Size(Px(380), Px(170));
         var area = screen.WorkingArea;
@@ -38,7 +38,7 @@ class KeyDialog : Form
 
         Controls.Add(new Label
         {
-            Text = "Press the key for: " + (job == KeyJob.Read ? "Read the screen" : "Close the answer"),
+            Text = "Press the key for: " + Purpose(job),
             Font = new Font("Segoe UI", Px(16), GraphicsUnit.Pixel),
             AutoSize = false,
             Bounds = new Rectangle(Px(16), Px(14), Px(348), Px(26)),
@@ -72,6 +72,21 @@ class KeyDialog : Form
             Close();
         };
         Controls.Add(cancel);
+    }
+
+    public static string JobName(KeyJob job)
+    {
+        return job == KeyJob.Region ? "Area" : job.ToString();
+    }
+
+    static string Purpose(KeyJob job)
+    {
+        return job switch
+        {
+            KeyJob.Read => "Read the screen",
+            KeyJob.Close => "Close the answer",
+            _ => "Read an area",
+        };
     }
 
     public static string KeyName(Keys keys)
@@ -151,9 +166,9 @@ class KeyDialog : Form
         {
             status.Text = "The Windows key alone also opens Start. Add another key to it.";
         }
-        else if (keys == other)
+        else if (taken.TryGetValue(keys, out var owner))
         {
-            status.Text = $"{KeyName(keys)} is already the {(job == KeyJob.Read ? "Close" : "Read")} key.";
+            status.Text = $"{KeyName(keys)} is already the {JobName(owner)} key.";
         }
         else if (!register(keys))
         {

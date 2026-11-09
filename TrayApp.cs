@@ -5,7 +5,7 @@ namespace Glance;
 
 class TrayApp : ApplicationContext
 {
-    const int ReadId = 1, CloseId = 2;
+    const int ReadId = 1, CloseId = 2, RegionId = 3;
     const string MouseScreen = "Screen with the mouse";
 
     readonly Settings settings = Settings.Load();
@@ -18,6 +18,7 @@ class TrayApp : ApplicationContext
     CancellationTokenSource? current;
     readonly List<ScreenLabel> labels = new();
     AnswerPopup? popup;
+    AreaPicker? picker;
     KeyDialog? keyDialog;
     KeyHook? keyHook;
     string? lastAnswer;
@@ -43,6 +44,8 @@ class TrayApp : ApplicationContext
         {
             if (id == ReadId)
                 Trigger(0);
+            else if (id == RegionId)
+                Trigger(0, true);
             else
                 CloseAnswer();
         };
@@ -87,13 +90,15 @@ class TrayApp : ApplicationContext
 
     void UpdateTooltip()
     {
-        tray.Text = $"Glance (Read: {KeyDialog.KeyName(settings.Hotkey)}, Close: {KeyDialog.KeyName(settings.CloseKey)})";
+        tray.Text = $"Glance (Read: {KeyDialog.KeyName(settings.Hotkey)}, Area: {KeyDialog.KeyName(settings.RegionKey)}, Close: {KeyDialog.KeyName(settings.CloseKey)})";
     }
 
     void Fire(Keys key)
     {
         if (key == settings.Hotkey)
             Trigger(0);
+        else if (key == settings.RegionKey)
+            Trigger(0, true);
         else if (key == settings.CloseKey)
             CloseAnswer();
     }
@@ -120,12 +125,14 @@ class TrayApp : ApplicationContext
         var failed = new List<string>();
         if (!Register(ReadId, settings.Hotkey))
             failed.Add($"{KeyDialog.KeyName(settings.Hotkey)} (reads the screen)");
+        if (!Register(RegionId, settings.RegionKey))
+            failed.Add($"{KeyDialog.KeyName(settings.RegionKey)} (reads an area)");
         if (!Register(CloseId, settings.CloseKey))
             failed.Add($"{KeyDialog.KeyName(settings.CloseKey)} (closes the answer)");
 
-        if (KeyDialog.UsesHook(settings.Hotkey) || KeyDialog.UsesHook(settings.CloseKey))
+        if (KeyDialog.UsesHook(settings.Hotkey) || KeyDialog.UsesHook(settings.RegionKey) || KeyDialog.UsesHook(settings.CloseKey))
         {
-            keyHook = new KeyHook { Bound = keys => keys == settings.Hotkey || keys == settings.CloseKey };
+            keyHook = new KeyHook { Bound = keys => keys == settings.Hotkey || keys == settings.RegionKey || keys == settings.CloseKey };
             keyHook.Lone += (key, ms) =>
             {
                 if (ms < 500)
@@ -157,9 +164,14 @@ class TrayApp : ApplicationContext
             return;
         }
         Unbind();
-        int id = job == KeyJob.Read ? ReadId : CloseId;
-        var other = job == KeyJob.Read ? settings.CloseKey : settings.Hotkey;
-        var dialog = keyDialog = new KeyDialog(Resolve(null), job, other, keys => Register(id, keys));
+        int id = job switch { KeyJob.Read => ReadId, KeyJob.Close => CloseId, _ => RegionId };
+        var taken = new Dictionary<Keys, KeyJob>();
+        foreach (var other in Enum.GetValues<KeyJob>())
+        {
+            if (other != job)
+                taken[KeyOf(other)] = other;
+        }
+        var dialog = keyDialog = new KeyDialog(Resolve(null), job, taken, keys => Register(id, keys));
         dialog.FormClosed += (_, _) =>
         {
             keyDialog = null;
@@ -167,6 +179,8 @@ class TrayApp : ApplicationContext
             {
                 if (job == KeyJob.Read)
                     settings.Hotkey = chosen;
+                else if (job == KeyJob.Region)
+                    settings.RegionKey = chosen;
                 else
                     settings.CloseKey = chosen;
                 bool saved = settings.Save();
@@ -174,13 +188,18 @@ class TrayApp : ApplicationContext
                 if (!saved)
                     WarnUnsaved();
                 else if (!KeyDialog.UsesHook(chosen) && (chosen & KeyDialog.Win) == 0)
-                    tray.ShowBalloonTip(5000, "Glance", $"{KeyDialog.KeyName(chosen)} now only works as the {job} key in every program. Change it from the tray menu to get it back.", ToolTipIcon.Info);
+                    tray.ShowBalloonTip(5000, "Glance", $"{KeyDialog.KeyName(chosen)} now only works as the {KeyDialog.JobName(job)} key in every program. Change it from the tray menu to get it back.", ToolTipIcon.Info);
             }
             Bind();
             dialog.Dispose();
         };
         dialog.Show();
         dialog.Activate();
+    }
+
+    Keys KeyOf(KeyJob job)
+    {
+        return job switch { KeyJob.Read => settings.Hotkey, KeyJob.Close => settings.CloseKey, _ => settings.RegionKey };
     }
 
     void CloseAnswer()
@@ -198,10 +217,12 @@ class TrayApp : ApplicationContext
         foreach (var item in old)
             item.Dispose();
         menu.Items.Add("Read screen now", null, (_, _) => Trigger(300));
+        menu.Items.Add("Read an area", null, (_, _) => Trigger(300, true));
         menu.Items.Add(ScreenMenu("Read from", settings.ReadDevice, d => settings.ReadDevice = d));
         menu.Items.Add(ScreenMenu("Show answer on", settings.ShowDevice, d => settings.ShowDevice = d));
         menu.Items.Add("Identify screens", null, (_, _) => Identify());
         menu.Items.Add($"Read key ({KeyDialog.KeyName(settings.Hotkey)})...", null, (_, _) => ChangeKey(KeyJob.Read));
+        menu.Items.Add($"Area key ({KeyDialog.KeyName(settings.RegionKey)})...", null, (_, _) => ChangeKey(KeyJob.Region));
         menu.Items.Add($"Close key ({KeyDialog.KeyName(settings.CloseKey)})...", null, (_, _) => ChangeKey(KeyJob.Close));
         bool autostart = StartValue() != null;
         menu.Items.Add(new ToolStripMenuItem("Start with Windows", null, (_, _) => SetStartWithWindows(!autostart))
@@ -294,19 +315,24 @@ class TrayApp : ApplicationContext
             label.Close();
     }
 
-    void Trigger(int delayMs)
+    void Trigger(int delayMs, bool area = false)
     {
         if (keyDialog != null)
         {
             keyDialog.Activate();
             return;
         }
+        if (picker != null)
+        {
+            picker.Activate();
+            return;
+        }
         current?.Cancel();
         var cts = current = new CancellationTokenSource();
-        _ = Read(delayMs, cts);
+        _ = Read(delayMs, area, cts);
     }
 
-    async Task Read(int delayMs, CancellationTokenSource cts)
+    async Task Read(int delayMs, bool area, CancellationTokenSource cts)
     {
         var ct = cts.Token;
         SetBusy(true);
@@ -315,7 +341,17 @@ class TrayApp : ApplicationContext
         try
         {
             await Task.Delay(delayMs + 150, ct);
-            var jpeg = await Task.Run(() => Grabber.Capture(Resolve(settings.ReadDevice)), ct);
+            var screen = Resolve(settings.ReadDevice);
+            using var shot = await Task.Run(() => Grabber.Grab(screen), ct);
+            ct.ThrowIfCancellationRequested();
+            Rectangle? crop = null;
+            if (area)
+            {
+                crop = await Pick(screen, shot, ct);
+                if (crop == null)
+                    return;
+            }
+            var jpeg = await Task.Run(() => Grabber.Encode(shot, crop), ct);
             ct.ThrowIfCancellationRequested();
 
             popup = new AnswerPopup(Resolve(settings.ShowDevice), "Reading...");
@@ -347,6 +383,22 @@ class TrayApp : ApplicationContext
         }
     }
 
+    async Task<Rectangle?> Pick(Screen screen, Bitmap shot, CancellationToken ct)
+    {
+        var done = new TaskCompletionSource<Rectangle?>();
+        var form = picker = new AreaPicker(screen, shot);
+        form.FormClosed += (_, _) =>
+        {
+            picker = null;
+            done.SetResult(form.Selection);
+        };
+        form.Show();
+        using var reg = ct.Register(form.Close);
+        var picked = await done.Task;
+        form.Dispose();
+        return picked;
+    }
+
     void ShowText(string text)
     {
         if (popup == null || popup.IsDisposed)
@@ -374,6 +426,7 @@ class TrayApp : ApplicationContext
     void Quit()
     {
         current?.Cancel();
+        picker?.Close();
         ClosePopup();
         keyDialog?.Close();
         keyHook?.Dispose();

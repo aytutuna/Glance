@@ -14,6 +14,7 @@ class Settings
     public string? ShowDevice { get; set; }
     public Keys Hotkey { get; set; } = Keys.Control | Keys.Shift | Keys.Q;
     public Keys CloseKey { get; set; } = Keys.Control | Keys.Shift | Keys.X;
+    public Keys RegionKey { get; set; } = Keys.Control | Keys.Shift | Keys.D;
 
     public static Settings Load()
     {
@@ -23,10 +24,8 @@ class Settings
             var settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(migrate ? OldFilePath : FilePath)) ?? new Settings();
             if (!KeyDialog.IsValid(settings.Hotkey))
                 settings.Hotkey = new Settings().Hotkey;
-            if (!KeyDialog.IsValid(settings.CloseKey))
-                settings.CloseKey = new Settings().CloseKey;
-            if (settings.CloseKey == settings.Hotkey)
-                settings.CloseKey = Keys.Control | Keys.Shift | Keys.W;
+            settings.CloseKey = Distinct(settings.CloseKey, settings.Hotkey);
+            settings.RegionKey = Distinct(settings.RegionKey, settings.Hotkey, settings.CloseKey);
             if (migrate)
                 settings.Save();
             return settings;
@@ -35,6 +34,19 @@ class Settings
         {
             return new Settings();
         }
+    }
+
+    static Keys Distinct(Keys key, params Keys[] taken)
+    {
+        if (KeyDialog.IsValid(key) && !taken.Contains(key))
+            return key;
+        foreach (char c in "XDWERASF")
+        {
+            var next = Keys.Control | Keys.Shift | (Keys)c;
+            if (!taken.Contains(next))
+                return next;
+        }
+        return key;
     }
 
     public bool Save()
