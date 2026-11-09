@@ -240,12 +240,19 @@ class TrayApp : ApplicationContext
 
     void CopyLast()
     {
+        Copy(lastAnswer!);
+    }
+
+    public static bool Copy(string text)
+    {
         try
         {
-            Clipboard.SetText(lastAnswer!);
+            Clipboard.SetText(text);
+            return true;
         }
         catch (System.Runtime.InteropServices.ExternalException)
         {
+            return false;
         }
     }
 
@@ -354,8 +361,7 @@ class TrayApp : ApplicationContext
             var jpeg = await Task.Run(() => Grabber.Encode(shot, crop), ct);
             ct.ThrowIfCancellationRequested();
 
-            popup = new AnswerPopup(Resolve(settings.ShowDevice), "Reading...");
-            popup.Show();
+            popup = NewPopup("Reading...", true);
 
             string answer = (await ClaudeCli.AskAsync(jpeg, ct)).Replace("**", "").Trim();
             ct.ThrowIfCancellationRequested();
@@ -403,13 +409,20 @@ class TrayApp : ApplicationContext
     {
         if (popup == null || popup.IsDisposed)
         {
-            popup = new AnswerPopup(Resolve(settings.ShowDevice), text);
-            popup.Show();
+            popup = NewPopup(text, false);
         }
         else
         {
             popup.SetText(text);
         }
+    }
+
+    AnswerPopup NewPopup(string text, bool reading)
+    {
+        var shown = new AnswerPopup(Resolve(settings.ShowDevice), text, reading);
+        shown.CloseClicked += CloseAnswer;
+        shown.Show();
+        return shown;
     }
 
     void ClosePopup()
