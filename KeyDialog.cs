@@ -1,4 +1,4 @@
-namespace ScreenCopy;
+namespace Glance;
 
 enum KeyJob { Read, Close }
 

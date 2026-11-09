@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace ScreenCopy;
+namespace Glance;
 
 static class Native
 {

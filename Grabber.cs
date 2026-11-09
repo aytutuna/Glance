@@ -1,7 +1,7 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
-namespace ScreenCopy;
+namespace Glance;
 
 static class Grabber
 {

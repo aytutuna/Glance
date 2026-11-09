@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
-namespace ScreenCopy;
+namespace Glance;
 
 static class ClaudeCli
 {
@@ -171,7 +171,7 @@ static class ClaudeCli
 
     static Process? Launch(IEnumerable<string> args)
     {
-        var workDir = Path.Combine(Path.GetTempPath(), "ScreenCopy");
+        var workDir = Path.Combine(Path.GetTempPath(), "Glance");
         Directory.CreateDirectory(workDir);
 
         var fallback = Path.Combine(

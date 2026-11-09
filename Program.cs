@@ -1,11 +1,11 @@
-namespace ScreenCopy;
+namespace Glance;
 
 static class Program
 {
     [STAThread]
     static void Main()
     {
-        using var mutex = new Mutex(true, @"Local\ScreenCopy", out bool first);
+        using var mutex = new Mutex(true, @"Local\Glance", out bool first);
         if (!first)
             return;
 

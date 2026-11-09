@@ -1,10 +1,13 @@
 using System.Text.Json;
 
-namespace ScreenCopy;
+namespace Glance;
 
 class Settings
 {
     static readonly string FilePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Glance", "settings.json");
+
+    static readonly string OldFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ScreenCopy", "settings.json");
 
     public string? ReadDevice { get; set; }
@@ -16,13 +19,16 @@ class Settings
     {
         try
         {
-            var settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath)) ?? new Settings();
+            bool migrate = !File.Exists(FilePath) && File.Exists(OldFilePath);
+            var settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(migrate ? OldFilePath : FilePath)) ?? new Settings();
             if (!KeyDialog.IsValid(settings.Hotkey))
                 settings.Hotkey = new Settings().Hotkey;
             if (!KeyDialog.IsValid(settings.CloseKey))
                 settings.CloseKey = new Settings().CloseKey;
             if (settings.CloseKey == settings.Hotkey)
                 settings.CloseKey = Keys.Control | Keys.Shift | Keys.W;
+            if (migrate)
+                settings.Save();
             return settings;
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)

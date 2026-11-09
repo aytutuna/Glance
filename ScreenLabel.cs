@@ -1,4 +1,4 @@
-namespace ScreenCopy;
+namespace Glance;
 
 class ScreenLabel : OverlayForm
 {

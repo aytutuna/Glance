@@ -1,6 +1,6 @@
 using System.Drawing.Drawing2D;
 
-namespace ScreenCopy;
+namespace Glance;
 
 class TrayApp : ApplicationContext
 {
@@ -50,7 +50,7 @@ class TrayApp : ApplicationContext
 
     void UpdateTooltip()
     {
-        tray.Text = $"ScreenCopy (Read: {KeyDialog.KeyName(settings.Hotkey)}, Close: {KeyDialog.KeyName(settings.CloseKey)})";
+        tray.Text = $"Glance (Read: {KeyDialog.KeyName(settings.Hotkey)}, Close: {KeyDialog.KeyName(settings.CloseKey)})";
     }
 
     void Fire(Keys key)
@@ -103,7 +103,7 @@ class TrayApp : ApplicationContext
         }
 
         if (failed.Count > 0)
-            tray.ShowBalloonTip(5000, "ScreenCopy", $"{string.Join(" and ", failed)} can't be used: Windows or another program holds it. Pick another key from the tray menu.", ToolTipIcon.Warning);
+            tray.ShowBalloonTip(5000, "Glance", $"{string.Join(" and ", failed)} can't be used: Windows or another program holds it. Pick another key from the tray menu.", ToolTipIcon.Warning);
     }
 
     void Unbind()
@@ -138,7 +138,7 @@ class TrayApp : ApplicationContext
                 if (!saved)
                     WarnUnsaved();
                 else if (!KeyDialog.UsesHook(chosen) && (chosen & KeyDialog.Win) == 0)
-                    tray.ShowBalloonTip(5000, "ScreenCopy", $"{KeyDialog.KeyName(chosen)} now only works as the {job} key in every program. Change it from the tray menu to get it back.", ToolTipIcon.Info);
+                    tray.ShowBalloonTip(5000, "Glance", $"{KeyDialog.KeyName(chosen)} now only works as the {job} key in every program. Change it from the tray menu to get it back.", ToolTipIcon.Info);
             }
             Bind();
             dialog.Dispose();
@@ -214,7 +214,7 @@ class TrayApp : ApplicationContext
 
     void WarnUnsaved()
     {
-        tray.ShowBalloonTip(5000, "ScreenCopy", "Couldn't save the settings file, so this choice won't survive a restart.", ToolTipIcon.Warning);
+        tray.ShowBalloonTip(5000, "Glance", "Couldn't save the settings file, so this choice won't survive a restart.", ToolTipIcon.Warning);
     }
 
     static string Describe(Screen s, int index)
