@@ -17,12 +17,21 @@ class Settings
         ("claude-haiku-5-5", "Haiku 5.5"),
     };
 
+    public static readonly (string Id, string Name)[] Modes =
+    {
+        ("answer", "Answer"),
+        ("explain", "Explain"),
+        ("translate", "Translate"),
+        ("summarize", "Summarize"),
+    };
+
     public string? ReadDevice { get; set; }
     public string? ShowDevice { get; set; }
     public Keys Hotkey { get; set; } = Keys.Control | Keys.Shift | Keys.Q;
     public Keys CloseKey { get; set; } = Keys.Control | Keys.Shift | Keys.X;
     public Keys RegionKey { get; set; } = Keys.Control | Keys.Shift | Keys.D;
     public string Model { get; set; } = Models[0].Id;
+    public string Mode { get; set; } = Modes[0].Id;
 
     public static Settings Load()
     {
@@ -36,6 +45,8 @@ class Settings
             settings.RegionKey = Distinct(settings.RegionKey, settings.Hotkey, settings.CloseKey);
             if (!Models.Any(m => m.Id == settings.Model))
                 settings.Model = Models[0].Id;
+            if (!Modes.Any(m => m.Id == settings.Mode))
+                settings.Mode = Modes[0].Id;
             if (migrate)
                 settings.Save();
             return settings;

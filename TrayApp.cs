@@ -222,6 +222,7 @@ class TrayApp : ApplicationContext
         menu.Items.Add(ScreenMenu("Read from", settings.ReadDevice, d => settings.ReadDevice = d));
         menu.Items.Add(ScreenMenu("Show answer on", settings.ShowDevice, d => settings.ShowDevice = d));
         menu.Items.Add(ModelMenu());
+        menu.Items.Add(ModeMenu());
         menu.Items.Add("Identify screens", null, (_, _) => Identify());
         menu.Items.Add($"Read key ({KeyDialog.KeyName(settings.Hotkey)})...", null, (_, _) => ChangeKey(KeyJob.Read));
         menu.Items.Add($"Area key ({KeyDialog.KeyName(settings.RegionKey)})...", null, (_, _) => ChangeKey(KeyJob.Region));
@@ -252,6 +253,22 @@ class TrayApp : ApplicationContext
                     WarnUnsaved();
             })
             { Checked = settings.Model == id });
+        }
+        return item;
+    }
+
+    ToolStripMenuItem ModeMenu()
+    {
+        var item = new ToolStripMenuItem("Mode");
+        foreach (var (id, name) in Settings.Modes)
+        {
+            item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
+            {
+                settings.Mode = id;
+                if (!settings.Save())
+                    WarnUnsaved();
+            })
+            { Checked = settings.Mode == id });
         }
         return item;
     }
@@ -384,7 +401,7 @@ class TrayApp : ApplicationContext
 
             var mine = popup = NewPopup("Reading...", true);
 
-            string answer = Clean(await ClaudeCli.AskAsync(jpeg, settings.Model, partial =>
+            string answer = Clean(await ClaudeCli.AskAsync(jpeg, settings.Model, settings.Mode, partial =>
             {
                 partial = Clean(partial);
                 if (partial.Length > 0 && !ct.IsCancellationRequested && popup == mine)
