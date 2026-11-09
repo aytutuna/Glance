@@ -84,6 +84,11 @@ class Settings
         }).ToArray();
     }
 
+    public bool SameHost(string? url)
+    {
+        return Uri.TryCreate(url?.Trim(), UriKind.Absolute, out var a) && Uri.TryCreate(CustomUrl, UriKind.Absolute, out var b) && a.Authority == b.Authority;
+    }
+
     public void AddKey(string id, string key)
     {
         if (GetKeys(id).Contains(key))
@@ -116,12 +121,18 @@ class Settings
         return id == "custom" ? !string.IsNullOrEmpty(CustomUrl) : HasKey(id);
     }
 
+    // the file exists but couldn't be read, so saving now would overwrite saved keys
+    bool unread;
+
     public static Settings Load()
     {
+        bool migrate = !File.Exists(FilePath) && File.Exists(OldFilePath);
+        string path = migrate ? OldFilePath : FilePath;
+        if (!File.Exists(path))
+            return new Settings();
         try
         {
-            bool migrate = !File.Exists(FilePath) && File.Exists(OldFilePath);
-            var settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(migrate ? OldFilePath : FilePath)) ?? new Settings();
+            var settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(path)) ?? new Settings();
             if (!KeyDialog.IsValid(settings.Hotkey))
                 settings.Hotkey = new Settings().Hotkey;
             settings.CloseKey = Distinct(settings.CloseKey, settings.Hotkey);
@@ -138,9 +149,21 @@ class Settings
                 settings.Save();
             return settings;
         }
-        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+        catch (JsonException)
         {
-            return new Settings();
+            try
+            {
+                File.Copy(path, path + ".bad", true);
+                return new Settings();
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                return new Settings { unread = true };
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return new Settings { unread = true };
         }
     }
 
@@ -159,10 +182,15 @@ class Settings
 
     public bool Save()
     {
+        if (unread)
+            return false;
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(this));
+            // written aside first so a crash can't leave a cut-off file
+            string temp = FilePath + ".tmp";
+            File.WriteAllText(temp, JsonSerializer.Serialize(this));
+            File.Move(temp, FilePath, true);
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

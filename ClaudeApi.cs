@@ -44,6 +44,12 @@ class ClaudeApi(string url, string key) : IProvider
         {
             throw Failed(ex, key);
         }
+        catch (Exception ex) when (ex is IOException or HttpRequestException or JsonException)
+        {
+            // what already arrived is kept, as with the other providers
+            if (answer.Length == 0)
+                throw new AiException($"The connection to {Name} was lost.");
+        }
         ct.ThrowIfCancellationRequested();
         if (refused)
             throw new AiException($"{Name} declined to answer this one.");
@@ -88,14 +94,15 @@ class ClaudeApi(string url, string key) : IProvider
         }
 
         // effort and refusal fallbacks are rejected by older models a key can also list
+        bool current = Settings.Models.Any(m => m.Id == chat.Model);
         var request = new MessageCreateParams
         {
             Model = chat.Model,
-            MaxTokens = 64000,
+            MaxTokens = current ? 64000 : 8192,
             System = Prompts.System(chat),
             Messages = messages,
         };
-        if (Settings.Models.Any(m => m.Id == chat.Model))
+        if (current)
             request = request with { OutputConfig = new BetaOutputConfig { Effort = Effort.High } };
         if (chat.Model is "claude-opus-5-5" or "claude-sonnet-5-5")
         {
@@ -113,12 +120,18 @@ class ClaudeApi(string url, string key) : IProvider
         try
         {
             var page = await Client(url, key).Models.List(cancellationToken: ct);
-            var ids = page.Items.Select(m => m.ID).Where(id => id.Length > 0).Order(StringComparer.OrdinalIgnoreCase).ToArray();
-            return ids.Length > 0 ? ids : throw new AiException($"{Name} listed no models.");
+            var ids = new List<string>();
+            await foreach (var m in page.Paginate(ct))
+                ids.Add(m.ID);
+            return ids.Count > 0 ? ids.Order(StringComparer.OrdinalIgnoreCase).ToArray() : throw new AiException($"{Name} listed no models.");
         }
         catch (AnthropicException ex)
         {
             throw Failed(ex, key);
+        }
+        catch (Exception ex) when (ex is IOException or HttpRequestException or JsonException)
+        {
+            throw new AiException($"{Name} didn't send a list of models.");
         }
     }
 
@@ -134,7 +147,7 @@ class ClaudeApi(string url, string key) : IProvider
     {
         int start = message.IndexOf('{');
         if (start < 0)
-            return null;
+            return Api.Tidy(message, key);
         try
         {
             using var doc = JsonDocument.Parse(message[start..]);
@@ -142,33 +155,32 @@ class ClaudeApi(string url, string key) : IProvider
         }
         catch (JsonException)
         {
-            return null;
+            return Api.Tidy(message, key);
         }
     }
 
     static AiException Failed(AnthropicException ex, string key)
     {
-        string head = ex switch
+        int code = (int?)(ex as AnthropicApiException)?.StatusCode ?? 0;
+        // an error event inside the stream has no status, only a type in its body
+        if (code == 0 && (ex.Message.Contains("rate_limit_error") || ex.Message.Contains("billing_error") || ex.Message.Contains("authentication_error")))
+            code = 429;
+        string head = code switch
         {
-            AnthropicUnauthorizedException => $"{Name} rejected the API key (401).",
-            AnthropicForbiddenException => $"{Name} refused the request (403).",
-            AnthropicNotFoundException => $"{Name} doesn't have that model (404).",
-            AnthropicRateLimitException => $"{Name} is rate limiting this key, or its quota is used up (429).",
-            Anthropic5xxException => $"{Name} had a server error.",
-            AnthropicIOException => $"Couldn't reach {Name}. Check the connection.",
-            AnthropicBadRequestException => $"{Name} returned an error (400).",
+            401 => $"{Name} rejected the API key (401).",
+            402 => $"This key is out of credit (402).",
+            403 => $"{Name} refused the request (403).",
+            404 => $"{Name} doesn't have that model (404).",
+            429 => $"{Name} is rate limiting this key, or its quota is used up (429).",
+            400 => $"{Name} returned an error (400).",
+            >= 500 => $"{Name} had a server error ({code}).",
+            >= 300 and < 400 => $"{Name} answered with a redirect, which Glance doesn't follow.",
+            _ when ex is AnthropicIOException => $"Couldn't reach {Name}. Check the connection.",
             _ => $"{Name} reported an error.",
         };
-        string? detail = ex is AnthropicBadRequestException ? Detail(ex.Message, key) : null;
+        // providers can echo part of a bad key back, so a 401 gets no detail
+        string? detail = code == 401 ? null : Detail(ex.Message, key);
         string text = detail == null ? head : head + " " + detail;
-        int code = ex switch
-        {
-            AnthropicUnauthorizedException => 401,
-            AnthropicForbiddenException => 403,
-            AnthropicRateLimitException => 429,
-            AnthropicBadRequestException => 400,
-            _ => 0,
-        };
         return new AiException(text) { KeyProblem = Api.Spent(code, text) };
     }
 }

@@ -70,15 +70,20 @@ static class Api
         using (resp)
         {
             string text = await Failure(resp, name, key, ct);
-            throw new AiException(text) { KeyProblem = Spent((int)resp.StatusCode, text) };
+            // a custom provider's name is its host, which must not match the words below
+            throw new AiException(text) { KeyProblem = Spent((int)resp.StatusCode, text.Replace(name, "")) };
         }
     }
 
     // out of credit, rate limited or dead: another key may still work
     public static bool Spent(int code, string text)
     {
-        return code is 401 or 402 or 403 or 429 ||
-            code == 400 && (text.Contains("credit", StringComparison.OrdinalIgnoreCase) || text.Contains("api key", StringComparison.OrdinalIgnoreCase));
+        return code is 401 or 402 or 403 or 429 || code == 400 && SpentWords(text);
+    }
+
+    public static bool SpentWords(string text)
+    {
+        return new[] { "credit", "api key", "quota", "rate limit" }.Any(w => text.Contains(w, StringComparison.OrdinalIgnoreCase));
     }
 
     static async Task<string> Failure(HttpResponseMessage resp, string name, string? key, CancellationToken ct)

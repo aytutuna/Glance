@@ -71,7 +71,10 @@ abstract class ChatProvider(string name, string? key, TimeSpan limit) : IProvide
     protected AiException Failed(JsonElement root)
     {
         var detail = Api.Message(root, Key);
-        return new AiException(detail == null ? $"{Name} reported an error." : $"{Name} reported an error: {detail}");
+        return new AiException(detail == null ? $"{Name} reported an error." : $"{Name} reported an error: {detail}")
+        {
+            KeyProblem = detail != null && Api.SpentWords(detail),
+        };
     }
 
     protected static StringContent Json(object body)

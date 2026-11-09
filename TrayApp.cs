@@ -275,8 +275,13 @@ class TrayApp : ApplicationContext
         dialog.FormClosed += (_, _) =>
         {
             connectDialog = null;
-            if (dialog.Changed && !settings.Save())
-                WarnUnsaved();
+            if (dialog.Changed)
+            {
+                // an open thread holds the old keys, and one may have just been removed
+                CloseAnswer();
+                if (!settings.Save())
+                    WarnUnsaved();
+            }
             dialog.Dispose();
         };
         dialog.Show();
@@ -456,6 +461,7 @@ class TrayApp : ApplicationContext
         ClosePopup();
         CloseLabels();
         var provider = Ai.Create(settings);
+        string model = settings.ActiveModel();
         await Task.Delay(delayMs + 150, ct);
         var screen = Resolve(settings.ReadDevice);
         using var shot = await Task.Run(() => Grabber.Grab(screen), ct);
@@ -471,7 +477,7 @@ class TrayApp : ApplicationContext
         ct.ThrowIfCancellationRequested();
 
         var mine = popup = NewPopup("Reading...", true);
-        await Reply(new Conversation(jpeg, settings.ActiveModel(), settings.Mode, provider), mine, ct);
+        await Reply(new Conversation(jpeg, model, settings.Mode, provider), mine, ct);
     }
 
     async Task Reply(Conversation c, AnswerPopup mine, CancellationToken ct)

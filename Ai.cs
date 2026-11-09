@@ -27,7 +27,8 @@ static class Ai
 
     public static Task<string[]> Models(Settings s, string id, string? urlText, string? typedKey, CancellationToken ct)
     {
-        string? key = typedKey ?? Keys(s, id).FirstOrDefault();
+        // a key saved for one custom address is never sent to a newly typed one
+        string? key = typedKey ?? (id == "custom" && !s.SameHost(urlText) ? null : Keys(s, id).FirstOrDefault());
         string url = BaseOf(id, urlText, key != null);
         return id switch
         {

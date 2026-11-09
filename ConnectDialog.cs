@@ -234,13 +234,17 @@ class ConnectDialog : Form
         string? address = null;
         if (id == "custom")
         {
-            var error = Api.CheckUrl(url.Text, hasKey, out var normal);
+            bool sameHost = settings.SameHost(url.Text);
+            var error = Api.CheckUrl(url.Text, typed.Length > 0 || hasKey && sameHost, out var normal);
             if (error != null)
             {
                 Say(error, true);
                 return;
             }
             address = normal;
+            // saved keys belong to the old address
+            if (!sameHost)
+                settings.ApiKeys.Remove(id);
         }
         if (typed.Length > 0)
             settings.AddKey(id, typed);
