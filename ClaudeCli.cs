@@ -16,6 +16,20 @@ class ClaudeCli : IProvider
 
     public async Task<string> AskAsync(Conversation chat, Action<string> onText, CancellationToken ct)
     {
+        try
+        {
+            return await Run(chat, onText, ct);
+        }
+        catch (AiException ex)
+        {
+            // its limit and sign-in messages are plain text that changes between versions,
+            // so any failure counts as a reason to move on rather than matching their wording
+            throw new AiException(ex.Message) { KeyProblem = true };
+        }
+    }
+
+    static async Task<string> Run(Conversation chat, Action<string> onText, CancellationToken ct)
+    {
         var args = new List<string>
         {
             "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",

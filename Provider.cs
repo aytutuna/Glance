@@ -15,32 +15,40 @@ class AiException(string message) : Exception(message)
     public bool KeyProblem { get; init; }
 }
 
-class KeyRing(string id, string[] keys, Func<string, IProvider> make) : IProvider
+// Tries each option in turn without asking, for when a limit or a budget runs out.
+class Failover(string id, (IProvider Provider, string Model)[] steps) : IProvider
 {
-    // start from the key that last worked, so a spent key isn't retried on every read
-    static readonly Dictionary<string, int> Last = new();
+    // a limit comes back eventually, so the first choice gets another try after this long
+    const long RetryMs = 30 * 60 * 1000;
+
+    // starts from what last worked, so a spent option isn't retried on every read
+    static readonly Dictionary<string, (int At, long Since)> Last = new();
 
     public async Task<string> AskAsync(Conversation chat, Action<string> onText, CancellationToken ct)
     {
-        int start = Last.GetValueOrDefault(id) % keys.Length;
+        if (Last.TryGetValue(id, out var last) && Environment.TickCount64 - last.Since >= RetryMs)
+            Last.Remove(id);
+        int start = Last.TryGetValue(id, out last) ? last.At % steps.Length : 0;
         for (int i = 0; ; i++)
         {
-            int at = (start + i) % keys.Length;
-            bool wrote = false;
+            int at = (start + i) % steps.Length;
+            chat.Model = steps[at].Model;
             try
             {
-                string answer = await make(keys[at]).AskAsync(chat, text =>
-                {
-                    wrote = true;
-                    onText(text);
-                }, ct);
-                Last[id] = at;
+                string answer = await steps[at].Provider.AskAsync(chat, onText, ct);
+                if (at == 0)
+                    Last.Remove(id);
+                else if (!Last.TryGetValue(id, out var kept) || kept.At != at)
+                    Last[id] = (at, Environment.TickCount64);
                 return answer;
             }
-            catch (AiException ex) when (ex.KeyProblem && !wrote)
+            catch (AiException ex) when (ex.KeyProblem && i + 1 < steps.Length)
             {
-                if (i + 1 == keys.Length)
-                    throw new AiException($"All {keys.Length} saved keys failed. {ex.Message}");
+                // onText always carries the whole text, so the next option replaces any partial answer
+            }
+            catch (AiException ex) when (ex.KeyProblem && steps.Length > 1)
+            {
+                throw new AiException($"All {steps.Length} options failed. {ex.Message}");
             }
         }
     }

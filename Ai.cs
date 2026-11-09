@@ -5,20 +5,30 @@ static class Ai
     public static IProvider Create(Settings s)
     {
         string id = s.Provider;
-        if (id == Settings.Claude)
-            return new ClaudeCli();
+        if (id is Settings.Claude or "anthropic")
+            return ClaudeChain(s);
         var keys = Keys(s, id);
         string url = BaseOf(id, s.CustomUrl, keys.Length > 0);
+        string model = s.ProviderModels.GetValueOrDefault(id) ?? "";
         return keys.Length > 1
-            ? new KeyRing(id, keys, key => Make(id, url, key))
+            ? new Failover(id, keys.Select(key => (Make(id, url, key), model)).ToArray())
             : Make(id, url, keys.FirstOrDefault());
+    }
+
+    // The CLI and each API key have separate limits, so when one runs out the next carries on.
+    // The chain stays within Claude: other companies only see screenshots when picked by hand.
+    static IProvider ClaudeChain(Settings s)
+    {
+        string apiModel = s.ProviderModels.GetValueOrDefault("anthropic") ?? Settings.Models[0].Id;
+        var api = s.GetKeys("anthropic").Select(key => ((IProvider)new ClaudeApi(ClaudeApi.DefaultUrl, key), apiModel));
+        var cli = new[] { ((IProvider)new ClaudeCli(), s.Model) };
+        return new Failover(s.Provider, (s.Provider == Settings.Claude ? cli.Concat(api) : api.Concat(cli)).ToArray());
     }
 
     static IProvider Make(string id, string url, string? key)
     {
         return id switch
         {
-            "anthropic" => new ClaudeApi(ClaudeApi.DefaultUrl, key!),
             "gemini" => new GeminiProvider(key!),
             "openai" => new OpenAiProvider("OpenAI", url, key, TimeSpan.FromSeconds(90)),
             _ => new OpenAiProvider(new Uri(url).Host, url, key, TimeSpan.FromMinutes(5)),

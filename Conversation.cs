@@ -3,7 +3,7 @@ namespace Glance;
 class Conversation(byte[] jpeg, string model, string mode, IProvider provider)
 {
     public byte[] Jpeg { get; } = jpeg;
-    public string Model { get; } = model;
+    public string Model { get; set; } = model;
     public string Mode { get; } = mode;
     public IProvider Provider { get; } = provider;
     public string Pending { get; private set; } = Prompts.First(mode);
