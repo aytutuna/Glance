@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using Microsoft.Win32;
 
 namespace Glance;
 
@@ -46,6 +47,42 @@ class TrayApp : ApplicationContext
                 CloseAnswer();
         };
         Bind();
+        var stored = StartValue();
+        if (stored != null && stored != StartCommand)
+            SetStartWithWindows(true);
+    }
+
+    static string StartCommand => $"\"{Environment.ProcessPath}\"";
+
+    static RegistryKey? RunKey(bool write)
+    {
+        return Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", write);
+    }
+
+    static string? StartValue()
+    {
+        using var key = RunKey(false);
+        return key?.GetValue("Glance") as string;
+    }
+
+    bool SetStartWithWindows(bool on)
+    {
+        try
+        {
+            using var key = RunKey(true);
+            if (key == null)
+                return false;
+            if (on)
+                key.SetValue("Glance", StartCommand);
+            else
+                key.DeleteValue("Glance", false);
+            return true;
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
+        {
+            tray.ShowBalloonTip(5000, "Glance", "Couldn't change the Windows startup setting.", ToolTipIcon.Warning);
+            return false;
+        }
     }
 
     void UpdateTooltip()
@@ -166,6 +203,11 @@ class TrayApp : ApplicationContext
         menu.Items.Add("Identify screens", null, (_, _) => Identify());
         menu.Items.Add($"Read key ({KeyDialog.KeyName(settings.Hotkey)})...", null, (_, _) => ChangeKey(KeyJob.Read));
         menu.Items.Add($"Close key ({KeyDialog.KeyName(settings.CloseKey)})...", null, (_, _) => ChangeKey(KeyJob.Close));
+        bool autostart = StartValue() != null;
+        menu.Items.Add(new ToolStripMenuItem("Start with Windows", null, (_, _) => SetStartWithWindows(!autostart))
+        {
+            Checked = autostart,
+        });
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(new ToolStripMenuItem("Copy last answer", null, (_, _) => CopyLast())
         {
