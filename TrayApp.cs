@@ -225,6 +225,12 @@ class TrayApp : ApplicationContext
         menu.Items.Add(ScreenMenu("Read from", settings.ReadDevice, d => settings.ReadDevice = d));
         menu.Items.Add(ScreenMenu("Show answer on", settings.ShowDevice, d => settings.ShowDevice = d));
         menu.Items.Add(PositionMenu());
+        menu.Items.Add(new ToolStripMenuItem("Plain black answer", null, (_, _) =>
+        {
+            settings.PlainAnswer = !settings.PlainAnswer;
+            SaveLook();
+        })
+        { Checked = settings.PlainAnswer });
         menu.Items.Add(AiMenu());
         if (settings.Provider == Settings.Claude)
             menu.Items.Add(ModelMenu());
@@ -255,12 +261,56 @@ class TrayApp : ApplicationContext
             item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
             {
                 settings.CenterAnswer = center;
-                if (!settings.Save())
-                    WarnUnsaved();
+                settings.UseArea = false;
+                SaveLook();
             })
-            { Checked = settings.CenterAnswer == center });
+            { Checked = !settings.UseArea && settings.CenterAnswer == center });
         }
+        if (settings.AnswerArea != null)
+        {
+            item.DropDownItems.Add(new ToolStripMenuItem("Drawn area", null, (_, _) =>
+            {
+                settings.UseArea = true;
+                SaveLook();
+            })
+            { Checked = settings.UseArea });
+        }
+        item.DropDownItems.Add(new ToolStripSeparator());
+        item.DropDownItems.Add("Draw answer area...", null, (_, _) => DrawArea());
         return item;
+    }
+
+    void SaveLook()
+    {
+        if (!settings.Save())
+            WarnUnsaved();
+    }
+
+    void DrawArea()
+    {
+        if (keyDialog != null || picker != null)
+        {
+            ((Form?)keyDialog ?? picker)!.Activate();
+            return;
+        }
+        Start(async ct =>
+        {
+            ClosePopup();
+            CloseLabels();
+            // the tray menu has to fade out before the screen is captured
+            await Task.Delay(300, ct);
+            var screen = Resolve(settings.ShowDevice);
+            using var shot = await Task.Run(() => Grabber.Grab(screen), ct);
+            ct.ThrowIfCancellationRequested();
+            var drawn = await Pick(screen, shot, "Drag the area where answers should appear. Esc cancels.", ct);
+            if (drawn is not Rectangle r)
+                return;
+            double w = shot.Width, h = shot.Height;
+            settings.AnswerArea = new[] { r.X / w, r.Y / h, r.Width / w, r.Height / h };
+            settings.UseArea = true;
+            SaveLook();
+            popup = NewPopup("Answers will appear here.", false);
+        });
     }
 
     ToolStripMenuItem AiMenu()
@@ -486,7 +536,7 @@ class TrayApp : ApplicationContext
         Rectangle? crop = null;
         if (area)
         {
-            crop = await Pick(screen, shot, ct);
+            crop = await Pick(screen, shot, "Drag over the area to read. Esc cancels.", ct);
             if (crop == null)
                 return;
         }
@@ -534,10 +584,10 @@ class TrayApp : ApplicationContext
         return text.Replace("**", "").Trim();
     }
 
-    async Task<Rectangle?> Pick(Screen screen, Bitmap shot, CancellationToken ct)
+    async Task<Rectangle?> Pick(Screen screen, Bitmap shot, string hint, CancellationToken ct)
     {
         var done = new TaskCompletionSource<Rectangle?>();
-        var form = picker = new AreaPicker(screen, shot);
+        var form = picker = new AreaPicker(screen, shot, hint);
         form.FormClosed += (_, _) =>
         {
             picker = null;
@@ -560,7 +610,7 @@ class TrayApp : ApplicationContext
 
     AnswerPopup NewPopup(string text, bool reading)
     {
-        var made = new AnswerPopup(Resolve(settings.ShowDevice), text, reading, settings.CenterAnswer);
+        var made = new AnswerPopup(Resolve(settings.ShowDevice), text, reading, settings);
         made.CloseClicked += CloseAnswer;
         made.Asked += Follow;
         made.Show();

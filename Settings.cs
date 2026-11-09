@@ -41,6 +41,15 @@ class Settings
     public string? ReadDevice { get; set; }
     public string? ShowDevice { get; set; }
     public bool CenterAnswer { get; set; }
+    public bool PlainAnswer { get; set; }
+    public bool UseArea { get; set; }
+    // left, top, width, height as fractions of the screen, so it survives a resolution change
+    public double[]? AnswerArea { get; set; }
+
+    public static bool ValidArea(double[]? a)
+    {
+        return a is { Length: 4 } && a.All(v => v >= 0 && v <= 1) && a[2] > 0 && a[3] > 0 && a[0] + a[2] <= 1.001 && a[1] + a[3] <= 1.001;
+    }
     public Keys Hotkey { get; set; } = Keys.Control | Keys.Shift | Keys.Q;
     public Keys CloseKey { get; set; } = Keys.Control | Keys.Shift | Keys.X;
     public Keys RegionKey { get; set; } = Keys.Control | Keys.Shift | Keys.D;
@@ -142,6 +151,11 @@ class Settings
                 settings.Model = Models[0].Id;
             if (!Modes.Any(m => m.Id == settings.Mode))
                 settings.Mode = Modes[0].Id;
+            if (!ValidArea(settings.AnswerArea))
+            {
+                settings.AnswerArea = null;
+                settings.UseArea = false;
+            }
             settings.ApiKeys ??= new();
             settings.ProviderModels ??= new();
             if (!Providers.Any(p => p.Id == settings.Provider) || !settings.Configured(settings.Provider))

@@ -18,26 +18,32 @@ class AnswerPopup : OverlayForm
     long lastLayout;
     Rectangle target;
     bool ask, activatable;
-    readonly bool centered;
+    readonly bool centered, plain;
+    readonly double[]? area;
+    Font? fit;
     IntPtr previous;
 
     public event Action? CloseClicked;
     public event Action<string>? Asked;
 
-    public AnswerPopup(Screen screen, string text, bool reading = false, bool centered = false)
+    public AnswerPopup(Screen screen, string text, bool reading = false, Settings? look = null)
     {
         this.text = text;
         this.screen = screen;
-        this.centered = centered;
+        area = look is { UseArea: true } ? look.AnswerArea : null;
+        centered = area == null && look is { CenterAnswer: true };
+        plain = look is { PlainAnswer: true };
         scale = Native.ScaleFor(screen);
         font = NewFont();
+        if (area != null)
+            fit = LargestFit();
 
-        BackColor = Color.FromArgb(32, 32, 32);
+        BackColor = plain ? Color.Black : Color.FromArgb(32, 32, 32);
 
         label = new Label
         {
-            Font = font,
-            ForeColor = Color.FromArgb(240, 240, 240),
+            Font = TextFont,
+            ForeColor = plain ? Color.White : Color.FromArgb(240, 240, 240),
             BackColor = BackColor,
             AutoSize = false,
             UseMnemonic = false,
@@ -66,6 +72,14 @@ class AnswerPopup : OverlayForm
         Controls.Add(panel);
         Controls.Add(inputBar);
         Controls.Add(bar);
+        if (plain)
+        {
+            // no buttons to click, so a click anywhere closes it
+            bar.Visible = false;
+            Click += (_, _) => CloseClicked?.Invoke();
+            panel.Click += (_, _) => CloseClicked?.Invoke();
+            label.Click += (_, _) => CloseClicked?.Invoke();
+        }
         SetReading(reading);
         reset.Tick += (_, _) =>
         {
@@ -179,8 +193,9 @@ class AnswerPopup : OverlayForm
     public void SetText(string text, string? copy = null, bool ask = false)
     {
         this.text = copy ?? text;
-        this.ask = ask;
+        this.ask = ask && !plain;
         SetReading(false);
+        ResetFit();
         Render(text);
     }
 
@@ -189,7 +204,55 @@ class AnswerPopup : OverlayForm
         Release();
         ask = false;
         SetReading(true);
+        ResetFit();
         Render(text);
+    }
+
+    Font TextFont => fit ?? font;
+
+    Font LargestFit()
+    {
+        return new Font("Segoe UI", (float)(72 * scale), GraphicsUnit.Pixel);
+    }
+
+    void ResetFit()
+    {
+        if (fit == null)
+            return;
+        var next = LargestFit();
+        // the Font setter ignores an equal font, so swapping would leave the label on a disposed one
+        if (next.Equals(fit))
+        {
+            next.Dispose();
+            return;
+        }
+        var old = fit;
+        fit = next;
+        label.Font = fit;
+        old.Dispose();
+    }
+
+    // shrinks only, so text streaming in doesn't make the size jump back up
+    void Shrink(string text, int width, int height)
+    {
+        float floor = (float)(12 * scale);
+        while (fit!.Size > floor && Measure(text, width) > height)
+        {
+            var old = fit;
+            fit = new Font("Segoe UI", Math.Max(floor, old.Size * 0.9f), GraphicsUnit.Pixel);
+            label.Font = fit;
+            old.Dispose();
+        }
+    }
+
+    Rectangle? Drawn()
+    {
+        if (area == null)
+            return null;
+        var b = screen.Bounds;
+        int w = Math.Min(b.Width, Math.Max((int)(area[2] * b.Width), (int)(160 * scale)));
+        int h = Math.Min(b.Height, Math.Max((int)(area[3] * b.Height), (int)(60 * scale)));
+        return new Rectangle(Math.Min(b.X + (int)(area[0] * b.Width), b.Right - w), Math.Min(b.Y + (int)(area[1] * b.Height), b.Bottom - h), w, h);
     }
 
     // partial text: relayout at most every 50 ms, and Copy stays off until SetText
@@ -219,11 +282,12 @@ class AnswerPopup : OverlayForm
             scale = now;
             var old = font;
             font = NewFont();
-            label.Font = font;
             copy.Font = font;
             close.Font = font;
             box.Font = font;
             old.Dispose();
+            ResetFit();
+            label.Font = TextFont;
         }
         Fit(text);
         EnsureBounds();
@@ -255,16 +319,20 @@ class AnswerPopup : OverlayForm
     void Fit(string text)
     {
         var wa = screen.WorkingArea;
+        var drawn = Drawn();
         int margin = (int)(16 * scale), pad = (int)(14 * Unit);
-        int width = Math.Min((int)(420 * Unit), wa.Width - 2 * margin);
-        int maxHeight = (int)(wa.Height * (centered ? 0.85 : 0.6));
+        int width = drawn?.Width ?? Math.Min((int)(420 * Unit), wa.Width - 2 * margin);
+        int maxHeight = drawn?.Height ?? (int)(wa.Height * (centered ? 0.85 : 0.6));
         int inner = width - 2 * pad;
 
-        int textHeight = Measure(text, inner);
-        int barHeight = (int)(28 * Unit);
+        int barHeight = plain ? 0 : (int)(28 * Unit);
         int inputHeight = ask ? (int)(38 * Unit) : 0;
-        int height = textHeight + 2 * pad + barHeight + inputHeight;
-        if (height > maxHeight)
+        int chrome = 2 * pad + barHeight + inputHeight;
+        if (drawn != null)
+            Shrink(text, inner, maxHeight - chrome);
+        int textHeight = Measure(text, inner);
+        int height = drawn?.Height ?? textHeight + chrome;
+        if (textHeight + chrome > maxHeight)
         {
             inner -= (int)(20 * scale);
             textHeight = Measure(text, inner);
@@ -284,15 +352,16 @@ class AnswerPopup : OverlayForm
         panel.AutoScrollMinSize = new Size(0, textHeight + 2 * pad);
 
         var b = screen.Bounds;
-        target = centered
-            ? new Rectangle(b.X + (b.Width - width) / 2, b.Y + (b.Height - height) / 2, width, height)
-            : new Rectangle(wa.Right - width - margin, wa.Bottom - height - margin, width, height);
+        target = drawn
+            ?? (centered
+                ? new Rectangle(b.X + (b.Width - width) / 2, b.Y + (b.Height - height) / 2, width, height)
+                : new Rectangle(wa.Right - width - margin, wa.Bottom - height - margin, width, height));
     }
 
     int Measure(string text, int width)
     {
         var flags = TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix | TextFormatFlags.TextBoxControl;
-        return TextRenderer.MeasureText(text, font, new Size(width, int.MaxValue), flags).Height + 2;
+        return TextRenderer.MeasureText(text, TextFont, new Size(width, int.MaxValue), flags).Height + 2;
     }
 
     protected override void Dispose(bool disposing)
@@ -302,6 +371,7 @@ class AnswerPopup : OverlayForm
             reset.Dispose();
             flush.Dispose();
             font.Dispose();
+            fit?.Dispose();
         }
         base.Dispose(disposing);
     }

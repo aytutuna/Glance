@@ -6,6 +6,7 @@ class AreaPicker : Form
 
     readonly Screen screen;
     readonly Bitmap shot;
+    readonly string hint;
     readonly Font font;
     Rectangle sel;
     Point start;
@@ -14,10 +15,11 @@ class AreaPicker : Form
     // in pixels of the captured bitmap
     public Rectangle? Selection { get; private set; }
 
-    public AreaPicker(Screen screen, Bitmap shot)
+    public AreaPicker(Screen screen, Bitmap shot, string hint)
     {
         this.screen = screen;
         this.shot = shot;
+        this.hint = hint;
         font = new Font("Segoe UI", (float)(16 * Native.ScaleFor(screen)), GraphicsUnit.Pixel);
 
         AutoScaleMode = AutoScaleMode.None;
@@ -132,7 +134,6 @@ class AreaPicker : Form
         }
         else if (!dragging)
         {
-            const string hint = "Drag over the area to read. Esc cancels.";
             var size = TextRenderer.MeasureText(hint, font);
             int pad = size.Height / 2;
             var box = new Rectangle((all.Width - size.Width) / 2 - pad, all.Height / 8, size.Width + 2 * pad, size.Height + pad);
