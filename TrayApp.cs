@@ -224,6 +224,7 @@ class TrayApp : ApplicationContext
         menu.Items.Add("Read an area", null, (_, _) => Trigger(300, true));
         menu.Items.Add(ScreenMenu("Read from", settings.ReadDevice, d => settings.ReadDevice = d));
         menu.Items.Add(ScreenMenu("Show answer on", settings.ShowDevice, d => settings.ShowDevice = d));
+        menu.Items.Add(PositionMenu());
         menu.Items.Add(AiMenu());
         if (settings.Provider == Settings.Claude)
             menu.Items.Add(ModelMenu());
@@ -244,6 +245,22 @@ class TrayApp : ApplicationContext
         menu.Items.Add(recent);
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Exit", null, (_, _) => Quit());
+    }
+
+    ToolStripMenuItem PositionMenu()
+    {
+        var item = new ToolStripMenuItem("Answer position");
+        foreach (var (name, center) in new[] { ("Bottom right", false), ("Center of the screen", true) })
+        {
+            item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
+            {
+                settings.CenterAnswer = center;
+                if (!settings.Save())
+                    WarnUnsaved();
+            })
+            { Checked = settings.CenterAnswer == center });
+        }
+        return item;
     }
 
     ToolStripMenuItem AiMenu()
@@ -543,7 +560,7 @@ class TrayApp : ApplicationContext
 
     AnswerPopup NewPopup(string text, bool reading)
     {
-        var made = new AnswerPopup(Resolve(settings.ShowDevice), text, reading);
+        var made = new AnswerPopup(Resolve(settings.ShowDevice), text, reading, settings.CenterAnswer);
         made.CloseClicked += CloseAnswer;
         made.Asked += Follow;
         made.Show();

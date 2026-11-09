@@ -18,15 +18,17 @@ class AnswerPopup : OverlayForm
     long lastLayout;
     Rectangle target;
     bool ask, activatable;
+    readonly bool centered;
     IntPtr previous;
 
     public event Action? CloseClicked;
     public event Action<string>? Asked;
 
-    public AnswerPopup(Screen screen, string text, bool reading = false)
+    public AnswerPopup(Screen screen, string text, bool reading = false, bool centered = false)
     {
         this.text = text;
         this.screen = screen;
+        this.centered = centered;
         scale = Native.ScaleFor(screen);
         font = NewFont();
 
@@ -278,7 +280,10 @@ class AnswerPopup : OverlayForm
         label.SetBounds(pad, pad, inner, textHeight);
         panel.AutoScrollMinSize = new Size(0, textHeight + 2 * pad);
 
-        target = new Rectangle(wa.Right - width - margin, wa.Bottom - height - margin, width, height);
+        var b = screen.Bounds;
+        target = centered
+            ? new Rectangle(b.X + (b.Width - width) / 2, b.Y + (b.Height - height) / 2, width, height)
+            : new Rectangle(wa.Right - width - margin, wa.Bottom - height - margin, width, height);
     }
 
     int Measure(string text, int width)

@@ -40,6 +40,7 @@ class Settings
 
     public string? ReadDevice { get; set; }
     public string? ShowDevice { get; set; }
+    public bool CenterAnswer { get; set; }
     public Keys Hotkey { get; set; } = Keys.Control | Keys.Shift | Keys.Q;
     public Keys CloseKey { get; set; } = Keys.Control | Keys.Shift | Keys.X;
     public Keys RegionKey { get; set; } = Keys.Control | Keys.Shift | Keys.D;
