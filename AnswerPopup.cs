@@ -20,7 +20,7 @@ class AnswerPopup : OverlayForm
     bool ask, activatable;
     readonly bool centered, plain;
     readonly double[]? area;
-    Font? fit;
+    Font? fit, glyph;
     IntPtr previous;
 
     public event Action? CloseClicked;
@@ -74,11 +74,14 @@ class AnswerPopup : OverlayForm
         Controls.Add(bar);
         if (plain)
         {
-            // no buttons to click, so a click anywhere closes it
+            // a touch screen takes stray taps, so only this button closes the black screen
             bar.Visible = false;
-            Click += (_, _) => CloseClicked?.Invoke();
-            panel.Click += (_, _) => CloseClicked?.Invoke();
-            label.Click += (_, _) => CloseClicked?.Invoke();
+            bar.Controls.Remove(close);
+            Controls.Add(close);
+            close.BringToFront();
+            close.ForeColor = Color.FromArgb(110, 110, 110);
+            glyph = NewGlyph();
+            close.Font = glyph;
         }
         SetReading(reading);
         reset.Tick += (_, _) =>
@@ -210,6 +213,11 @@ class AnswerPopup : OverlayForm
 
     Font TextFont => fit ?? font;
 
+    Font NewGlyph()
+    {
+        return new Font("Segoe UI", (float)(30 * scale), GraphicsUnit.Pixel);
+    }
+
     Font LargestFit()
     {
         return new Font("Segoe UI", (float)((plain ? 120 : 72) * scale), GraphicsUnit.Pixel);
@@ -284,6 +292,13 @@ class AnswerPopup : OverlayForm
             font = NewFont();
             copy.Font = font;
             close.Font = font;
+            if (glyph != null)
+            {
+                var oldGlyph = glyph;
+                glyph = NewGlyph();
+                close.Font = glyph;
+                oldGlyph.Dispose();
+            }
             box.Font = font;
             old.Dispose();
             ResetFit();
@@ -323,7 +338,7 @@ class AnswerPopup : OverlayForm
         var drawn = Drawn();
         // plain blacks out the whole screen; the text goes in the drawn area, or across all of it
         Rectangle? room = plain ? drawn ?? b : drawn;
-        int margin = (int)(16 * scale), pad = (int)((plain && drawn == null ? 32 : 14) * Unit);
+        int margin = (int)(16 * scale), pad = (int)((plain && drawn == null ? 72 : 14) * Unit);
         int width = room?.Width ?? Math.Min((int)(420 * Unit), wa.Width - 2 * margin);
         int maxHeight = room?.Height ?? (int)(wa.Height * (centered ? 0.85 : 0.6));
         int inner = width - 2 * pad;
@@ -349,6 +364,11 @@ class AnswerPopup : OverlayForm
         int closeWidth = (int)(30 * Unit), copyWidth = (int)(90 * Unit);
         close.SetBounds(width - pad - closeWidth, 0, closeWidth, barHeight);
         copy.SetBounds(close.Left - copyWidth, 0, copyWidth, barHeight);
+        if (plain)
+        {
+            int size = (int)(48 * scale);
+            close.SetBounds(b.Width - size - margin, margin, size, size);
+        }
 
         label.Text = text;
         var at = plain ? new Point(room!.Value.X - b.X, room.Value.Y - b.Y) : Point.Empty;
@@ -375,6 +395,7 @@ class AnswerPopup : OverlayForm
             flush.Dispose();
             font.Dispose();
             fit?.Dispose();
+            glyph?.Dispose();
         }
         base.Dispose(disposing);
     }
