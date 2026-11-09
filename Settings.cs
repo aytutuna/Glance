@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 
 namespace Glance;
@@ -25,6 +27,14 @@ class Settings
         ("summarize", "Summarize"),
     };
 
+    public static readonly (string Id, string Name)[] Providers =
+    {
+        ("claude", "Claude"),
+        ("openai", "OpenAI"),
+        ("gemini", "Gemini"),
+        ("custom", "Custom"),
+    };
+
     public string? ReadDevice { get; set; }
     public string? ShowDevice { get; set; }
     public Keys Hotkey { get; set; } = Keys.Control | Keys.Shift | Keys.Q;
@@ -32,6 +42,56 @@ class Settings
     public Keys RegionKey { get; set; } = Keys.Control | Keys.Shift | Keys.D;
     public string Model { get; set; } = Models[0].Id;
     public string Mode { get; set; } = Modes[0].Id;
+    public string Provider { get; set; } = Providers[0].Id;
+    public string? CustomUrl { get; set; }
+    public Dictionary<string, string> ProviderModels { get; set; } = new();
+    // DPAPI-encrypted for this Windows account, base64; never stored as plain text
+    public Dictionary<string, string> ApiKeys { get; set; } = new();
+
+    public string? GetKey(string id)
+    {
+        if (!ApiKeys.TryGetValue(id, out var stored))
+            return null;
+        try
+        {
+            return Encoding.UTF8.GetString(ProtectedData.Unprotect(Convert.FromBase64String(stored), null, DataProtectionScope.CurrentUser));
+        }
+        catch (Exception ex) when (ex is CryptographicException or FormatException)
+        {
+            return null;
+        }
+    }
+
+    public bool HasKey(string id)
+    {
+        return ApiKeys.ContainsKey(id);
+    }
+
+    public void SetKey(string id, string key)
+    {
+        ApiKeys[id] = Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes(key), null, DataProtectionScope.CurrentUser));
+    }
+
+    public void RemoveKey(string id)
+    {
+        ApiKeys.Remove(id);
+        if (!Configured(Provider))
+            Provider = Providers[0].Id;
+    }
+
+    public string ActiveModel()
+    {
+        return Provider == Providers[0].Id ? Model : ProviderModels.GetValueOrDefault(Provider) ?? "";
+    }
+
+    public bool Configured(string id)
+    {
+        if (id == Providers[0].Id)
+            return true;
+        if (!ProviderModels.TryGetValue(id, out var model) || model.Length == 0)
+            return false;
+        return id == "custom" ? !string.IsNullOrEmpty(CustomUrl) : HasKey(id);
+    }
 
     public static Settings Load()
     {
@@ -47,6 +107,10 @@ class Settings
                 settings.Model = Models[0].Id;
             if (!Modes.Any(m => m.Id == settings.Mode))
                 settings.Mode = Modes[0].Id;
+            settings.ApiKeys ??= new();
+            settings.ProviderModels ??= new();
+            if (!Providers.Any(p => p.Id == settings.Provider) || !settings.Configured(settings.Provider))
+                settings.Provider = Providers[0].Id;
             if (migrate)
                 settings.Save();
             return settings;

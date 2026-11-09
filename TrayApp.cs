@@ -415,6 +415,7 @@ class TrayApp : ApplicationContext
     {
         ClosePopup();
         CloseLabels();
+        var provider = Ai.Create(settings);
         await Task.Delay(delayMs + 150, ct);
         var screen = Resolve(settings.ReadDevice);
         using var shot = await Task.Run(() => Grabber.Grab(screen), ct);
@@ -430,7 +431,7 @@ class TrayApp : ApplicationContext
         ct.ThrowIfCancellationRequested();
 
         var mine = popup = NewPopup("Reading...", true);
-        await Reply(new Conversation(jpeg, settings.Model, settings.Mode, new ClaudeCli()), mine, ct);
+        await Reply(new Conversation(jpeg, settings.ActiveModel(), settings.Mode, provider), mine, ct);
     }
 
     async Task Reply(Conversation c, AnswerPopup mine, CancellationToken ct)
