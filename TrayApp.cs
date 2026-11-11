@@ -25,6 +25,7 @@ class TrayApp : ApplicationContext
     ConnectDialog? connectDialog;
     OrderDialog? orderDialog;
     ModesDialog? modesDialog;
+    SettingsDialog? settingsDialog;
     KeyHook? keyHook;
     readonly List<string> history;
     Conversation? chat;
@@ -83,13 +84,13 @@ class TrayApp : ApplicationContext
         return Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", write);
     }
 
-    static string? StartValue()
+    internal static string? StartValue()
     {
         using var key = RunKey(false);
         return key?.GetValue("Glance") as string;
     }
 
-    bool SetStartWithWindows(bool on)
+    internal bool SetStartWithWindows(bool on)
     {
         try
         {
@@ -182,7 +183,7 @@ class TrayApp : ApplicationContext
         keyHook = null;
     }
 
-    void ChangeKey(KeyJob job)
+    internal void ChangeKey(KeyJob job)
     {
         if (keyDialog != null)
         {
@@ -225,7 +226,7 @@ class TrayApp : ApplicationContext
         dialog.Activate();
     }
 
-    Keys KeyOf(KeyJob job)
+    internal Keys KeyOf(KeyJob job)
     {
         return job switch { KeyJob.Read => settings.Hotkey, KeyJob.Close => settings.CloseKey, KeyJob.Hide => settings.HideKey, _ => settings.RegionKey };
     }
@@ -303,6 +304,7 @@ class TrayApp : ApplicationContext
         { Enabled = history.Count > 0 });
         menu.Items.Add(recent);
         menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add("Settings...", null, (_, _) => OpenSettings());
         menu.Items.Add("Exit", null, (_, _) => Quit());
     }
 
@@ -338,25 +340,27 @@ class TrayApp : ApplicationContext
         var item = new ToolStripMenuItem("Text opacity");
         foreach (int percent in new[] { 100, 80, 60, 40, 20 })
         {
-            item.DropDownItems.Add(new ToolStripMenuItem($"{percent}%", null, (_, _) =>
-            {
-                settings.TextOpacity = percent;
-                if (popup != null && !popup.IsDisposed)
-                    popup.SetTextOpacity(percent);
-                SaveLook();
-            })
+            item.DropDownItems.Add(new ToolStripMenuItem($"{percent}%", null, (_, _) => SetOpacity(percent))
             { Checked = settings.TextOpacity == percent });
         }
         return item;
     }
 
-    void SaveLook()
+    internal void SetOpacity(int percent)
+    {
+        settings.TextOpacity = percent;
+        if (popup != null && !popup.IsDisposed)
+            popup.SetTextOpacity(percent);
+        SaveLook();
+    }
+
+    internal void SaveLook()
     {
         if (!settings.Save())
             WarnUnsaved();
     }
 
-    void DrawArea()
+    internal void DrawArea()
     {
         if (keyDialog != null || picker != null)
         {
@@ -405,7 +409,7 @@ class TrayApp : ApplicationContext
         return item;
     }
 
-    void ChangeOrder()
+    internal void ChangeOrder()
     {
         if (orderDialog != null)
         {
@@ -424,7 +428,7 @@ class TrayApp : ApplicationContext
         dialog.Activate();
     }
 
-    void EditModes()
+    internal void EditModes()
     {
         if (modesDialog != null)
         {
@@ -443,7 +447,7 @@ class TrayApp : ApplicationContext
         dialog.Activate();
     }
 
-    void Connect()
+    internal void Connect()
     {
         if (connectDialog != null)
         {
@@ -501,11 +505,15 @@ class TrayApp : ApplicationContext
         return item;
     }
 
+    internal static List<(string Value, string Name)> TranslateChoices()
+    {
+        return Settings.Languages.Select(l => (l, l)).Prepend(("", $"Windows language ({System.Globalization.CultureInfo.CurrentUICulture.EnglishName})")).ToList();
+    }
+
     ToolStripMenuItem TranslateMenu()
     {
         var item = new ToolStripMenuItem("Translate to");
-        var choices = Settings.Languages.Select(l => (l, l)).Prepend(("", $"Windows language ({System.Globalization.CultureInfo.CurrentUICulture.EnglishName})"));
-        foreach (var (value, name) in choices)
+        foreach (var (value, name) in TranslateChoices())
         {
             item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
             {
@@ -518,7 +526,7 @@ class TrayApp : ApplicationContext
         return item;
     }
 
-    void ToggleHistory()
+    internal void ToggleHistory()
     {
         settings.KeepHistory = !settings.KeepHistory;
         if (settings.KeepHistory)
@@ -552,18 +560,24 @@ class TrayApp : ApplicationContext
     ToolStripMenuItem ScreenMenu(string title, string? selected, Action<string?> choose, bool withAll = false)
     {
         var item = new ToolStripMenuItem(title);
-        var screens = Screen.AllScreens;
-        bool all = withAll && selected == AllScreens;
-        bool known = selected != null && screens.Any(s => s.DeviceName == selected);
-        item.DropDownItems.Add(ScreenItem(MouseScreen, !known && !all, () => choose(null)));
-        if (withAll)
-            item.DropDownItems.Add(ScreenItem("All screens", all, () => choose(AllScreens)));
-        for (int i = 0; i < screens.Length; i++)
-        {
-            string name = screens[i].DeviceName;
-            item.DropDownItems.Add(ScreenItem(Describe(screens[i], i), selected == name, () => choose(name)));
-        }
+        var choices = ScreenChoices(withAll);
+        // a screen that is gone counts as the screen with the mouse
+        if (!choices.Any(c => c.Device == selected))
+            selected = null;
+        foreach (var (device, text) in choices)
+            item.DropDownItems.Add(ScreenItem(text, device == selected, () => choose(device)));
         return item;
+    }
+
+    internal static List<(string? Device, string Text)> ScreenChoices(bool withAll)
+    {
+        var screens = Screen.AllScreens;
+        var choices = new List<(string?, string)> { (null, MouseScreen) };
+        if (withAll)
+            choices.Add((AllScreens, "All screens"));
+        for (int i = 0; i < screens.Length; i++)
+            choices.Add((screens[i].DeviceName, Describe(screens[i], i)));
+        return choices;
     }
 
     ToolStripMenuItem ScreenItem(string text, bool on, Action pick)
@@ -804,6 +818,23 @@ class TrayApp : ApplicationContext
         tray.Icon = busy ? busyIcon : idleIcon;
     }
 
+    void OpenSettings()
+    {
+        if (settingsDialog != null)
+        {
+            settingsDialog.Activate();
+            return;
+        }
+        var dialog = settingsDialog = new SettingsDialog(Resolve(null), settings, this);
+        dialog.FormClosed += (_, _) =>
+        {
+            settingsDialog = null;
+            dialog.Dispose();
+        };
+        dialog.Show();
+        dialog.Activate();
+    }
+
     void Quit()
     {
         current?.Cancel();
@@ -811,6 +842,7 @@ class TrayApp : ApplicationContext
         ClosePopup();
         keyDialog?.Close();
         connectDialog?.Close();
+        settingsDialog?.Close();
         keyHook?.Dispose();
         hotkeyWindow.Dispose();
         tray.Visible = false;
