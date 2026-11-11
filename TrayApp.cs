@@ -273,6 +273,7 @@ class TrayApp : ApplicationContext
         if (settings.Chain().Contains(Settings.Claude))
             menu.Items.Add(ModelMenu());
         menu.Items.Add(ModeMenu());
+        menu.Items.Add(TranslateMenu());
         menu.Items.Add("Identify screens", null, (_, _) => Identify());
         menu.Items.Add($"Read key ({KeyDialog.KeyName(settings.Hotkey)})...", null, (_, _) => ChangeKey(KeyJob.Read));
         menu.Items.Add($"Area key ({KeyDialog.KeyName(settings.RegionKey)})...", null, (_, _) => ChangeKey(KeyJob.Region));
@@ -466,6 +467,23 @@ class TrayApp : ApplicationContext
         return item;
     }
 
+    ToolStripMenuItem TranslateMenu()
+    {
+        var item = new ToolStripMenuItem("Translate to");
+        var choices = Settings.Languages.Select(l => (l, l)).Prepend(("", $"Windows language ({System.Globalization.CultureInfo.CurrentUICulture.EnglishName})"));
+        foreach (var (value, name) in choices)
+        {
+            item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
+            {
+                settings.TranslateTo = value;
+                if (!settings.Save())
+                    WarnUnsaved();
+            })
+            { Checked = settings.TranslateTo == value });
+        }
+        return item;
+    }
+
     static string Preview(string answer)
     {
         string line = Regex.Replace(answer, @"\s+", " ");
@@ -654,7 +672,7 @@ class TrayApp : ApplicationContext
             ClosePopup();
             mine = popup = NewPopup("Reading...", true);
         }
-        await Reply(new Conversation(jpeg, model, settings.Mode, provider), mine, ct);
+        await Reply(new Conversation(jpeg, model, settings.Mode, Prompts.Instruction(settings, settings.Mode), provider), mine, ct);
     }
 
     async Task Reply(Conversation c, AnswerPopup mine, CancellationToken ct)

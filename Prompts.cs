@@ -27,7 +27,7 @@ static class Prompts
 
     public static string System(Conversation chat)
     {
-        return Base(chat.Mode) + (chat.Done.Count > 0 ? FollowUp : "");
+        return chat.Instruction + (chat.Done.Count > 0 ? FollowUp : "");
     }
 
     // the model sees one message each time, so earlier turns go in as delimited context
@@ -42,14 +42,14 @@ static class Prompts
         return text.ToString();
     }
 
-    static string Base(string mode)
+    public static string Instruction(Settings settings, string mode)
     {
         return mode switch
         {
             "explain" => Explain,
             "summarize" => Summarize,
             "translate" => "You are shown a screenshot. Translate all the text on it into " +
-                CultureInfo.CurrentUICulture.EnglishName + ", keeping the order and line breaks. " +
+                (settings.TranslateTo.Length > 0 ? settings.TranslateTo : CultureInfo.CurrentUICulture.EnglishName) + ", keeping the order and line breaks. " +
                 "If the text is already in that language, say so in one line. " + Tail +
                 "If there is no text, say so in one line." + Plain,
             _ => Answer,

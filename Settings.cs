@@ -27,6 +27,12 @@ class Settings
         ("summarize", "Summarize"),
     };
 
+    public static readonly string[] Languages =
+    {
+        "English", "Turkish", "Spanish", "French", "German", "Italian", "Portuguese",
+        "Russian", "Arabic", "Chinese (Simplified)", "Japanese", "Korean", "Hindi",
+    };
+
     public const string Claude = "claude";
 
     public static readonly (string Id, string Name)[] Providers =
@@ -57,6 +63,8 @@ class Settings
     public Keys HideKey { get; set; } = Keys.Control | Keys.Shift | Keys.B;
     public string Model { get; set; } = Models[0].Id;
     public string Mode { get; set; } = Modes[0].Id;
+    // English name of the language to translate into; empty follows the Windows language
+    public string TranslateTo { get; set; } = "";
     public string Provider { get; set; } = Claude;
     public string? CustomUrl { get; set; }
     public Dictionary<string, string> ProviderModels { get; set; } = new();
@@ -219,6 +227,7 @@ class Settings
             settings.ApiKeys ??= new();
             settings.ProviderModels ??= new();
             settings.Order ??= new();
+            settings.TranslateTo ??= "";
             settings.TextOpacity = Math.Clamp(settings.TextOpacity, 10, 100);
             if (!Providers.Any(p => p.Id == settings.Provider) || !settings.Configured(settings.Provider))
                 settings.Provider = Claude;
