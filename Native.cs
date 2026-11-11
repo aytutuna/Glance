@@ -40,6 +40,9 @@ static class Native
 
     public const uint WDA_EXCLUDEFROMCAPTURE = 0x11;
 
+    // earlier builds treat the flag like WDA_MONITOR and draw the window black in captures
+    public static readonly bool CanExcludeFromCapture = Environment.OSVersion.Version.Build >= 19041;
+
     [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr SetWindowsHookEx(int hookId, HookProc proc, IntPtr module, uint threadId);
 

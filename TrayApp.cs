@@ -412,10 +412,20 @@ class TrayApp : ApplicationContext
         {
             ClosePopup();
             CloseLabels();
-            // the tray menu has to fade out before the screen is captured
-            await Task.Delay(300, ct);
+            settingsDialog?.Hide();
+            Bitmap shot;
             var screen = Resolve(settings.ShowDevice);
-            using var shot = await Task.Run(() => Grabber.Grab(screen.Bounds), ct);
+            try
+            {
+                // the tray menu and the settings window have to be gone before the screen is captured
+                await Task.Delay(300, ct);
+                shot = await Task.Run(() => Grabber.Grab(screen.Bounds), ct);
+            }
+            finally
+            {
+                settingsDialog?.Show();
+            }
+            using var kept = shot;
             ct.ThrowIfCancellationRequested();
             var drawn = await Pick(screen, shot, Strings.DragAnswerArea, ct);
             if (drawn is not Rectangle r)
@@ -749,7 +759,7 @@ class TrayApp : ApplicationContext
         CloseLabels();
         var provider = Ai.Create(settings);
         string model = settings.ActiveModel();
-        await Task.Delay(delayMs, ct);
+        await Task.Delay(Native.CanExcludeFromCapture ? delayMs : delayMs + 150, ct);
         var bounds = all ? SystemInformation.VirtualScreen : screen.Bounds;
         using var shot = await Task.Run(() => Grabber.Grab(bounds), ct);
         ct.ThrowIfCancellationRequested();

@@ -21,11 +21,12 @@ class OverlayForm : Form
         Native.SetWindowLongPtr(Handle, GWL_EXSTYLE, on ? style & ~WS_EX_NOACTIVATE : style | WS_EX_NOACTIVATE);
     }
 
-    // before Windows 10 2004 this fails and the windows simply stay in the shot
+    // only from Windows 10 2004 on; before that the popup is waited out instead of excluded
     protected override void OnHandleCreated(EventArgs e)
     {
         base.OnHandleCreated(e);
-        Native.SetWindowDisplayAffinity(Handle, Native.WDA_EXCLUDEFROMCAPTURE);
+        if (Native.CanExcludeFromCapture)
+            Native.SetWindowDisplayAffinity(Handle, Native.WDA_EXCLUDEFROMCAPTURE);
     }
 
     protected override bool ShowWithoutActivation => true;
