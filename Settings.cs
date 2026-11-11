@@ -4,6 +4,13 @@ using System.Text.Json;
 
 namespace Glance;
 
+class CustomMode
+{
+    public string Id { get; set; } = "custom:" + Guid.NewGuid().ToString("N")[..8];
+    public string Name { get; set; } = "";
+    public string Prompt { get; set; } = "";
+}
+
 class Settings
 {
     static readonly string FilePath = Path.Combine(
@@ -66,6 +73,9 @@ class Settings
     // English name of the language to translate into; empty follows the Windows language
     public string TranslateTo { get; set; } = "";
     public string Provider { get; set; } = Claude;
+    public List<CustomMode> CustomModes { get; set; } = new();
+    // edited prompts of the built-in modes by mode id; a missing entry means the default text
+    public Dictionary<string, string> PromptOverrides { get; set; } = new();
     public string? CustomUrl { get; set; }
     public Dictionary<string, string> ProviderModels { get; set; } = new();
     // DPAPI-encrypted for this Windows account, base64; never stored as plain text
@@ -77,6 +87,11 @@ class Settings
     static string Tag(string stored)
     {
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(stored)))[..8].ToLowerInvariant();
+    }
+
+    public List<(string Id, string Name)> AllModes()
+    {
+        return Modes.Concat(CustomModes.Select(m => (m.Id, m.Name))).ToList();
     }
 
     public List<(string Entry, string Label)> Options()
@@ -217,7 +232,9 @@ class Settings
             settings.HideKey = Distinct(settings.HideKey, settings.Hotkey, settings.CloseKey, settings.RegionKey);
             if (!Models.Any(m => m.Id == settings.Model))
                 settings.Model = Models[0].Id;
-            if (!Modes.Any(m => m.Id == settings.Mode))
+            settings.CustomModes ??= new();
+            settings.PromptOverrides ??= new();
+            if (!settings.AllModes().Any(m => m.Id == settings.Mode))
                 settings.Mode = Modes[0].Id;
             if (!ValidArea(settings.AnswerArea))
             {

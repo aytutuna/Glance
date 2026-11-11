@@ -24,6 +24,7 @@ class TrayApp : ApplicationContext
     KeyDialog? keyDialog;
     ConnectDialog? connectDialog;
     OrderDialog? orderDialog;
+    ModesDialog? modesDialog;
     KeyHook? keyHook;
     readonly List<string> history = new();
     Conversation? chat;
@@ -411,6 +412,25 @@ class TrayApp : ApplicationContext
         dialog.Activate();
     }
 
+    void EditModes()
+    {
+        if (modesDialog != null)
+        {
+            modesDialog.Activate();
+            return;
+        }
+        var dialog = modesDialog = new ModesDialog(Resolve(null), settings);
+        dialog.FormClosed += (_, _) =>
+        {
+            modesDialog = null;
+            if (dialog.Changed)
+                SaveLook();
+            dialog.Dispose();
+        };
+        dialog.Show();
+        dialog.Activate();
+    }
+
     void Connect()
     {
         if (connectDialog != null)
@@ -454,9 +474,9 @@ class TrayApp : ApplicationContext
     ToolStripMenuItem ModeMenu()
     {
         var item = new ToolStripMenuItem("Mode");
-        foreach (var (id, name) in Settings.Modes)
+        foreach (var (id, name) in settings.AllModes())
         {
-            item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
+            item.DropDownItems.Add(new ToolStripMenuItem(name.Replace("&", "&&"), null, (_, _) =>
             {
                 settings.Mode = id;
                 if (!settings.Save())
@@ -464,6 +484,8 @@ class TrayApp : ApplicationContext
             })
             { Checked = settings.Mode == id });
         }
+        item.DropDownItems.Add(new ToolStripSeparator());
+        item.DropDownItems.Add("Edit modes...", null, (_, _) => EditModes());
         return item;
     }
 

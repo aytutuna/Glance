@@ -44,6 +44,14 @@ static class Prompts
 
     public static string Instruction(Settings settings, string mode)
     {
+        if (settings.PromptOverrides.GetValueOrDefault(mode) is { Length: > 0 } edited)
+            return edited;
+        var custom = settings.CustomModes.FirstOrDefault(m => m.Id == mode);
+        return custom != null ? custom.Prompt + " " + Tail : Default(settings, mode);
+    }
+
+    public static string Default(Settings settings, string mode)
+    {
         return mode switch
         {
             "explain" => Explain,
@@ -63,7 +71,8 @@ static class Prompts
             "explain" => "Explain this screenshot.",
             "summarize" => "Summarize this screenshot.",
             "translate" => "Translate the text in this screenshot.",
-            _ => "Answer the question in this screenshot.",
+            "answer" => "Answer the question in this screenshot.",
+            _ => "Follow your instructions for this screenshot.",
         };
     }
 }
