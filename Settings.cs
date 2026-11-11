@@ -263,15 +263,23 @@ class Settings
     // the file exists but couldn't be read, so saving now would overwrite saved keys
     bool unread;
 
+    string file = FilePath;
+
     public static Settings Load()
     {
-        bool migrate = !File.Exists(FilePath) && File.Exists(OldFilePath);
-        string path = migrate ? OldFilePath : FilePath;
+        return Load(FilePath, OldFilePath);
+    }
+
+    internal static Settings Load(string filePath, string oldFilePath)
+    {
+        bool migrate = !File.Exists(filePath) && File.Exists(oldFilePath);
+        string path = migrate ? oldFilePath : filePath;
         if (!File.Exists(path))
             return new Settings();
         try
         {
             var settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText(path)) ?? new Settings();
+            settings.file = filePath;
             if (!KeyDialog.IsValid(settings.Hotkey))
                 settings.Hotkey = new Settings().Hotkey;
             settings.CloseKey = Distinct(settings.CloseKey, settings.Hotkey);
@@ -336,11 +344,11 @@ class Settings
             return false;
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
+            Directory.CreateDirectory(Path.GetDirectoryName(file)!);
             // written aside first so a crash can't leave a cut-off file
-            string temp = FilePath + ".tmp";
+            string temp = file + ".tmp";
             File.WriteAllText(temp, JsonSerializer.Serialize(this));
-            File.Move(temp, FilePath, true);
+            File.Move(temp, file, true);
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
