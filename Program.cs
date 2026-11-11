@@ -21,7 +21,7 @@ static class Program
         Application.ThreadException += (_, e) =>
         {
             Log.Write("ui thread", e.Exception);
-            app?.Notify("Something went wrong. Details are in glance.log.", ToolTipIcon.Error);
+            app?.Notify(Strings.Crashed, ToolTipIcon.Error);
         };
 
         app = new TrayApp();

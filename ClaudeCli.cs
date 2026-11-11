@@ -8,10 +8,6 @@ namespace Glance;
 
 class ClaudeCli : IProvider
 {
-    const string NotFound = "Glance can't find the claude command. Install the Claude CLI, run claude once to sign in, then try again.";
-
-    const string TimedOut = "Claude took too long to answer.";
-
     static readonly UTF8Encoding Utf8 = new(false);
     static bool? supportsEffort;
 
@@ -48,7 +44,7 @@ class ClaudeCli : IProvider
 
         using var proc = Launch(args);
         if (proc == null)
-            throw new AiException(NotFound);
+            throw new AiException(Strings.CliNotFound);
 
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(ct);
         limit.CancelAfter(TimeSpan.FromSeconds(90));
@@ -85,17 +81,17 @@ class ClaudeCli : IProvider
                 // so the kill registration may already be disposed by the time it would run
                 Kill(proc);
                 ct.ThrowIfCancellationRequested();
-                throw new AiException(TimedOut);
+                throw new AiException(Strings.CliTimedOut);
             }
 
             // the kill closes the pipes, so the awaits above can finish normally after a timeout
             ct.ThrowIfCancellationRequested();
             if (limit.IsCancellationRequested)
-                throw new AiException(TimedOut);
+                throw new AiException(Strings.CliTimedOut);
 
             var (result, failed) = read.Result;
             if (failed)
-                throw new AiException(string.IsNullOrEmpty(result) ? "Claude reported an error." : result);
+                throw new AiException(string.IsNullOrEmpty(result) ? Strings.CliError : result);
             if (!string.IsNullOrEmpty(result))
                 return result;
 
@@ -104,9 +100,9 @@ class ClaudeCli : IProvider
                 var tail = string.Join('\n', errors.Result.Trim().Split('\n').TakeLast(5)).Trim();
                 if (tail.Length > 600)
                     tail = tail[^600..];
-                throw new AiException(tail.Length > 0 ? tail : $"Claude exited with code {proc.ExitCode}.");
+                throw new AiException(tail.Length > 0 ? tail : string.Format(Strings.CliExit, proc.ExitCode));
             }
-            throw new AiException("Claude returned no answer.");
+            throw new AiException(Strings.CliNoAnswer);
         }
         finally
         {

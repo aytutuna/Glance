@@ -7,7 +7,6 @@ namespace Glance;
 class TrayApp : ApplicationContext
 {
     const int ReadId = 1, CloseId = 2, RegionId = 3, HideId = 4;
-    const string MouseScreen = "Screen with the mouse";
     const string AllScreens = "all";
 
     readonly Settings settings = Settings.Load();
@@ -74,7 +73,7 @@ class TrayApp : ApplicationContext
 
     public void ShowRunning()
     {
-        Notify($"Glance is already running. Press {KeyDialog.KeyName(settings.Hotkey)} to read the screen.", ToolTipIcon.Info);
+        Notify(string.Format(Strings.AlreadyRunning, KeyDialog.KeyName(settings.Hotkey)), ToolTipIcon.Info);
     }
 
     static string StartCommand => $"\"{Environment.ProcessPath}\"";
@@ -105,14 +104,14 @@ class TrayApp : ApplicationContext
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
         {
-            tray.ShowBalloonTip(5000, "Glance", "Couldn't change the Windows startup setting.", ToolTipIcon.Warning);
+            tray.ShowBalloonTip(5000, "Glance", Strings.StartupFailed, ToolTipIcon.Warning);
             return false;
         }
     }
 
     void UpdateTooltip()
     {
-        tray.Text = $"Glance (Read: {KeyDialog.KeyName(settings.Hotkey)}, Area: {KeyDialog.KeyName(settings.RegionKey)}, Close: {KeyDialog.KeyName(settings.CloseKey)})";
+        tray.Text = string.Format(Strings.Tooltip, KeyDialog.KeyName(settings.Hotkey), KeyDialog.KeyName(settings.RegionKey), KeyDialog.KeyName(settings.CloseKey));
     }
 
     void Fire(Keys key)
@@ -148,13 +147,13 @@ class TrayApp : ApplicationContext
         Unbind();
         var failed = new List<string>();
         if (!Register(ReadId, settings.Hotkey))
-            failed.Add($"{KeyDialog.KeyName(settings.Hotkey)} (reads the screen)");
+            failed.Add(string.Format(Strings.KeyReadsScreen, KeyDialog.KeyName(settings.Hotkey)));
         if (!Register(RegionId, settings.RegionKey))
-            failed.Add($"{KeyDialog.KeyName(settings.RegionKey)} (reads an area)");
+            failed.Add(string.Format(Strings.KeyReadsArea, KeyDialog.KeyName(settings.RegionKey)));
         if (!Register(CloseId, settings.CloseKey))
-            failed.Add($"{KeyDialog.KeyName(settings.CloseKey)} (closes the answer)");
+            failed.Add(string.Format(Strings.KeyClosesAnswer, KeyDialog.KeyName(settings.CloseKey)));
         if (!Register(HideId, settings.HideKey))
-            failed.Add($"{KeyDialog.KeyName(settings.HideKey)} (hides the answer text)");
+            failed.Add(string.Format(Strings.KeyHidesAnswer, KeyDialog.KeyName(settings.HideKey)));
 
         var all = new[] { settings.Hotkey, settings.RegionKey, settings.CloseKey, settings.HideKey };
         if (all.Any(KeyDialog.UsesHook))
@@ -173,7 +172,7 @@ class TrayApp : ApplicationContext
         }
 
         if (failed.Count > 0)
-            tray.ShowBalloonTip(5000, "Glance", $"{string.Join(" and ", failed)} can't be used: Windows or another program holds it. Pick another key from the tray menu.", ToolTipIcon.Warning);
+            tray.ShowBalloonTip(5000, "Glance", string.Format(Strings.KeysFailed, string.Join(Strings.ListJoin, failed)), ToolTipIcon.Warning);
     }
 
     void Unbind()
@@ -217,7 +216,7 @@ class TrayApp : ApplicationContext
                 if (!saved)
                     WarnUnsaved();
                 else if (!KeyDialog.UsesHook(chosen) && (chosen & KeyDialog.Win) == 0)
-                    tray.ShowBalloonTip(5000, "Glance", $"{KeyDialog.KeyName(chosen)} now only works as the {KeyDialog.JobName(job)} key in every program. Change it from the tray menu to get it back.", ToolTipIcon.Info);
+                    tray.ShowBalloonTip(5000, "Glance", string.Format(Strings.KeyOnlyHere, KeyDialog.KeyName(chosen), KeyDialog.JobName(job)), ToolTipIcon.Info);
             }
             Bind();
             dialog.Dispose();
@@ -259,13 +258,13 @@ class TrayApp : ApplicationContext
         menu.Items.Clear();
         foreach (var item in old)
             item.Dispose();
-        menu.Items.Add("Read screen now", null, (_, _) => Trigger(300));
-        menu.Items.Add("Read an area", null, (_, _) => Trigger(300, true));
-        menu.Items.Add("Hide answer text", null, (_, _) => HideAnswer());
-        menu.Items.Add(ScreenMenu("Read from", settings.ReadDevice, d => settings.ReadDevice = d, true));
-        menu.Items.Add(ScreenMenu("Show answer on", settings.ShowDevice, d => settings.ShowDevice = d));
+        menu.Items.Add(Strings.MenuReadNow, null, (_, _) => Trigger(300));
+        menu.Items.Add(Strings.ReadArea, null, (_, _) => Trigger(300, true));
+        menu.Items.Add(Strings.MenuHideText, null, (_, _) => HideAnswer());
+        menu.Items.Add(ScreenMenu(Strings.ReadFrom, settings.ReadDevice, d => settings.ReadDevice = d, true));
+        menu.Items.Add(ScreenMenu(Strings.ShowAnswerOn, settings.ShowDevice, d => settings.ShowDevice = d));
         menu.Items.Add(PositionMenu());
-        menu.Items.Add(new ToolStripMenuItem("Plain black answer", null, (_, _) =>
+        menu.Items.Add(new ToolStripMenuItem(Strings.PlainAnswer, null, (_, _) =>
         {
             settings.PlainAnswer = !settings.PlainAnswer;
             SaveLook();
@@ -277,25 +276,23 @@ class TrayApp : ApplicationContext
             menu.Items.Add(ModelMenu());
         menu.Items.Add(ModeMenu());
         menu.Items.Add(TranslateMenu());
-        menu.Items.Add("Identify screens", null, (_, _) => Identify());
-        menu.Items.Add($"Read key ({KeyDialog.KeyName(settings.Hotkey)})...", null, (_, _) => ChangeKey(KeyJob.Read));
-        menu.Items.Add($"Area key ({KeyDialog.KeyName(settings.RegionKey)})...", null, (_, _) => ChangeKey(KeyJob.Region));
-        menu.Items.Add($"Close key ({KeyDialog.KeyName(settings.CloseKey)})...", null, (_, _) => ChangeKey(KeyJob.Close));
-        menu.Items.Add($"Hide key ({KeyDialog.KeyName(settings.HideKey)})...", null, (_, _) => ChangeKey(KeyJob.Hide));
+        menu.Items.Add(Strings.IdentifyScreens, null, (_, _) => Identify());
+        foreach (var job in new[] { KeyJob.Read, KeyJob.Region, KeyJob.Close, KeyJob.Hide })
+            menu.Items.Add(string.Format(Strings.KeyMenu, KeyDialog.JobName(job), KeyDialog.KeyName(KeyOf(job))), null, (_, _) => ChangeKey(job));
         bool autostart = StartValue() != null;
-        menu.Items.Add(new ToolStripMenuItem("Start with Windows", null, (_, _) => SetStartWithWindows(!autostart))
+        menu.Items.Add(new ToolStripMenuItem(Strings.StartWithWindows, null, (_, _) => SetStartWithWindows(!autostart))
         {
             Checked = autostart,
         });
         menu.Items.Add(new ToolStripSeparator());
-        var recent = new ToolStripMenuItem("Recent answers");
+        var recent = new ToolStripMenuItem(Strings.RecentAnswers);
         foreach (var answer in history)
             recent.DropDownItems.Add(Preview(answer), null, (_, _) => Copy(answer));
         if (history.Count > 0)
             recent.DropDownItems.Add(new ToolStripSeparator());
-        recent.DropDownItems.Add(new ToolStripMenuItem("Keep answers after closing", null, (_, _) => ToggleHistory())
+        recent.DropDownItems.Add(new ToolStripMenuItem(Strings.KeepAnswers, null, (_, _) => ToggleHistory())
         { Checked = settings.KeepHistory });
-        recent.DropDownItems.Add(new ToolStripMenuItem("Clear recent answers", null, (_, _) =>
+        recent.DropDownItems.Add(new ToolStripMenuItem(Strings.ClearRecent, null, (_, _) =>
         {
             history.Clear();
             if (settings.KeepHistory)
@@ -304,14 +301,14 @@ class TrayApp : ApplicationContext
         { Enabled = history.Count > 0 });
         menu.Items.Add(recent);
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("Settings...", null, (_, _) => OpenSettings());
-        menu.Items.Add("Exit", null, (_, _) => Quit());
+        menu.Items.Add(Strings.MenuSettings, null, (_, _) => OpenSettings());
+        menu.Items.Add(Strings.MenuExit, null, (_, _) => Quit());
     }
 
     ToolStripMenuItem PositionMenu()
     {
-        var item = new ToolStripMenuItem("Answer position");
-        foreach (var (name, center) in new[] { ("Bottom right", false), ("Center of the screen", true) })
+        var item = new ToolStripMenuItem(Strings.AnswerPosition);
+        foreach (var (name, center) in new[] { (Strings.BottomRight, false), (Strings.CenterOfScreen, true) })
         {
             item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
             {
@@ -323,7 +320,7 @@ class TrayApp : ApplicationContext
         }
         if (settings.AnswerArea != null)
         {
-            item.DropDownItems.Add(new ToolStripMenuItem("Drawn area", null, (_, _) =>
+            item.DropDownItems.Add(new ToolStripMenuItem(Strings.DrawnArea, null, (_, _) =>
             {
                 settings.UseArea = true;
                 SaveLook();
@@ -331,13 +328,13 @@ class TrayApp : ApplicationContext
             { Checked = settings.UseArea });
         }
         item.DropDownItems.Add(new ToolStripSeparator());
-        item.DropDownItems.Add("Draw answer area...", null, (_, _) => DrawArea());
+        item.DropDownItems.Add(Strings.DrawAnswerArea, null, (_, _) => DrawArea());
         return item;
     }
 
     ToolStripMenuItem OpacityMenu()
     {
-        var item = new ToolStripMenuItem("Text opacity");
+        var item = new ToolStripMenuItem(Strings.TextOpacity);
         foreach (int percent in new[] { 100, 80, 60, 40, 20 })
         {
             item.DropDownItems.Add(new ToolStripMenuItem($"{percent}%", null, (_, _) => SetOpacity(percent))
@@ -376,20 +373,20 @@ class TrayApp : ApplicationContext
             var screen = Resolve(settings.ShowDevice);
             using var shot = await Task.Run(() => Grabber.Grab(screen.Bounds), ct);
             ct.ThrowIfCancellationRequested();
-            var drawn = await Pick(screen, shot, "Drag the area where answers should appear. Esc cancels.", ct);
+            var drawn = await Pick(screen, shot, Strings.DragAnswerArea, ct);
             if (drawn is not Rectangle r)
                 return;
             double w = shot.Width, h = shot.Height;
             settings.AnswerArea = new[] { r.X / w, r.Y / h, r.Width / w, r.Height / h };
             settings.UseArea = true;
             SaveLook();
-            popup = NewPopup("Answers will appear here.", false);
+            popup = NewPopup(Strings.AnswersHere, false);
         });
     }
 
     ToolStripMenuItem AiMenu()
     {
-        var item = new ToolStripMenuItem("AI");
+        var item = new ToolStripMenuItem(Strings.AI);
         var chain = settings.Chain();
         var names = settings.Options().ToDictionary(o => o.Entry, o => o.Label);
         for (int i = 0; i < chain.Count; i++)
@@ -404,8 +401,8 @@ class TrayApp : ApplicationContext
             { Checked = i == 0 });
         }
         item.DropDownItems.Add(new ToolStripSeparator());
-        item.DropDownItems.Add("Change order...", null, (_, _) => ChangeOrder());
-        item.DropDownItems.Add("Connect an AI...", null, (_, _) => Connect());
+        item.DropDownItems.Add(Strings.ChangeOrder, null, (_, _) => ChangeOrder());
+        item.DropDownItems.Add(Strings.ConnectAi, null, (_, _) => Connect());
         return item;
     }
 
@@ -473,7 +470,7 @@ class TrayApp : ApplicationContext
 
     ToolStripMenuItem ModelMenu()
     {
-        var item = new ToolStripMenuItem("Claude CLI model");
+        var item = new ToolStripMenuItem(Strings.ClaudeCliModel);
         foreach (var (id, name) in Settings.Models)
         {
             item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
@@ -489,7 +486,7 @@ class TrayApp : ApplicationContext
 
     ToolStripMenuItem ModeMenu()
     {
-        var item = new ToolStripMenuItem("Mode");
+        var item = new ToolStripMenuItem(Strings.Mode);
         foreach (var (id, name) in settings.AllModes())
         {
             item.DropDownItems.Add(new ToolStripMenuItem(name.Replace("&", "&&"), null, (_, _) =>
@@ -501,18 +498,18 @@ class TrayApp : ApplicationContext
             { Checked = settings.Mode == id });
         }
         item.DropDownItems.Add(new ToolStripSeparator());
-        item.DropDownItems.Add("Edit modes...", null, (_, _) => EditModes());
+        item.DropDownItems.Add(Strings.EditModes, null, (_, _) => EditModes());
         return item;
     }
 
     internal static List<(string Value, string Name)> TranslateChoices()
     {
-        return Settings.Languages.Select(l => (l, l)).Prepend(("", $"Windows language ({System.Globalization.CultureInfo.CurrentUICulture.EnglishName})")).ToList();
+        return Settings.Languages.Select(l => (l, l)).Prepend(("", string.Format(Strings.WindowsLanguage, System.Globalization.CultureInfo.CurrentUICulture.NativeName))).ToList();
     }
 
     ToolStripMenuItem TranslateMenu()
     {
-        var item = new ToolStripMenuItem("Translate to");
+        var item = new ToolStripMenuItem(Strings.TranslateTo);
         foreach (var (value, name) in TranslateChoices())
         {
             item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
@@ -572,9 +569,9 @@ class TrayApp : ApplicationContext
     internal static List<(string? Device, string Text)> ScreenChoices(bool withAll)
     {
         var screens = Screen.AllScreens;
-        var choices = new List<(string?, string)> { (null, MouseScreen) };
+        var choices = new List<(string?, string)> { (null, Strings.MouseScreen) };
         if (withAll)
-            choices.Add((AllScreens, "All screens"));
+            choices.Add((AllScreens, Strings.AllScreens));
         for (int i = 0; i < screens.Length; i++)
             choices.Add((screens[i].DeviceName, Describe(screens[i], i)));
         return choices;
@@ -593,13 +590,12 @@ class TrayApp : ApplicationContext
 
     void WarnUnsaved()
     {
-        tray.ShowBalloonTip(5000, "Glance", "Couldn't save the settings file, so this choice won't survive a restart.", ToolTipIcon.Warning);
+        tray.ShowBalloonTip(5000, "Glance", Strings.SettingsNotSaved, ToolTipIcon.Warning);
     }
 
     static string Describe(Screen s, int index)
     {
-        string text = $"Screen {index + 1} ({s.Bounds.Width}x{s.Bounds.Height}";
-        return s.Primary ? text + ", primary)" : text + ")";
+        return string.Format(s.Primary ? Strings.ScreenPrimary : Strings.ScreenPlain, index + 1, s.Bounds.Width, s.Bounds.Height);
     }
 
     static Screen Resolve(string? device)
@@ -710,7 +706,7 @@ class TrayApp : ApplicationContext
         Rectangle? crop = null;
         if (area)
         {
-            crop = await Pick(screen, shot, "Drag over the area to read. Esc cancels.", ct);
+            crop = await Pick(screen, shot, Strings.DragReadArea, ct);
             if (crop == null)
                 return;
         }
@@ -722,13 +718,13 @@ class TrayApp : ApplicationContext
         {
             chat = null;
             thread = shown = "";
-            kept.Busy("Reading...");
+            kept.Busy(Strings.Reading);
             mine = kept;
         }
         else
         {
             ClosePopup();
-            mine = popup = NewPopup("Reading...", true);
+            mine = popup = NewPopup(Strings.Reading, true);
         }
         await Reply(new Conversation(jpeg, model, settings.Mode, Prompts.Instruction(settings, settings.Mode), provider), mine, ct);
     }
@@ -743,7 +739,7 @@ class TrayApp : ApplicationContext
         }, ct));
         ct.ThrowIfCancellationRequested();
         if (answer.Length == 0)
-            throw new AiException("The answer was empty.");
+            throw new AiException(Strings.AnswerEmpty);
         c.Complete(answer);
         chat = c;
         history.Insert(0, answer);
@@ -760,9 +756,9 @@ class TrayApp : ApplicationContext
         var mine = popup;
         if (c == null || mine == null)
             return;
-        thread = shown + "\n\nQ: " + question + "\n\n";
+        thread = shown + "\n\n" + Strings.QuestionPrefix + question + "\n\n";
         c.Ask(question);
-        mine.Busy(thread + "Reading...");
+        mine.Busy(thread + Strings.Reading);
         Start(ct => Reply(c, mine, ct));
     }
 

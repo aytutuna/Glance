@@ -48,7 +48,7 @@ class Failover(string id, (IProvider Provider, string Model)[] steps) : IProvide
             }
             catch (AiException ex) when (ex.KeyProblem && steps.Length > 1)
             {
-                throw new AiException($"All {steps.Length} options failed. {ex.Message}");
+                throw new AiException(string.Format(Strings.AllFailed, steps.Length, ex.Message));
             }
         }
     }
@@ -71,7 +71,7 @@ static class Api
         }
         catch (HttpRequestException)
         {
-            throw new AiException($"Couldn't reach {name}. Check the connection and the address.");
+            throw new AiException(string.Format(Strings.CantReach, name));
         }
         if (resp.IsSuccessStatusCode)
             return resp;
@@ -98,15 +98,15 @@ static class Api
     {
         int code = (int)resp.StatusCode;
         if (code is >= 300 and < 400)
-            return $"{name} answered with a redirect. Glance doesn't follow redirects, so check the address.";
+            return string.Format(Strings.Redirect, name);
         string head = code switch
         {
-            401 => $"{name} rejected the API key (401).",
-            403 => $"{name} refused the request (403).",
-            404 => $"{name} doesn't have that model or address (404).",
-            429 => $"{name} is rate limiting this key, or its quota is used up (429).",
-            >= 500 => $"{name} had a server error ({code}).",
-            _ => $"{name} returned an error ({code}).",
+            401 => string.Format(Strings.Http401, name),
+            403 => string.Format(Strings.Http403, name),
+            404 => string.Format(Strings.Http404, name),
+            429 => string.Format(Strings.Http429, name),
+            >= 500 => string.Format(Strings.HttpServer, name, code),
+            _ => string.Format(Strings.HttpOther, name, code),
         };
         // providers can echo part of a bad key back, so a 401 gets no detail
         if (code == 401)
@@ -188,7 +188,7 @@ static class Api
                 if (buf[i] != '\n')
                 {
                     if (line.Length >= MaxLine)
-                        throw new AiException("The reply had a line that was far too long.");
+                        throw new AiException(Strings.LineTooLong);
                     line.Append(buf[i]);
                     continue;
                 }
@@ -214,18 +214,18 @@ static class Api
     {
         url = text.Trim().TrimEnd('/');
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https"))
-            return "The base URL must start with http:// or https://.";
+            return Strings.BaseUrlScheme;
         if (uri.UserInfo.Length > 0)
-            return "Take the user name and password out of the base URL.";
+            return Strings.BaseUrlUser;
         if (uri.Query.Length > 0 || uri.Fragment.Length > 0)
-            return "Take everything from ? or # onwards out of the base URL.";
+            return Strings.BaseUrlQuery;
         if (withKey && uri.Scheme == "http" && !uri.IsLoopback)
-            return "A plain http address would send the API key unencrypted. Use https, or an address on this PC.";
+            return Strings.BaseUrlPlain;
         return null;
     }
 
     public static string? CheckKey(string key)
     {
-        return key.Any(c => c <= ' ' || c > '~') ? "That key has characters an API key can't have." : null;
+        return key.Any(c => c <= ' ' || c > '~') ? Strings.BadKeyChars : null;
     }
 }

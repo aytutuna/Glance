@@ -28,10 +28,10 @@ class Settings
 
     public static readonly (string Id, string Name)[] Modes =
     {
-        ("answer", "Answer"),
-        ("explain", "Explain"),
-        ("translate", "Translate"),
-        ("summarize", "Summarize"),
+        ("answer", Strings.ModeAnswer),
+        ("explain", Strings.ModeExplain),
+        ("translate", Strings.ModeTranslate),
+        ("summarize", Strings.ModeSummarize),
     };
 
     public static readonly string[] Languages =
@@ -48,7 +48,7 @@ class Settings
         ("anthropic", "Claude API"),
         ("openai", "OpenAI"),
         ("gemini", "Gemini"),
-        ("custom", "Custom"),
+        ("custom", Strings.CustomName),
     };
 
     public string? ReadDevice { get; set; }
@@ -104,11 +104,11 @@ class Settings
                 continue;
             var stored = ApiKeys.GetValueOrDefault(id) ?? new();
             if (stored.Count == 0 && id == "custom")
-                list.Add((id, Uri.TryCreate(CustomUrl, UriKind.Absolute, out var u) ? $"Custom ({u.Host})" : "Custom"));
+                list.Add((id, Uri.TryCreate(CustomUrl, UriKind.Absolute, out var u) ? string.Format(Strings.CustomHost, u.Host) : Strings.CustomName));
             foreach (var s in stored)
             {
                 string? key = Open(s);
-                string end = key == null ? "key can't be read" : key.Length >= 12 ? $"key ending {key[^4..]}" : "key";
+                string end = key == null ? Strings.OptKeyUnreadable : key.Length >= 12 ? string.Format(Strings.OptKeyEnding, key[^4..]) : Strings.OptKey;
                 list.Add(($"{id}:{Tag(s)}", $"{name}, {end}"));
             }
         }
@@ -169,8 +169,8 @@ class Settings
         {
             string? key = Open(stored);
             if (key == null)
-                return $"Key {i + 1} (can't be read)";
-            return key.Length >= 12 ? $"Key {i + 1} (ending {key[^4..]})" : $"Key {i + 1}";
+                return string.Format(Strings.SavedKeyUnreadable, i + 1);
+            return key.Length >= 12 ? string.Format(Strings.SavedKeyEnding, i + 1, key[^4..]) : string.Format(Strings.SavedKey, i + 1);
         }).ToArray();
     }
 

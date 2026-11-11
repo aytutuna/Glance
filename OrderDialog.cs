@@ -25,22 +25,21 @@ class OrderDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
-        Text = "AI order";
+        Text = Strings.OrderTitle;
         StartPosition = FormStartPosition.Manual;
         font = new Font("Segoe UI", Px(13), GraphicsUnit.Pixel);
         Font = font;
 
         note = new Label
         {
-            Text = "Glance asks the first ticked AI. When it runs out of usage or credit, the next one answers " +
-                "without asking. After 30 minutes it goes back to the first.",
+            Text = Strings.OrderNote,
             AutoSize = false,
         };
         status = new Label { AutoSize = false, ForeColor = Color.Firebrick };
-        up = MakeButton("Up", () => Shift(-1));
-        down = MakeButton("Down", () => Shift(1));
-        save = MakeButton("Save", Save);
-        cancel = MakeButton("Cancel", Close);
+        up = MakeButton(Strings.Up, () => Shift(-1));
+        down = MakeButton(Strings.Down, () => Shift(1));
+        save = MakeButton(Strings.Save, Save);
+        cancel = MakeButton(Strings.Cancel, Close);
         AcceptButton = save;
         CancelButton = cancel;
 
@@ -98,7 +97,7 @@ class OrderDialog : Form
         var order = items.Where((_, i) => list.GetItemChecked(i)).Select(o => o.Entry).ToList();
         if (order.Count == 0)
         {
-            status.Text = "Tick at least one.";
+            status.Text = Strings.TickOne;
             return;
         }
         settings.Order = order;

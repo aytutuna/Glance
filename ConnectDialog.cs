@@ -32,27 +32,27 @@ class ConnectDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
-        Text = "Connect an AI";
+        Text = Strings.ConnectTitle;
         StartPosition = FormStartPosition.Manual;
         font = new Font("Segoe UI", Px(13), GraphicsUnit.Pixel);
         Font = font;
 
-        providerLabel = Caption("AI");
-        savedLabel = Caption("Saved keys, tried in turn when one runs out");
-        keyLabel = Caption("API key");
-        urlLabel = Caption("Base URL");
-        modelLabel = Caption("Model");
-        note = Caption("Screenshots you read are sent to the AI you choose here.");
+        providerLabel = Caption(Strings.AI);
+        savedLabel = Caption(Strings.SavedKeysCaption);
+        keyLabel = Caption(Strings.ApiKey);
+        urlLabel = Caption(Strings.BaseUrl);
+        modelLabel = Caption(Strings.Model);
+        note = Caption(Strings.ConnectNote);
         note.ForeColor = SystemColors.GrayText;
         status = Caption("");
         status.ForeColor = Color.Firebrick;
         url.PlaceholderText = "http://localhost:11434/v1";
         model.DropDownStyle = ComboBoxStyle.DropDown;
 
-        remove = MakeButton("Remove key", Remove);
-        load = MakeButton("Load models", () => _ = LoadModels());
-        save = MakeButton("Save", Save);
-        cancel = MakeButton("Cancel", Close);
+        remove = MakeButton(Strings.RemoveKey, Remove);
+        load = MakeButton(Strings.LoadModels, () => _ = LoadModels());
+        save = MakeButton(Strings.Save, Save);
+        cancel = MakeButton(Strings.Cancel, Close);
         AcceptButton = save;
         CancelButton = cancel;
 
@@ -111,8 +111,8 @@ class ConnectDialog : Form
         saved.Items.AddRange(settings.KeyNames(id).Cast<object>().ToArray());
         if (stored)
             saved.SelectedIndex = 0;
-        key.PlaceholderText = stored ? "Paste another key to add it" : id == "custom" ? "Optional" : "Paste the API key";
-        keyLabel.Text = stored ? "Add a key" : id == "custom" ? "API key (optional)" : "API key";
+        key.PlaceholderText = stored ? Strings.PasteAnotherKey : id == "custom" ? Strings.Optional : Strings.PasteKey;
+        keyLabel.Text = stored ? Strings.AddKey : id == "custom" ? Strings.ApiKeyOptional : Strings.ApiKey;
     }
 
     void Arrange()
@@ -173,7 +173,7 @@ class ConnectDialog : Form
         loading?.Cancel();
         var cts = loading = new CancellationTokenSource(TimeSpan.FromSeconds(20));
         load.Enabled = false;
-        Say("Loading models...", false);
+        Say(Strings.LoadingModels, false);
         try
         {
             var ids = await Ai.Models(settings, Id, url.Text, typed.Length > 0 ? typed : null, cts.Token);
@@ -181,7 +181,7 @@ class ConnectDialog : Form
                 return;
             model.Items.Clear();
             model.Items.AddRange(ids);
-            Say($"{ids.Length} models loaded. The key works.", false);
+            Say(string.Format(Strings.ModelsLoaded, ids.Length), false);
             model.Focus();
             model.DroppedDown = true;
         }
@@ -193,7 +193,7 @@ class ConnectDialog : Form
         catch (OperationCanceledException)
         {
             if (loading == cts)
-                Say("The provider didn't answer in time.", true);
+                Say(Strings.ProviderTimeout, true);
         }
         finally
         {
@@ -216,19 +216,19 @@ class ConnectDialog : Form
         }
         if (typed.Length == 0 && settings.HasKey(id) && settings.GetKeys(id).Length == 0)
         {
-            Say("The saved keys can't be read. Enter a new one, or remove them.", true);
+            Say(Strings.SavedKeysUnreadable, true);
             return;
         }
         bool hasKey = typed.Length > 0 || settings.HasKey(id);
         if (id != "custom" && !hasKey)
         {
-            Say("Enter the API key.", true);
+            Say(Strings.EnterKey, true);
             return;
         }
         string picked = model.Text.Trim();
         if (picked.Length == 0)
         {
-            Say("Pick or type a model. Load models lists the ones this key can use.", true);
+            Say(Strings.PickModel, true);
             return;
         }
         string? address = null;

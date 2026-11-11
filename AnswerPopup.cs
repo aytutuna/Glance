@@ -53,7 +53,7 @@ class AnswerPopup : OverlayForm
         panel = new Panel { Dock = DockStyle.Fill, AutoScroll = true, BackColor = BackColor };
         panel.Controls.Add(label);
         bar = new Panel { Dock = DockStyle.Top, BackColor = BackColor };
-        copy = NewButton("Copy", ContentAlignment.MiddleRight);
+        copy = NewButton(Strings.Copy, ContentAlignment.MiddleRight);
         close = NewButton("×", ContentAlignment.MiddleCenter);
         copy.Click += (_, _) => CopyText();
         close.Click += (_, _) => CloseClicked?.Invoke();
@@ -66,7 +66,7 @@ class AnswerPopup : OverlayForm
             ForeColor = Color.FromArgb(240, 240, 240),
             BackColor = Color.FromArgb(52, 52, 52),
             BorderStyle = BorderStyle.FixedSingle,
-            PlaceholderText = "Ask a follow-up",
+            PlaceholderText = Strings.FollowUp,
         };
         box.MouseDown += (_, _) => TakeFocus();
         box.KeyDown += BoxKeyDown;
@@ -85,7 +85,7 @@ class AnswerPopup : OverlayForm
         reset.Tick += (_, _) =>
         {
             reset.Stop();
-            copy.Text = "Copy";
+            copy.Text = Strings.Copy;
         };
 
         flush.Tick += (_, _) =>
@@ -185,7 +185,7 @@ class AnswerPopup : OverlayForm
 
     void CopyText()
     {
-        copy.Text = TrayApp.Copy(text) ? "Copied" : "Failed";
+        copy.Text = TrayApp.Copy(text) ? Strings.Copied : Strings.CopyFailed;
         reset.Stop();
         reset.Start();
     }

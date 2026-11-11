@@ -33,16 +33,16 @@ class SettingsDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
-        Text = "Glance settings";
+        Text = Strings.SettingsTitle;
         StartPosition = FormStartPosition.Manual;
         font = new Font("Segoe UI", Px(13), GraphicsUnit.Pixel);
         Font = font;
 
-        var reading = new TabPage("Reading");
-        var answer = new TabPage("Answer");
-        var keys = new TabPage("Keys");
-        var ai = new TabPage("AI");
-        var general = new TabPage("General");
+        var reading = new TabPage(Strings.TabReading);
+        var answer = new TabPage(Strings.TabAnswer);
+        var keys = new TabPage(Strings.TabKeys);
+        var ai = new TabPage(Strings.AI);
+        var general = new TabPage(Strings.TabGeneral);
 
         readFrom = Combo(() =>
         {
@@ -59,10 +59,10 @@ class SettingsDialog : Form
             settings.TranslateTo = languages[translate!.SelectedIndex].Value;
             app.SaveLook();
         });
-        Row(reading, 0, "Read from", readFrom);
-        Row(reading, 1, "Mode", mode);
-        Row(reading, 2, "Translate to", translate);
-        Add(reading, Button("Edit modes...", app.EditModes), Field, 12 + 3 * 34, 120);
+        Row(reading, 0, Strings.ReadFrom, readFrom);
+        Row(reading, 1, Strings.Mode, mode);
+        Row(reading, 2, Strings.TranslateTo, translate);
+        Add(reading, Button(Strings.EditModes, app.EditModes), Field, 12 + 3 * 34, 150);
 
         showOn = Combo(() =>
         {
@@ -83,33 +83,33 @@ class SettingsDialog : Form
         });
         opacity = Combo(() => app.SetOpacity(Opacities[opacity!.SelectedIndex]));
         opacity.Items.AddRange(Opacities.Select(p => (object)$"{p}%").ToArray());
-        plain = new CheckBox { Text = "Plain black answer" };
+        plain = new CheckBox { Text = Strings.PlainAnswer };
         plain.Click += (_, _) =>
         {
             settings.PlainAnswer = plain.Checked;
             app.SaveLook();
         };
-        Row(answer, 0, "Show answer on", showOn);
-        Row(answer, 1, "Answer position", position);
-        Add(answer, Button("Draw answer area...", app.DrawArea), Field, 12 + 2 * 34, 150);
-        Row(answer, 3, "Text opacity", opacity);
+        Row(answer, 0, Strings.ShowAnswerOn, showOn);
+        Row(answer, 1, Strings.AnswerPosition, position);
+        Add(answer, Button(Strings.DrawAnswerArea, app.DrawArea), Field, 12 + 2 * 34, 150);
+        Row(answer, 3, Strings.TextOpacity, opacity);
         Add(answer, plain, 12, 12 + 4 * 34, Wide);
 
-        var jobs = new[] { (KeyJob.Read, "Read key"), (KeyJob.Region, "Area key"), (KeyJob.Close, "Close key"), (KeyJob.Hide, "Hide key") };
+        var jobs = new[] { KeyJob.Read, KeyJob.Region, KeyJob.Close, KeyJob.Hide };
         for (int i = 0; i < jobs.Length; i++)
         {
-            var (job, text) = jobs[i];
+            var job = jobs[i];
             var name = keyNames[job] = new Label { AutoSize = false };
-            Row(keys, i, text, name, 150);
-            Add(keys, Button("Change...", () => app.ChangeKey(job)), Field + 158, 12 + i * 34 - 3, 112);
+            Row(keys, i, string.Format(Strings.KeyTitle, KeyDialog.JobName(job)), name, 150);
+            Add(keys, Button(Strings.Change, () => app.ChangeKey(job)), Field + 158, 12 + i * 34 - 3, 112);
         }
 
         order = new Label { AutoSize = false };
-        Add(ai, new Label { Text = "Order", AutoSize = false }, 12, 12 + 5, 130);
+        Add(ai, new Label { Text = Strings.Order, AutoSize = false }, 12, 12 + 5, 130);
         Add(ai, order, Field, 12 + 5, Wide, 88);
-        Add(ai, Button("Change order...", app.ChangeOrder), Field, 12 + 100, 130);
-        Add(ai, Button("Connect an AI...", app.Connect), Field + 140, 12 + 100, 130);
-        modelLabel = new Label { Text = "Claude CLI model", AutoSize = false };
+        Add(ai, Button(Strings.ChangeOrder, app.ChangeOrder), Field, 12 + 100, 136);
+        Add(ai, Button(Strings.ConnectAi, app.Connect), Field + 146, 12 + 100, 136);
+        modelLabel = new Label { Text = Strings.ClaudeCliModel, AutoSize = false };
         model = Combo(() =>
         {
             settings.Model = Settings.Models[model!.SelectedIndex].Id;
@@ -119,21 +119,21 @@ class SettingsDialog : Form
         Add(ai, modelLabel, 12, 12 + 144 + 5, 130);
         Add(ai, model, Field, 12 + 144, Wide);
 
-        autostart = new CheckBox { Text = "Start with Windows" };
+        autostart = new CheckBox { Text = Strings.StartWithWindows };
         autostart.Click += (_, _) =>
         {
             app.SetStartWithWindows(autostart.Checked);
             Reload();
         };
-        history = new CheckBox { Text = "Keep answers after closing" };
+        history = new CheckBox { Text = Strings.KeepAnswers };
         history.Click += (_, _) => app.ToggleHistory();
         Add(general, autostart, 12, 12, Wide + Field);
         Add(general, history, 12, 12 + 34, Wide + Field);
-        Add(general, Button("Open log folder", OpenLogFolder), 12, 12 + 2 * 34, 130);
+        Add(general, Button(Strings.OpenLogFolder, OpenLogFolder), 12, 12 + 2 * 34, 160);
 
         var tabs = new TabControl { Bounds = new Rectangle(Px(12), Px(12), Px(436), Px(290)) };
         tabs.TabPages.AddRange(new[] { reading, answer, keys, ai, general });
-        var close = Button("Close", Close);
+        var close = Button(Strings.Close, Close);
         close.Bounds = new Rectangle(Px(348), Px(314), Px(100), Px(30));
         CancelButton = close;
         Controls.AddRange(new Control[] { tabs, close });
@@ -199,9 +199,9 @@ class SettingsDialog : Form
 
         showChoices = TrayApp.ScreenChoices(false);
         Fill(showOn, showChoices.Select(c => c.Text), Math.Max(0, showChoices.FindIndex(c => c.Device == settings.ShowDevice)));
-        positions = new() { ("Bottom right", false, false), ("Center of the screen", true, false) };
+        positions = new() { (Strings.BottomRight, false, false), (Strings.CenterOfScreen, true, false) };
         if (settings.AnswerArea != null)
-            positions.Add(("Drawn area", false, true));
+            positions.Add((Strings.DrawnArea, false, true));
         int at = settings.UseArea && settings.AnswerArea != null ? positions.Count - 1 : settings.CenterAnswer ? 1 : 0;
         Fill(position, positions.Select(p => p.Name), at);
         opacity.SelectedIndex = Array.IndexOf(Opacities, settings.TextOpacity);

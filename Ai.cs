@@ -29,7 +29,7 @@ static class Ai
             }
         }
         if (steps.Count == 0)
-            throw new AiException("None of the AIs in the order can be used. Check them under AI in the tray menu.");
+            throw new AiException(Strings.NoAiUsable);
         return new Failover(string.Join("|", chain), steps.ToArray());
     }
 
@@ -62,9 +62,9 @@ static class Ai
     {
         var keys = s.GetKeys(id);
         if (keys.Length == 0 && s.HasKey(id))
-            throw new AiException("The saved API key can't be read by this Windows account. Connect the AI again to enter a new one.");
+            throw new AiException(Strings.SavedKeyUnusable);
         if (keys.Length == 0 && id != "custom")
-            throw new AiException("This AI needs an API key.");
+            throw new AiException(Strings.NeedsKey);
         return keys;
     }
 

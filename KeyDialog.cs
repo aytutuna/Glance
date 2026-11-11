@@ -30,7 +30,7 @@ class KeyDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
-        Text = JobName(job) + " key";
+        Text = string.Format(Strings.KeyTitle, JobName(job));
         StartPosition = FormStartPosition.Manual;
         ClientSize = new Size(Px(380), Px(170));
         var area = screen.WorkingArea;
@@ -38,14 +38,14 @@ class KeyDialog : Form
 
         Controls.Add(new Label
         {
-            Text = "Press the key for: " + Purpose(job),
+            Text = string.Format(Strings.PressKeyFor, Purpose(job)),
             Font = new Font("Segoe UI", Px(16), GraphicsUnit.Pixel),
             AutoSize = false,
             Bounds = new Rectangle(Px(16), Px(14), Px(348), Px(26)),
         });
         Controls.Add(new Label
         {
-            Text = "Fn by itself doesn't reach Windows on most laptops.",
+            Text = Strings.FnHint,
             Font = new Font("Segoe UI", Px(12), GraphicsUnit.Pixel),
             ForeColor = SystemColors.GrayText,
             AutoSize = false,
@@ -61,7 +61,7 @@ class KeyDialog : Form
         Controls.Add(status);
         var cancel = new Button
         {
-            Text = "Cancel",
+            Text = Strings.Cancel,
             Font = new Font("Segoe UI", Px(12), GraphicsUnit.Pixel),
             TabStop = false,
             Bounds = new Rectangle(Px(264), Px(128), Px(100), Px(30)),
@@ -76,17 +76,17 @@ class KeyDialog : Form
 
     public static string JobName(KeyJob job)
     {
-        return job == KeyJob.Region ? "Area" : job.ToString();
+        return job switch { KeyJob.Read => Strings.JobRead, KeyJob.Close => Strings.JobClose, KeyJob.Hide => Strings.JobHide, _ => Strings.JobArea };
     }
 
     static string Purpose(KeyJob job)
     {
         return job switch
         {
-            KeyJob.Read => "Read the screen",
-            KeyJob.Close => "Close the answer",
-            KeyJob.Hide => "Hide the answer text, keep the screen black",
-            _ => "Read an area",
+            KeyJob.Read => Strings.PurposeRead,
+            KeyJob.Close => Strings.PurposeClose,
+            KeyJob.Hide => Strings.PurposeHide,
+            _ => Strings.ReadArea,
         };
     }
 
@@ -165,15 +165,15 @@ class KeyDialog : Form
             return;
         if (keys is Keys.LWin or Keys.RWin)
         {
-            status.Text = "The Windows key alone also opens Start. Add another key to it.";
+            status.Text = Strings.WinKeyAlone;
         }
         else if (taken.TryGetValue(keys, out var owner))
         {
-            status.Text = $"{KeyName(keys)} is already the {JobName(owner)} key.";
+            status.Text = string.Format(Strings.KeyTaken, KeyName(keys), JobName(owner));
         }
         else if (!register(keys))
         {
-            status.Text = $"{KeyName(keys)} can't be used. Windows or another program holds it.";
+            status.Text = string.Format(Strings.KeyHeld, KeyName(keys));
         }
         else
         {

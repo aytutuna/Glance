@@ -38,7 +38,7 @@ class ClaudeApi(string url, string key) : IProvider
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
-            throw new AiException($"{Name} took too long to answer.");
+            throw new AiException(string.Format(Strings.TookTooLong, Name));
         }
         catch (AnthropicException ex)
         {
@@ -48,13 +48,13 @@ class ClaudeApi(string url, string key) : IProvider
         {
             // what already arrived is kept, as with the other providers
             if (answer.Length == 0)
-                throw new AiException($"The connection to {Name} was lost.");
+                throw new AiException(string.Format(Strings.ConnectionLost, Name));
         }
         ct.ThrowIfCancellationRequested();
         if (refused)
-            throw new AiException($"{Name} declined to answer this one.");
+            throw new AiException(string.Format(Strings.Declined, Name));
         if (answer.Length == 0)
-            throw new AiException($"{Name} returned no answer.");
+            throw new AiException(string.Format(Strings.NoAnswer, Name));
         return answer.ToString();
     }
 
@@ -123,7 +123,7 @@ class ClaudeApi(string url, string key) : IProvider
             var ids = new List<string>();
             await foreach (var m in page.Paginate(ct))
                 ids.Add(m.ID);
-            return ids.Count > 0 ? ids.Order(StringComparer.OrdinalIgnoreCase).ToArray() : throw new AiException($"{Name} listed no models.");
+            return ids.Count > 0 ? ids.Order(StringComparer.OrdinalIgnoreCase).ToArray() : throw new AiException(string.Format(Strings.ListedNoModels, Name));
         }
         catch (AnthropicException ex)
         {
@@ -131,7 +131,7 @@ class ClaudeApi(string url, string key) : IProvider
         }
         catch (Exception ex) when (ex is IOException or HttpRequestException or JsonException)
         {
-            throw new AiException($"{Name} didn't send a list of models.");
+            throw new AiException(string.Format(Strings.NoModelList, Name));
         }
     }
 
@@ -167,16 +167,16 @@ class ClaudeApi(string url, string key) : IProvider
             code = 429;
         string head = code switch
         {
-            401 => $"{Name} rejected the API key (401).",
-            402 => $"This key is out of credit (402).",
-            403 => $"{Name} refused the request (403).",
-            404 => $"{Name} doesn't have that model (404).",
-            429 => $"{Name} is rate limiting this key, or its quota is used up (429).",
-            400 => $"{Name} returned an error (400).",
-            >= 500 => $"{Name} had a server error ({code}).",
-            >= 300 and < 400 => $"{Name} answered with a redirect, which Glance doesn't follow.",
-            _ when ex is AnthropicIOException => $"Couldn't reach {Name}. Check the connection.",
-            _ => $"{Name} reported an error.",
+            401 => string.Format(Strings.Http401, Name),
+            402 => Strings.Http402,
+            403 => string.Format(Strings.Http403, Name),
+            404 => string.Format(Strings.Http404Model, Name),
+            429 => string.Format(Strings.Http429, Name),
+            400 => string.Format(Strings.HttpOther, Name, code),
+            >= 500 => string.Format(Strings.HttpServer, Name, code),
+            >= 300 and < 400 => string.Format(Strings.RedirectShort, Name),
+            _ when ex is AnthropicIOException => string.Format(Strings.CantReachShort, Name),
+            _ => string.Format(Strings.ReportedError, Name),
         };
         // providers can echo part of a bad key back, so a 401 gets no detail
         string? detail = code == 401 ? null : Detail(ex.Message, key);

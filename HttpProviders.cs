@@ -53,25 +53,25 @@ abstract class ChatProvider(string name, string? key, TimeSpan limit) : IProvide
             catch (IOException)
             {
                 if (answer.Length == 0)
-                    throw new AiException($"The connection to {Name} was lost.");
+                    throw new AiException(string.Format(Strings.ConnectionLost, Name));
             }
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
-            throw new AiException($"{Name} took too long to answer.");
+            throw new AiException(string.Format(Strings.TookTooLong, Name));
         }
         ct.ThrowIfCancellationRequested();
         if (cut.IsCancellationRequested)
-            throw new AiException($"{Name} took too long to answer.");
+            throw new AiException(string.Format(Strings.TookTooLong, Name));
         if (answer.Length == 0)
-            throw new AiException($"{Name} returned no answer.");
+            throw new AiException(string.Format(Strings.NoAnswer, Name));
         return answer.ToString();
     }
 
     protected AiException Failed(JsonElement root)
     {
         var detail = Api.Message(root, Key);
-        return new AiException(detail == null ? $"{Name} reported an error." : $"{Name} reported an error: {detail}")
+        return new AiException(detail == null ? string.Format(Strings.ReportedError, Name) : string.Format(Strings.ReportedErrorDetail, Name, detail))
         {
             KeyProblem = detail != null && Api.SpentWords(detail),
         };
@@ -95,14 +95,14 @@ abstract class ChatProvider(string name, string? key, TimeSpan limit) : IProvide
         }
         catch (JsonException)
         {
-            throw new AiException($"{name} didn't send a list of models.");
+            throw new AiException(string.Format(Strings.NoModelList, name));
         }
     }
 
     protected static string[] Sorted(IEnumerable<string> ids, string name)
     {
         var list = ids.Where(id => id.Length > 0).Distinct().Order(StringComparer.OrdinalIgnoreCase).ToArray();
-        return list.Length > 0 ? list : throw new AiException($"{name} listed no models.");
+        return list.Length > 0 ? list : throw new AiException(string.Format(Strings.ListedNoModels, name));
     }
 }
 
@@ -161,7 +161,7 @@ class OpenAiProvider(string name, string baseUrl, string? key, TimeSpan limit) :
             text.GetString() is { Length: > 0 } s)
             return s;
         if (!any && choice.TryGetProperty("finish_reason", out var why) && why.ValueKind == JsonValueKind.String && why.GetString() == "content_filter")
-            throw new AiException($"{Name} filtered the answer and returned no text.");
+            throw new AiException(string.Format(Strings.Filtered, Name));
         return null;
     }
 
@@ -235,7 +235,7 @@ class GeminiProvider(string? key) : ChatProvider("Gemini", key, TimeSpan.FromSec
             throw Failed(root);
         if (!any && root.TryGetProperty("promptFeedback", out var feedback) && feedback.ValueKind == JsonValueKind.Object &&
             feedback.TryGetProperty("blockReason", out var block) && block.ValueKind == JsonValueKind.String)
-            throw new AiException($"Gemini blocked the screenshot ({Reason(block)}) and returned no text.");
+            throw new AiException(string.Format(Strings.GeminiBlocked, Reason(block)));
         if (!root.TryGetProperty("candidates", out var candidates) || candidates.ValueKind != JsonValueKind.Array || candidates.GetArrayLength() == 0 ||
             candidates[0].ValueKind != JsonValueKind.Object)
             return null;
@@ -254,7 +254,7 @@ class GeminiProvider(string? key) : ChatProvider("Gemini", key, TimeSpan.FromSec
             return text.ToString();
         if (!any && candidate.TryGetProperty("finishReason", out var why) && why.ValueKind == JsonValueKind.String &&
             why.GetString() is not ("STOP" or "MAX_TOKENS"))
-            throw new AiException($"Gemini stopped without an answer ({Reason(why)}). It may have blocked the content.");
+            throw new AiException(string.Format(Strings.GeminiStopped, Reason(why)));
         return null;
     }
 

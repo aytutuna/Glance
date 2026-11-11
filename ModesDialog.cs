@@ -36,17 +36,17 @@ class ModesDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
-        Text = "Edit modes";
+        Text = Strings.EditModesTitle;
         StartPosition = FormStartPosition.Manual;
         font = new Font("Segoe UI", Px(13), GraphicsUnit.Pixel);
         Font = font;
 
         status = new Label { AutoSize = false, ForeColor = Color.Firebrick };
-        add = MakeButton("Add", Add);
-        delete = MakeButton("Delete", Delete);
-        reset = MakeButton("Reset", Reset);
-        save = MakeButton("OK", Save);
-        cancel = MakeButton("Cancel", Close);
+        add = MakeButton(Strings.Add, Add);
+        delete = MakeButton(Strings.Delete, Delete);
+        reset = MakeButton(Strings.Reset, Reset);
+        save = MakeButton(Strings.Ok, Save);
+        cancel = MakeButton(Strings.Cancel, Close);
         CancelButton = cancel;
 
         entries = Settings.Modes.Select(m => new Entry
@@ -120,8 +120,8 @@ class ModesDialog : Form
     void Add()
     {
         Keep();
-        entries.Add(new Entry { Id = new CustomMode().Id, Name = "New mode" });
-        list.Items.Add("New mode");
+        entries.Add(new Entry { Id = new CustomMode().Id, Name = Strings.NewMode });
+        list.Items.Add(Strings.NewMode);
         list.SelectedIndex = entries.Count - 1;
         name.Focus();
         name.SelectAll();
@@ -148,7 +148,7 @@ class ModesDialog : Form
         if (blank != null)
         {
             list.SelectedIndex = entries.IndexOf(blank);
-            status.Text = blank.Builtin ? "The prompt can't be empty. Use Reset for the default." : "A mode needs a name and a prompt.";
+            status.Text = blank.Builtin ? Strings.PromptEmpty : Strings.ModeNeedsBoth;
             return;
         }
         settings.CustomModes = entries.Where(e => !e.Builtin)
