@@ -26,12 +26,13 @@ class TrayApp : ApplicationContext
     OrderDialog? orderDialog;
     ModesDialog? modesDialog;
     KeyHook? keyHook;
-    readonly List<string> history = new();
+    readonly List<string> history;
     Conversation? chat;
     string thread = "", shown = "";
 
     public TrayApp()
     {
+        history = settings.KeepHistory ? Settings.LoadHistory() : new();
         menu.Opening += (_, e) =>
         {
             BuildMenu();
@@ -286,9 +287,20 @@ class TrayApp : ApplicationContext
             Checked = autostart,
         });
         menu.Items.Add(new ToolStripSeparator());
-        var recent = new ToolStripMenuItem("Recent answers") { Enabled = history.Count > 0 };
+        var recent = new ToolStripMenuItem("Recent answers");
         foreach (var answer in history)
             recent.DropDownItems.Add(Preview(answer), null, (_, _) => Copy(answer));
+        if (history.Count > 0)
+            recent.DropDownItems.Add(new ToolStripSeparator());
+        recent.DropDownItems.Add(new ToolStripMenuItem("Keep answers after closing", null, (_, _) => ToggleHistory())
+        { Checked = settings.KeepHistory });
+        recent.DropDownItems.Add(new ToolStripMenuItem("Clear recent answers", null, (_, _) =>
+        {
+            history.Clear();
+            if (settings.KeepHistory)
+                Settings.SaveHistory(history);
+        })
+        { Enabled = history.Count > 0 });
         menu.Items.Add(recent);
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Exit", null, (_, _) => Quit());
@@ -506,6 +518,16 @@ class TrayApp : ApplicationContext
         return item;
     }
 
+    void ToggleHistory()
+    {
+        settings.KeepHistory = !settings.KeepHistory;
+        if (settings.KeepHistory)
+            Settings.SaveHistory(history);
+        else
+            Settings.DeleteHistory();
+        SaveLook();
+    }
+
     static string Preview(string answer)
     {
         string line = Regex.Replace(answer, @"\s+", " ");
@@ -713,6 +735,8 @@ class TrayApp : ApplicationContext
         history.Insert(0, answer);
         if (history.Count > 10)
             history.RemoveAt(10);
+        if (settings.KeepHistory)
+            Settings.SaveHistory(history);
         ShowText(thread + answer, answer, true);
     }
 

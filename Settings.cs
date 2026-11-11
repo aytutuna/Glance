@@ -57,6 +57,7 @@ class Settings
     public bool PlainAnswer { get; set; }
     public int TextOpacity { get; set; } = 100;
     public bool UseArea { get; set; }
+    public bool KeepHistory { get; set; }
     // left, top, width, height as fractions of the screen, so it survives a resolution change
     public double[]? AnswerArea { get; set; }
 
@@ -211,6 +212,50 @@ class Settings
         if (!ProviderModels.TryGetValue(id, out var model) || model.Length == 0)
             return false;
         return id == "custom" ? !string.IsNullOrEmpty(CustomUrl) : HasKey(id);
+    }
+
+    static readonly string HistoryPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Glance", "history.dat");
+
+    public static List<string> LoadHistory()
+    {
+        try
+        {
+            var bytes = ProtectedData.Unprotect(File.ReadAllBytes(HistoryPath), null, DataProtectionScope.CurrentUser);
+            return JsonSerializer.Deserialize<List<string>>(bytes)?.Take(10).ToList() ?? new();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or CryptographicException or JsonException)
+        {
+            return new();
+        }
+    }
+
+    public static void SaveHistory(List<string> answers)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(HistoryPath)!);
+            var bytes = ProtectedData.Protect(JsonSerializer.SerializeToUtf8Bytes(answers), null, DataProtectionScope.CurrentUser);
+            string temp = HistoryPath + ".tmp";
+            File.WriteAllBytes(temp, bytes);
+            File.Move(temp, HistoryPath, true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Log.Write("history not saved", ex);
+        }
+    }
+
+    public static void DeleteHistory()
+    {
+        try
+        {
+            File.Delete(HistoryPath);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Log.Write("history not deleted", ex);
+        }
     }
 
     // the file exists but couldn't be read, so saving now would overwrite saved keys
