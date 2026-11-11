@@ -22,6 +22,7 @@ class ModesDialog : Form
     readonly Button add, delete, reset, save, cancel;
     readonly List<Entry> entries;
     int shown = -1;
+    bool renaming;
 
     public bool Changed { get; private set; }
 
@@ -53,16 +54,24 @@ class ModesDialog : Form
         {
             Id = m.Id,
             Name = m.Name,
-            Prompt = settings.PromptOverrides.GetValueOrDefault(m.Id) is { Length: > 0 } edited ? edited : Prompts.Default(settings, m.Id),
+            Prompt = Prompts.Instruction(settings, m.Id),
             Builtin = true,
         }).Concat(settings.CustomModes.Select(m => new Entry { Id = m.Id, Name = m.Name, Prompt = m.Prompt })).ToList();
         foreach (var entry in entries)
             list.Items.Add(entry.Name);
-        list.SelectedIndexChanged += (_, _) => Show(list.SelectedIndex);
+        list.SelectedIndexChanged += (_, _) =>
+        {
+            if (!renaming)
+                Show(list.SelectedIndex);
+        };
         name.TextChanged += (_, _) =>
         {
             if (shown >= 0 && !entries[shown].Builtin && (string)list.Items[shown] != name.Text)
+            {
+                renaming = true;
                 list.Items[shown] = name.Text;
+                renaming = false;
+            }
         };
 
         Controls.AddRange(new Control[] { list, add, delete, reset, name, prompt, status, save, cancel });
@@ -99,7 +108,7 @@ class ModesDialog : Form
             return;
         entries[shown].Prompt = prompt.Text;
         if (!entries[shown].Builtin)
-            entries[shown].Name = name.Text.Trim();
+            entries[shown].Name = name.Text;
     }
 
     void Show(int index)
@@ -144,6 +153,8 @@ class ModesDialog : Form
     void Save()
     {
         Keep();
+        foreach (var entry in entries.Where(e => !e.Builtin))
+            entry.Name = entry.Name.Trim();
         var blank = entries.FirstOrDefault(e => e.Prompt.Trim().Length == 0 || e.Name.Length == 0);
         if (blank != null)
         {
@@ -154,7 +165,7 @@ class ModesDialog : Form
         settings.CustomModes = entries.Where(e => !e.Builtin)
             .Select(e => new CustomMode { Id = e.Id, Name = e.Name, Prompt = e.Prompt.Trim() }).ToList();
         settings.PromptOverrides = entries.Where(e => e.Builtin && e.Prompt.Trim() != Prompts.Default(settings, e.Id))
-            .ToDictionary(e => e.Id, e => e.Prompt.Trim());
+            .ToDictionary(e => e.Id, e => e.Prompt.Trim().Replace(Prompts.Language(settings), "{language}"));
         if (!settings.AllModes().Any(m => m.Id == settings.Mode))
             settings.Mode = Settings.Modes[0].Id;
         Changed = true;
