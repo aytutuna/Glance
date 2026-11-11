@@ -621,7 +621,7 @@ class TrayApp : ApplicationContext
         CloseLabels();
         var provider = Ai.Create(settings);
         string model = settings.ActiveModel();
-        await Task.Delay(delayMs + 150, ct);
+        await Task.Delay(delayMs, ct);
         using var shot = await Task.Run(() => Grabber.Grab(screen), ct);
         ct.ThrowIfCancellationRequested();
         Rectangle? crop = null;
