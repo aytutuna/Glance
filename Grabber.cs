@@ -5,21 +5,22 @@ namespace Glance;
 
 static class Grabber
 {
-    const int MaxEdge = 2000;
+    public const int MaxEdge = 2000;
+    // two full HD screens side by side stay at full size; Claude shrinks past ~1568 itself
+    public const int WideEdge = 4000;
 
-    public static Bitmap Grab(Screen screen)
+    public static Bitmap Grab(Rectangle area)
     {
-        var area = screen.Bounds;
         var full = new Bitmap(area.Width, area.Height, PixelFormat.Format24bppRgb);
         using var g = Graphics.FromImage(full);
         g.CopyFromScreen(area.Location, Point.Empty, area.Size);
         return full;
     }
 
-    public static byte[] Encode(Bitmap full, Rectangle? crop)
+    public static byte[] Encode(Bitmap full, Rectangle? crop, int maxEdge = MaxEdge)
     {
         var part = crop ?? new Rectangle(Point.Empty, full.Size);
-        double scale = Math.Min(1.0, (double)MaxEdge / Math.Max(part.Width, part.Height));
+        double scale = Math.Min(1.0, (double)maxEdge / Math.Max(part.Width, part.Height));
         using var ms = new MemoryStream();
         if (scale < 1.0)
         {

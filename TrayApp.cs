@@ -8,6 +8,7 @@ class TrayApp : ApplicationContext
 {
     const int ReadId = 1, CloseId = 2, RegionId = 3, HideId = 4;
     const string MouseScreen = "Screen with the mouse";
+    const string AllScreens = "all";
 
     readonly Settings settings = Settings.Load();
     readonly NotifyIcon tray = new();
@@ -258,7 +259,7 @@ class TrayApp : ApplicationContext
         menu.Items.Add("Read screen now", null, (_, _) => Trigger(300));
         menu.Items.Add("Read an area", null, (_, _) => Trigger(300, true));
         menu.Items.Add("Hide answer text", null, (_, _) => HideAnswer());
-        menu.Items.Add(ScreenMenu("Read from", settings.ReadDevice, d => settings.ReadDevice = d));
+        menu.Items.Add(ScreenMenu("Read from", settings.ReadDevice, d => settings.ReadDevice = d, true));
         menu.Items.Add(ScreenMenu("Show answer on", settings.ShowDevice, d => settings.ShowDevice = d));
         menu.Items.Add(PositionMenu());
         menu.Items.Add(new ToolStripMenuItem("Plain black answer", null, (_, _) =>
@@ -355,7 +356,7 @@ class TrayApp : ApplicationContext
             // the tray menu has to fade out before the screen is captured
             await Task.Delay(300, ct);
             var screen = Resolve(settings.ShowDevice);
-            using var shot = await Task.Run(() => Grabber.Grab(screen), ct);
+            using var shot = await Task.Run(() => Grabber.Grab(screen.Bounds), ct);
             ct.ThrowIfCancellationRequested();
             var drawn = await Pick(screen, shot, "Drag the area where answers should appear. Esc cancels.", ct);
             if (drawn is not Rectangle r)
@@ -486,12 +487,15 @@ class TrayApp : ApplicationContext
         }
     }
 
-    ToolStripMenuItem ScreenMenu(string title, string? selected, Action<string?> choose)
+    ToolStripMenuItem ScreenMenu(string title, string? selected, Action<string?> choose, bool withAll = false)
     {
         var item = new ToolStripMenuItem(title);
         var screens = Screen.AllScreens;
+        bool all = withAll && selected == AllScreens;
         bool known = selected != null && screens.Any(s => s.DeviceName == selected);
-        item.DropDownItems.Add(ScreenItem(MouseScreen, !known, () => choose(null)));
+        item.DropDownItems.Add(ScreenItem(MouseScreen, !known && !all, () => choose(null)));
+        if (withAll)
+            item.DropDownItems.Add(ScreenItem("All screens", all, () => choose(AllScreens)));
         for (int i = 0; i < screens.Length; i++)
         {
             string name = screens[i].DeviceName;
@@ -605,24 +609,27 @@ class TrayApp : ApplicationContext
     async Task Read(int delayMs, bool area, CancellationToken ct)
     {
         var screen = Resolve(settings.ReadDevice);
+        // an area is drawn on one screen, so it falls back to the screen with the mouse
+        bool all = settings.ReadDevice == AllScreens && !area;
         var open = popup is { IsDisposed: false } shownPopup ? shownPopup : null;
         // the pointer can rest on the answer screen (a ScreenPad is also the touchpad);
         // reading that screen would only capture the answer, so read the main one instead
-        if (open != null && open.Device == screen.DeviceName && settings.ReadDevice != open.Device)
+        if (!all && open != null && open.Device == screen.DeviceName && settings.ReadDevice != open.Device)
         {
             var others = Screen.AllScreens.Where(s => s.DeviceName != open.Device).ToList();
             screen = others.FirstOrDefault(s => s.Primary) ?? others.FirstOrDefault() ?? screen;
         }
         // an answer on another screen stays up while the next one is read;
         // on the screen being read it would end up in the screenshot
-        bool keep = open != null && open.Device != screen.DeviceName && open.Look == AnswerPopup.LookOf(settings);
+        bool keep = !all && open != null && open.Device != screen.DeviceName && open.Look == AnswerPopup.LookOf(settings);
         if (!keep)
             ClosePopup();
         CloseLabels();
         var provider = Ai.Create(settings);
         string model = settings.ActiveModel();
         await Task.Delay(delayMs, ct);
-        using var shot = await Task.Run(() => Grabber.Grab(screen), ct);
+        var bounds = all ? SystemInformation.VirtualScreen : screen.Bounds;
+        using var shot = await Task.Run(() => Grabber.Grab(bounds), ct);
         ct.ThrowIfCancellationRequested();
         Rectangle? crop = null;
         if (area)
@@ -631,7 +638,7 @@ class TrayApp : ApplicationContext
             if (crop == null)
                 return;
         }
-        var jpeg = await Task.Run(() => Grabber.Encode(shot, crop), ct);
+        var jpeg = await Task.Run(() => Grabber.Encode(shot, crop, all ? Grabber.WideEdge : Grabber.MaxEdge), ct);
         ct.ThrowIfCancellationRequested();
 
         AnswerPopup mine;
