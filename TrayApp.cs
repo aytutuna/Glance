@@ -593,10 +593,17 @@ class TrayApp : ApplicationContext
     async Task Read(int delayMs, bool area, CancellationToken ct)
     {
         var screen = Resolve(settings.ReadDevice);
+        var open = popup is { IsDisposed: false } shownPopup ? shownPopup : null;
+        // the pointer can rest on the answer screen (a ScreenPad is also the touchpad);
+        // reading that screen would only capture the answer, so read the main one instead
+        if (open != null && open.Device == screen.DeviceName && settings.ReadDevice != open.Device)
+        {
+            var others = Screen.AllScreens.Where(s => s.DeviceName != open.Device).ToList();
+            screen = others.FirstOrDefault(s => s.Primary) ?? others.FirstOrDefault() ?? screen;
+        }
         // an answer on another screen stays up while the next one is read;
         // on the screen being read it would end up in the screenshot
-        bool keep = popup is { IsDisposed: false } open && open.Device != screen.DeviceName &&
-            open.Device == Resolve(settings.ShowDevice).DeviceName && open.Look == AnswerPopup.LookOf(settings);
+        bool keep = open != null && open.Device != screen.DeviceName && open.Look == AnswerPopup.LookOf(settings);
         if (!keep)
             ClosePopup();
         CloseLabels();
