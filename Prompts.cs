@@ -45,9 +45,15 @@ static class Prompts
     public static string Instruction(Settings settings, string mode)
     {
         if (settings.PromptOverrides.GetValueOrDefault(mode) is { Length: > 0 } edited)
-            return edited;
+            return edited.Replace("{language}", Language(settings));
         var custom = settings.CustomModes.FirstOrDefault(m => m.Id == mode);
         return custom != null ? custom.Prompt + " " + Tail : Default(settings, mode);
+    }
+
+    // an edited translate prompt keeps {language} so the Translate to choice still applies
+    public static string Language(Settings settings)
+    {
+        return settings.TranslateTo.Length > 0 ? settings.TranslateTo : CultureInfo.CurrentUICulture.EnglishName;
     }
 
     public static string Default(Settings settings, string mode)
@@ -57,7 +63,7 @@ static class Prompts
             "explain" => Explain,
             "summarize" => Summarize,
             "translate" => "You are shown a screenshot. Translate all the text on it into " +
-                (settings.TranslateTo.Length > 0 ? settings.TranslateTo : CultureInfo.CurrentUICulture.EnglishName) + ", keeping the order and line breaks. " +
+                Language(settings) + ", keeping the order and line breaks. " +
                 "If the text is already in that language, say so in one line. " + Tail +
                 "If there is no text, say so in one line." + Plain,
             _ => Answer,
