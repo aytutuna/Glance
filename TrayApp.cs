@@ -68,6 +68,11 @@ class TrayApp : ApplicationContext
             tray.ShowBalloonTip(5000, "Glance", text, icon);
     }
 
+    public void ShowRunning()
+    {
+        Notify($"Glance is already running. Press {KeyDialog.KeyName(settings.Hotkey)} to read the screen.", ToolTipIcon.Info);
+    }
+
     static string StartCommand => $"\"{Environment.ProcessPath}\"";
 
     static RegistryKey? RunKey(bool write)
