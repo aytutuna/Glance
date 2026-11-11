@@ -21,6 +21,13 @@ class OverlayForm : Form
         Native.SetWindowLongPtr(Handle, GWL_EXSTYLE, on ? style & ~WS_EX_NOACTIVATE : style | WS_EX_NOACTIVATE);
     }
 
+    // before Windows 10 2004 this fails and the windows simply stay in the shot
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+        Native.SetWindowDisplayAffinity(Handle, Native.WDA_EXCLUDEFROMCAPTURE);
+    }
+
     protected override bool ShowWithoutActivation => true;
 
     protected override CreateParams CreateParams

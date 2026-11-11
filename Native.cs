@@ -35,6 +35,11 @@ static class Native
     [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
     public static extern nint SetWindowLongPtr(IntPtr hWnd, int index, nint value);
 
+    [DllImport("user32.dll")]
+    public static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint affinity);
+
+    public const uint WDA_EXCLUDEFROMCAPTURE = 0x11;
+
     [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr SetWindowsHookEx(int hookId, HookProc proc, IntPtr module, uint threadId);
 
