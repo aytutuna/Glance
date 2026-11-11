@@ -1,4 +1,7 @@
+using System.Diagnostics;
 using System.Drawing.Drawing2D;
+using System.Reflection;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
@@ -29,6 +32,7 @@ class TrayApp : ApplicationContext
     readonly List<string> history;
     Conversation? chat;
     string thread = "", shown = "";
+    string? updateVersion, updateUrl;
 
     public TrayApp()
     {
@@ -63,6 +67,7 @@ class TrayApp : ApplicationContext
         var stored = StartValue();
         if (stored != null && stored != StartCommand)
             SetStartWithWindows(true);
+        _ = CheckForUpdate();
     }
 
     public void Notify(string text, ToolTipIcon icon)
@@ -74,6 +79,37 @@ class TrayApp : ApplicationContext
     public void ShowRunning()
     {
         Notify(string.Format(Strings.AlreadyRunning, KeyDialog.KeyName(settings.Hotkey)), ToolTipIcon.Info);
+    }
+
+    async Task CheckForUpdate()
+    {
+        if (!settings.CheckUpdates || DateTime.UtcNow - settings.LastUpdateCheck < TimeSpan.FromDays(1))
+            return;
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var req = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/aytutuna/Glance/releases/latest");
+            req.Headers.UserAgent.ParseAdd("Glance");
+            using var resp = await Api.Http.SendAsync(req, cts.Token);
+            resp.EnsureSuccessStatusCode();
+            using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync(cts.Token));
+            string tag = doc.RootElement.GetProperty("tag_name").GetString() ?? "";
+            string url = doc.RootElement.GetProperty("html_url").GetString() ?? "";
+            settings.LastUpdateCheck = DateTime.UtcNow;
+            settings.Save();
+            if (Version.TryParse(tag.TrimStart('v'), out var latest)
+                && latest > Assembly.GetExecutingAssembly().GetName().Version
+                && url.StartsWith("https://github.com/aytutuna/Glance/"))
+            {
+                updateVersion = latest.ToString();
+                updateUrl = url;
+                Notify(string.Format(Strings.UpdateReady, updateVersion), ToolTipIcon.Info);
+            }
+        }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or JsonException or KeyNotFoundException)
+        {
+            Log.Write("update check", ex);
+        }
     }
 
     static string StartCommand => $"\"{Environment.ProcessPath}\"";
@@ -258,6 +294,12 @@ class TrayApp : ApplicationContext
         menu.Items.Clear();
         foreach (var item in old)
             item.Dispose();
+        if (updateUrl != null)
+        {
+            var url = updateUrl;
+            menu.Items.Add(string.Format(Strings.UpdateTo, updateVersion), null, (_, _) => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }));
+            menu.Items.Add(new ToolStripSeparator());
+        }
         menu.Items.Add(Strings.MenuReadNow, null, (_, _) => Trigger(300));
         menu.Items.Add(Strings.ReadArea, null, (_, _) => Trigger(300, true));
         menu.Items.Add(Strings.MenuHideText, null, (_, _) => HideAnswer());
@@ -284,6 +326,8 @@ class TrayApp : ApplicationContext
         {
             Checked = autostart,
         });
+        menu.Items.Add(new ToolStripMenuItem(Strings.CheckUpdates, null, (_, _) => ToggleUpdates())
+        { Checked = settings.CheckUpdates });
         menu.Items.Add(new ToolStripSeparator());
         var recent = new ToolStripMenuItem(Strings.RecentAnswers);
         foreach (var answer in history)
@@ -530,6 +574,12 @@ class TrayApp : ApplicationContext
             Settings.SaveHistory(history);
         else
             Settings.DeleteHistory();
+        SaveLook();
+    }
+
+    internal void ToggleUpdates()
+    {
+        settings.CheckUpdates = !settings.CheckUpdates;
         SaveLook();
     }
 

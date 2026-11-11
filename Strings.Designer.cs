@@ -166,4 +166,7 @@ static class Strings
     public static string CliError => Get("CliError");
     public static string CliExit => Get("CliExit");
     public static string CliNoAnswer => Get("CliNoAnswer");
+    public static string CheckUpdates => Get("CheckUpdates");
+    public static string UpdateTo => Get("UpdateTo");
+    public static string UpdateReady => Get("UpdateReady");
 }

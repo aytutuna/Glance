@@ -13,7 +13,7 @@ class SettingsDialog : Form
     readonly double scale;
     readonly Font font;
     readonly ComboBox readFrom, mode, translate, showOn, position, opacity, model;
-    readonly CheckBox plain, history, autostart;
+    readonly CheckBox plain, history, autostart, updates;
     readonly Label order, modelLabel;
     readonly Dictionary<KeyJob, Label> keyNames = new();
     List<(string? Device, string Text)> readChoices = new(), showChoices = new();
@@ -127,9 +127,12 @@ class SettingsDialog : Form
         };
         history = new CheckBox { Text = Strings.KeepAnswers };
         history.Click += (_, _) => app.ToggleHistory();
+        updates = new CheckBox { Text = Strings.CheckUpdates };
+        updates.Click += (_, _) => app.ToggleUpdates();
         Add(general, autostart, 12, 12, Wide + Field);
         Add(general, history, 12, 12 + 34, Wide + Field);
-        Add(general, Button(Strings.OpenLogFolder, OpenLogFolder), 12, 12 + 2 * 34, 160);
+        Add(general, updates, 12, 12 + 2 * 34, Wide + Field);
+        Add(general, Button(Strings.OpenLogFolder, OpenLogFolder), 12, 12 + 3 * 34, 160);
 
         var tabs = new TabControl { Bounds = new Rectangle(Px(12), Px(12), Px(436), Px(290)) };
         tabs.TabPages.AddRange(new[] { reading, answer, keys, ai, general });
@@ -218,6 +221,7 @@ class SettingsDialog : Form
 
         autostart.Checked = TrayApp.StartValue() != null;
         history.Checked = settings.KeepHistory;
+        updates.Checked = settings.CheckUpdates;
     }
 
     protected override void OnFormClosed(FormClosedEventArgs e)

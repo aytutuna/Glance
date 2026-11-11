@@ -58,6 +58,8 @@ class Settings
     public int TextOpacity { get; set; } = 100;
     public bool UseArea { get; set; }
     public bool KeepHistory { get; set; }
+    public bool CheckUpdates { get; set; } = true;
+    public DateTime LastUpdateCheck { get; set; }
     // left, top, width, height as fractions of the screen, so it survives a resolution change
     public double[]? AnswerArea { get; set; }
 

@@ -492,4 +492,13 @@
   <data name="CliNoAnswer" xml:space="preserve">
     <value>Claude yanıt döndürmedi.</value>
   </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>Güncellemeleri denetle</value>
+  </data>
+  <data name="UpdateTo" xml:space="preserve">
+    <value>Glance {0} sürümüne güncelle</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Glance {0} sürümü çıktı.</value>
+  </data>
 </root>

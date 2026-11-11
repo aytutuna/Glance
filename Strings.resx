@@ -492,4 +492,13 @@
   <data name="CliNoAnswer" xml:space="preserve">
     <value>Claude returned no answer.</value>
   </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="UpdateTo" xml:space="preserve">
+    <value>Update to Glance {0}</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Glance {0} is available.</value>
+  </data>
 </root>
