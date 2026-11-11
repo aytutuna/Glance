@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="MouseScreen" xml:space="preserve">
+    <value>Fare imlecinin olduğu ekran</value>
+  </data>
+  <data name="AllScreens" xml:space="preserve">
+    <value>Tüm ekranlar</value>
+  </data>
+  <data name="ScreenPlain" xml:space="preserve">
+    <value>Ekran {0} ({1}x{2})</value>
+  </data>
+  <data name="ScreenPrimary" xml:space="preserve">
+    <value>Ekran {0} ({1}x{2}, birincil)</value>
+  </data>
+  <data name="AlreadyRunning" xml:space="preserve">
+    <value>Glance zaten çalışıyor. Ekranı okumak için {0} tuşuna basın.</value>
+  </data>
+  <data name="StartupFailed" xml:space="preserve">
+    <value>Windows ile başlatma ayarı değiştirilemedi.</value>
+  </data>
+  <data name="Tooltip" xml:space="preserve">
+    <value>Glance (Okuma: {0}, Alan: {1}, Kapatma: {2})</value>
+  </data>
+  <data name="KeyReadsScreen" xml:space="preserve">
+    <value>{0} (ekranı okur)</value>
+  </data>
+  <data name="KeyReadsArea" xml:space="preserve">
+    <value>{0} (bir alanı okur)</value>
+  </data>
+  <data name="KeyClosesAnswer" xml:space="preserve">
+    <value>{0} (yanıtı kapatır)</value>
+  </data>
+  <data name="KeyHidesAnswer" xml:space="preserve">
+    <value>{0} (yanıt metnini gizler)</value>
+  </data>
+  <data name="ListJoin" xml:space="preserve">
+    <value> ve </value>
+  </data>
+  <data name="KeysFailed" xml:space="preserve">
+    <value>{0} kullanılamıyor: Windows veya başka bir program bu tuşu kullanıyor. Tepsi menüsünden başka bir tuş seçin.</value>
+  </data>
+  <data name="KeyOnlyHere" xml:space="preserve">
+    <value>{0} artık her programda yalnızca {1} tuşu olarak çalışıyor. Geri almak için tepsi menüsünden değiştirin.</value>
+  </data>
+  <data name="SettingsNotSaved" xml:space="preserve">
+    <value>Ayar dosyası kaydedilemedi, bu seçim yeniden başlatınca kaybolacak.</value>
+  </data>
+  <data name="MenuReadNow" xml:space="preserve">
+    <value>Ekranı şimdi oku</value>
+  </data>
+  <data name="ReadArea" xml:space="preserve">
+    <value>Bir alanı oku</value>
+  </data>
+  <data name="MenuHideText" xml:space="preserve">
+    <value>Yanıt metnini gizle</value>
+  </data>
+  <data name="ReadFrom" xml:space="preserve">
+    <value>Okuma ekranı</value>
+  </data>
+  <data name="ShowAnswerOn" xml:space="preserve">
+    <value>Yanıt ekranı</value>
+  </data>
+  <data name="PlainAnswer" xml:space="preserve">
+    <value>Düz siyah yanıt</value>
+  </data>
+  <data name="IdentifyScreens" xml:space="preserve">
+    <value>Ekranları tanımla</value>
+  </data>
+  <data name="KeyMenu" xml:space="preserve">
+    <value>{0} tuşu ({1})...</value>
+  </data>
+  <data name="KeyTitle" xml:space="preserve">
+    <value>{0} tuşu</value>
+  </data>
+  <data name="JobRead" xml:space="preserve">
+    <value>Okuma</value>
+  </data>
+  <data name="JobArea" xml:space="preserve">
+    <value>Alan</value>
+  </data>
+  <data name="JobClose" xml:space="preserve">
+    <value>Kapatma</value>
+  </data>
+  <data name="JobHide" xml:space="preserve">
+    <value>Gizleme</value>
+  </data>
+  <data name="StartWithWindows" xml:space="preserve">
+    <value>Windows ile başlat</value>
+  </data>
+  <data name="RecentAnswers" xml:space="preserve">
+    <value>Son yanıtlar</value>
+  </data>
+  <data name="KeepAnswers" xml:space="preserve">
+    <value>Kapatınca yanıtları sakla</value>
+  </data>
+  <data name="ClearRecent" xml:space="preserve">
+    <value>Son yanıtları temizle</value>
+  </data>
+  <data name="MenuSettings" xml:space="preserve">
+    <value>Ayarlar...</value>
+  </data>
+  <data name="MenuExit" xml:space="preserve">
+    <value>Çıkış</value>
+  </data>
+  <data name="AnswerPosition" xml:space="preserve">
+    <value>Yanıt konumu</value>
+  </data>
+  <data name="BottomRight" xml:space="preserve">
+    <value>Sağ alt</value>
+  </data>
+  <data name="CenterOfScreen" xml:space="preserve">
+    <value>Ekranın ortası</value>
+  </data>
+  <data name="DrawnArea" xml:space="preserve">
+    <value>Çizilen alan</value>
+  </data>
+  <data name="DrawAnswerArea" xml:space="preserve">
+    <value>Yanıt alanı çiz...</value>
+  </data>
+  <data name="TextOpacity" xml:space="preserve">
+    <value>Metin opaklığı</value>
+  </data>
+  <data name="DragAnswerArea" xml:space="preserve">
+    <value>Yanıtların görüneceği alanı sürükleyerek seçin. Esc iptal eder.</value>
+  </data>
+  <data name="AnswersHere" xml:space="preserve">
+    <value>Yanıtlar burada görünecek.</value>
+  </data>
+  <data name="AI" xml:space="preserve">
+    <value>Yapay zekâ</value>
+  </data>
+  <data name="ChangeOrder" xml:space="preserve">
+    <value>Sırayı değiştir...</value>
+  </data>
+  <data name="ConnectAi" xml:space="preserve">
+    <value>Yapay zekâ bağla...</value>
+  </data>
+  <data name="ClaudeCliModel" xml:space="preserve">
+    <value>Claude CLI modeli</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>Mod</value>
+  </data>
+  <data name="EditModes" xml:space="preserve">
+    <value>Modları düzenle...</value>
+  </data>
+  <data name="WindowsLanguage" xml:space="preserve">
+    <value>Windows dili ({0})</value>
+  </data>
+  <data name="TranslateTo" xml:space="preserve">
+    <value>Çeviri dili</value>
+  </data>
+  <data name="DragReadArea" xml:space="preserve">
+    <value>Okunacak alanı sürükleyerek seçin. Esc iptal eder.</value>
+  </data>
+  <data name="Reading" xml:space="preserve">
+    <value>Okunuyor...</value>
+  </data>
+  <data name="AnswerEmpty" xml:space="preserve">
+    <value>Yanıt boştu.</value>
+  </data>
+  <data name="QuestionPrefix" xml:space="preserve">
+    <value>S: </value>
+  </data>
+  <data name="Crashed" xml:space="preserve">
+    <value>Bir şeyler ters gitti. Ayrıntılar glance.log dosyasında.</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopyala</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Kopyalandı</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>Başarısız</value>
+  </data>
+  <data name="FollowUp" xml:space="preserve">
+    <value>Devam sorusu sorun</value>
+  </data>
+  <data name="PressKeyFor" xml:space="preserve">
+    <value>Şu iş için tuşa basın: {0}</value>
+  </data>
+  <data name="FnHint" xml:space="preserve">
+    <value>Fn tuşu çoğu dizüstü bilgisayarda tek başına Windows'a ulaşmaz.</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="PurposeRead" xml:space="preserve">
+    <value>Ekranı oku</value>
+  </data>
+  <data name="PurposeClose" xml:space="preserve">
+    <value>Yanıtı kapat</value>
+  </data>
+  <data name="PurposeHide" xml:space="preserve">
+    <value>Yanıt metnini gizle, ekranı siyah bırak</value>
+  </data>
+  <data name="WinKeyAlone" xml:space="preserve">
+    <value>Windows tuşu tek başına Başlat'ı da açar. Yanına başka bir tuş ekleyin.</value>
+  </data>
+  <data name="KeyTaken" xml:space="preserve">
+    <value>{0} zaten {1} tuşu.</value>
+  </data>
+  <data name="KeyHeld" xml:space="preserve">
+    <value>{0} kullanılamıyor. Windows veya başka bir program bu tuşu kullanıyor.</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Glance ayarları</value>
+  </data>
+  <data name="TabReading" xml:space="preserve">
+    <value>Okuma</value>
+  </data>
+  <data name="TabAnswer" xml:space="preserve">
+    <value>Yanıt</value>
+  </data>
+  <data name="TabKeys" xml:space="preserve">
+    <value>Tuşlar</value>
+  </data>
+  <data name="TabGeneral" xml:space="preserve">
+    <value>Genel</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Değiştir...</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Sıra</value>
+  </data>
+  <data name="OpenLogFolder" xml:space="preserve">
+    <value>Günlük klasörünü aç</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="ConnectTitle" xml:space="preserve">
+    <value>Yapay zekâ bağla</value>
+  </data>
+  <data name="SavedKeysCaption" xml:space="preserve">
+    <value>Kayıtlı anahtarlar, biri tükenince sırayla denenir</value>
+  </data>
+  <data name="ApiKey" xml:space="preserve">
+    <value>API anahtarı</value>
+  </data>
+  <data name="BaseUrl" xml:space="preserve">
+    <value>Temel URL</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="ConnectNote" xml:space="preserve">
+    <value>Ekran görüntüleri seçtiğiniz yapay zekâya gönderilir.</value>
+  </data>
+  <data name="RemoveKey" xml:space="preserve">
+    <value>Anahtarı sil</value>
+  </data>
+  <data name="LoadModels" xml:space="preserve">
+    <value>Modelleri al</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Kaydet</value>
+  </data>
+  <data name="PasteAnotherKey" xml:space="preserve">
+    <value>Eklemek için başka bir anahtar yapıştırın</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>İsteğe bağlı</value>
+  </data>
+  <data name="PasteKey" xml:space="preserve">
+    <value>API anahtarını yapıştırın</value>
+  </data>
+  <data name="AddKey" xml:space="preserve">
+    <value>Anahtar ekle</value>
+  </data>
+  <data name="ApiKeyOptional" xml:space="preserve">
+    <value>API anahtarı (isteğe bağlı)</value>
+  </data>
+  <data name="LoadingModels" xml:space="preserve">
+    <value>Modeller yükleniyor...</value>
+  </data>
+  <data name="ModelsLoaded" xml:space="preserve">
+    <value>{0} model yüklendi. Anahtar çalışıyor.</value>
+  </data>
+  <data name="ProviderTimeout" xml:space="preserve">
+    <value>Sağlayıcı zamanında yanıt vermedi.</value>
+  </data>
+  <data name="SavedKeysUnreadable" xml:space="preserve">
+    <value>Kayıtlı anahtarlar okunamıyor. Yeni bir anahtar girin veya bunları silin.</value>
+  </data>
+  <data name="EnterKey" xml:space="preserve">
+    <value>API anahtarını girin.</value>
+  </data>
+  <data name="PickModel" xml:space="preserve">
+    <value>Bir model seçin veya yazın. Bu anahtarın kullanabildiği modeller için Modelleri al'a basın.</value>
+  </data>
+  <data name="SavedKeyUnreadable" xml:space="preserve">
+    <value>Anahtar {0} (okunamıyor)</value>
+  </data>
+  <data name="SavedKeyEnding" xml:space="preserve">
+    <value>Anahtar {0} ({1} ile biten)</value>
+  </data>
+  <data name="SavedKey" xml:space="preserve">
+    <value>Anahtar {0}</value>
+  </data>
+  <data name="OptKeyUnreadable" xml:space="preserve">
+    <value>anahtar okunamıyor</value>
+  </data>
+  <data name="OptKeyEnding" xml:space="preserve">
+    <value>{0} ile biten anahtar</value>
+  </data>
+  <data name="OptKey" xml:space="preserve">
+    <value>anahtar</value>
+  </data>
+  <data name="CustomName" xml:space="preserve">
+    <value>Özel</value>
+  </data>
+  <data name="CustomHost" xml:space="preserve">
+    <value>Özel ({0})</value>
+  </data>
+  <data name="OrderTitle" xml:space="preserve">
+    <value>Yapay zekâ sırası</value>
+  </data>
+  <data name="OrderNote" xml:space="preserve">
+    <value>Glance işaretli ilk yapay zekâya sorar. Kullanım hakkı veya kredisi biterse sonraki sormadan yanıtlar. 30 dakika sonra ilkine döner.</value>
+  </data>
+  <data name="Up" xml:space="preserve">
+    <value>Yukarı</value>
+  </data>
+  <data name="Down" xml:space="preserve">
+    <value>Aşağı</value>
+  </data>
+  <data name="TickOne" xml:space="preserve">
+    <value>En az birini işaretleyin.</value>
+  </data>
+  <data name="EditModesTitle" xml:space="preserve">
+    <value>Modları düzenle</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Ekle</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Sil</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Sıfırla</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>Tamam</value>
+  </data>
+  <data name="NewMode" xml:space="preserve">
+    <value>Yeni mod</value>
+  </data>
+  <data name="PromptEmpty" xml:space="preserve">
+    <value>İstem boş olamaz. Varsayılan metin için Sıfırla'yı kullanın.</value>
+  </data>
+  <data name="ModeNeedsBoth" xml:space="preserve">
+    <value>Bir modun adı ve istemi olmalı.</value>
+  </data>
+  <data name="ModeAnswer" xml:space="preserve">
+    <value>Yanıtla</value>
+  </data>
+  <data name="ModeExplain" xml:space="preserve">
+    <value>Açıkla</value>
+  </data>
+  <data name="ModeTranslate" xml:space="preserve">
+    <value>Çevir</value>
+  </data>
+  <data name="ModeSummarize" xml:space="preserve">
+    <value>Özetle</value>
+  </data>
+  <data name="ConnectionLost" xml:space="preserve">
+    <value>{0} ile bağlantı koptu.</value>
+  </data>
+  <data name="TookTooLong" xml:space="preserve">
+    <value>{0} yanıtlamak için çok uzun sürdü.</value>
+  </data>
+  <data name="NoAnswer" xml:space="preserve">
+    <value>{0} yanıt döndürmedi.</value>
+  </data>
+  <data name="ReportedError" xml:space="preserve">
+    <value>{0} bir hata bildirdi.</value>
+  </data>
+  <data name="ReportedErrorDetail" xml:space="preserve">
+    <value>{0} bir hata bildirdi: {1}</value>
+  </data>
+  <data name="NoModelList" xml:space="preserve">
+    <value>{0} model listesi göndermedi.</value>
+  </data>
+  <data name="ListedNoModels" xml:space="preserve">
+    <value>{0} hiç model listelemedi.</value>
+  </data>
+  <data name="Filtered" xml:space="preserve">
+    <value>{0} yanıtı filtreledi ve metin döndürmedi.</value>
+  </data>
+  <data name="GeminiBlocked" xml:space="preserve">
+    <value>Gemini ekran görüntüsünü engelledi ({0}) ve metin döndürmedi.</value>
+  </data>
+  <data name="GeminiStopped" xml:space="preserve">
+    <value>Gemini yanıt vermeden durdu ({0}). İçeriği engellemiş olabilir.</value>
+  </data>
+  <data name="Declined" xml:space="preserve">
+    <value>{0} bu soruyu yanıtlamayı reddetti.</value>
+  </data>
+  <data name="NoAiUsable" xml:space="preserve">
+    <value>Sıradaki yapay zekâların hiçbiri kullanılamıyor. Tepsi menüsünde Yapay zekâ altından kontrol edin.</value>
+  </data>
+  <data name="SavedKeyUnusable" xml:space="preserve">
+    <value>Kayıtlı API anahtarı bu Windows hesabıyla okunamıyor. Yeni bir anahtar girmek için yapay zekâyı yeniden bağlayın.</value>
+  </data>
+  <data name="NeedsKey" xml:space="preserve">
+    <value>Bu yapay zekâ için API anahtarı gerekli.</value>
+  </data>
+  <data name="AllFailed" xml:space="preserve">
+    <value>{0} seçeneğin hepsi başarısız oldu. {1}</value>
+  </data>
+  <data name="CantReach" xml:space="preserve">
+    <value>{0} sunucusuna ulaşılamadı. Bağlantıyı ve adresi kontrol edin.</value>
+  </data>
+  <data name="CantReachShort" xml:space="preserve">
+    <value>{0} sunucusuna ulaşılamadı. Bağlantıyı kontrol edin.</value>
+  </data>
+  <data name="Redirect" xml:space="preserve">
+    <value>{0} yönlendirme ile yanıt verdi. Glance yönlendirmeleri izlemez, adresi kontrol edin.</value>
+  </data>
+  <data name="RedirectShort" xml:space="preserve">
+    <value>{0} yönlendirme ile yanıt verdi, Glance bunu izlemez.</value>
+  </data>
+  <data name="Http401" xml:space="preserve">
+    <value>{0} API anahtarını reddetti (401).</value>
+  </data>
+  <data name="Http402" xml:space="preserve">
+    <value>Bu anahtarın kredisi bitti (402).</value>
+  </data>
+  <data name="Http403" xml:space="preserve">
+    <value>{0} isteği reddetti (403).</value>
+  </data>
+  <data name="Http404" xml:space="preserve">
+    <value>{0} bu modele veya adrese sahip değil (404).</value>
+  </data>
+  <data name="Http404Model" xml:space="preserve">
+    <value>{0} bu modele sahip değil (404).</value>
+  </data>
+  <data name="Http429" xml:space="preserve">
+    <value>{0} bu anahtarı sınırlıyor veya kotası bitti (429).</value>
+  </data>
+  <data name="HttpServer" xml:space="preserve">
+    <value>{0} sunucu hatası verdi ({1}).</value>
+  </data>
+  <data name="HttpOther" xml:space="preserve">
+    <value>{0} bir hata döndürdü ({1}).</value>
+  </data>
+  <data name="LineTooLong" xml:space="preserve">
+    <value>Yanıttaki bir satır çok uzundu.</value>
+  </data>
+  <data name="BaseUrlScheme" xml:space="preserve">
+    <value>Temel URL http:// veya https:// ile başlamalı.</value>
+  </data>
+  <data name="BaseUrlUser" xml:space="preserve">
+    <value>Kullanıcı adını ve parolayı temel URL'den çıkarın.</value>
+  </data>
+  <data name="BaseUrlQuery" xml:space="preserve">
+    <value>Temel URL'de ? veya # işaretinden sonrasını çıkarın.</value>
+  </data>
+  <data name="BaseUrlPlain" xml:space="preserve">
+    <value>Düz http adresi API anahtarını şifrelemeden gönderir. https kullanın veya bu bilgisayardaki bir adres girin.</value>
+  </data>
+  <data name="BadKeyChars" xml:space="preserve">
+    <value>Bu anahtarda bir API anahtarında bulunamayacak karakterler var.</value>
+  </data>
+  <data name="CliNotFound" xml:space="preserve">
+    <value>Glance claude komutunu bulamıyor. Claude CLI'ı kurun, oturum açmak için bir kez claude çalıştırın, sonra yeniden deneyin.</value>
+  </data>
+  <data name="CliTimedOut" xml:space="preserve">
+    <value>Claude yanıtlamak için çok uzun sürdü.</value>
+  </data>
+  <data name="CliError" xml:space="preserve">
+    <value>Claude bir hata bildirdi.</value>
+  </data>
+  <data name="CliExit" xml:space="preserve">
+    <value>Claude {0} koduyla kapandı.</value>
+  </data>
+  <data name="CliNoAnswer" xml:space="preserve">
+    <value>Claude yanıt döndürmedi.</value>
+  </data>
+</root>
