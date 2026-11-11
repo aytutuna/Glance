@@ -12,7 +12,6 @@ DefaultDirName={localappdata}\Programs\Glance
 DefaultGroupName=Glance
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 SetupIconFile=..\Glance.ico

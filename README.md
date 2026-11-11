@@ -38,7 +38,7 @@ The interface is in English and Turkish.
 You need the .NET 10 SDK.
 
     dotnet build Glance.csproj -c Release
-    dotnet test
+    dotnet test tests/Glance.Tests
 
 `scripts/publish.ps1` builds the self-contained x64 and arm64 executables into `publish/` and, if Inno Setup 6 is installed, the installer.
 
