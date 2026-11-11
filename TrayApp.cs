@@ -62,6 +62,12 @@ class TrayApp : ApplicationContext
             SetStartWithWindows(true);
     }
 
+    public void Notify(string text, ToolTipIcon icon)
+    {
+        if (tray.Visible)
+            tray.ShowBalloonTip(5000, "Glance", text, icon);
+    }
+
     static string StartCommand => $"\"{Environment.ProcessPath}\"";
 
     static RegistryKey? RunKey(bool write)
@@ -576,6 +582,7 @@ class TrayApp : ApplicationContext
         }
         catch (Exception ex)
         {
+            Log.Write("job failed", ex);
             if (!ct.IsCancellationRequested)
                 ShowText(thread + ex.Message, ex.Message, thread.Length > 0);
         }

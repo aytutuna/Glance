@@ -9,7 +9,18 @@ static class Program
         if (!first)
             return;
 
+        AppDomain.CurrentDomain.UnhandledException += (_, e) => Log.Write("unhandled", (Exception)e.ExceptionObject);
+        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
         ApplicationConfiguration.Initialize();
-        Application.Run(new TrayApp());
+
+        TrayApp? app = null;
+        Application.ThreadException += (_, e) =>
+        {
+            Log.Write("ui thread", e.Exception);
+            app?.Notify("Something went wrong. Details are in glance.log.", ToolTipIcon.Error);
+        };
+
+        app = new TrayApp();
+        Application.Run(app);
     }
 }
