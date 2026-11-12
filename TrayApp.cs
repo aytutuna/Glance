@@ -30,6 +30,9 @@ class TrayApp : ApplicationContext
     ModesDialog? modesDialog;
     SettingsDialog? settingsDialog;
     KeyHook? keyHook;
+    readonly Native.WinEventProc focusProc;
+    readonly IntPtr focusHook;
+    IntPtr lastWindow = Native.GetForegroundWindow();
     readonly List<string> history;
     Conversation? chat;
     string thread = "", shown = "";
@@ -38,6 +41,15 @@ class TrayApp : ApplicationContext
     public TrayApp()
     {
         history = settings.KeepHistory ? Settings.LoadHistory() : new();
+        // the desktop is kept too, so a click on it still means "read the screen";
+        // whether a window can be read is only checked at read time, since a new window
+        // can be cloaked or still minimized when it gets the focus
+        focusProc = (_, _, hwnd, _, _, _, _) =>
+        {
+            if (hwnd != IntPtr.Zero && !Native.PassingFocus(hwnd))
+                lastWindow = hwnd;
+        };
+        focusHook = Native.SetWinEventHook(Native.EVENT_SYSTEM_FOREGROUND, Native.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, focusProc, 0, 0, Native.WINEVENT_OUTOFCONTEXT);
         menu.Opening += (_, e) =>
         {
             BuildMenu();
@@ -744,8 +756,11 @@ class TrayApp : ApplicationContext
 
     async Task Read(int delayMs, bool area, CancellationToken ct)
     {
-        // taken first: closing the popup or waiting can change the focus
-        var window = settings.ReadDevice == ActiveWindow && !area ? Native.ReadableWindow(Native.GetForegroundWindow()) : null;
+        // taken first: closing the popup or waiting can change the focus. A tray click or
+        // the tray menu moves the focus to the taskbar or to Glance, so the window used last is read then
+        var window = settings.ReadDevice == ActiveWindow && !area
+            ? Native.ReadableWindow(Native.GetForegroundWindow()) ?? Native.ReadableWindow(lastWindow)
+            : null;
         var screen = window is { } w ? Screen.FromRectangle(w) : Resolve(settings.ReadDevice);
         // an area is drawn on one screen, so it falls back to the screen with the mouse;
         // a window that can't be read does too
@@ -908,6 +923,7 @@ class TrayApp : ApplicationContext
         connectDialog?.Close();
         settingsDialog?.Close();
         keyHook?.Dispose();
+        Native.UnhookWinEvent(focusHook);
         hotkeyWindow.Dispose();
         tray.Visible = false;
         tray.Dispose();

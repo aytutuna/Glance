@@ -38,8 +38,14 @@ static class Native
     [DllImport("user32.dll")]
     static extern bool GetWindowRect(IntPtr hWnd, out Rect rect);
 
+    [DllImport("user32.dll")]
+    static extern bool IsWindowVisible(IntPtr hWnd);
+
     [DllImport("dwmapi.dll")]
     static extern int DwmGetWindowAttribute(IntPtr hWnd, int attribute, out Rect rect, int size);
+
+    [DllImport("dwmapi.dll")]
+    static extern int DwmGetWindowAttribute(IntPtr hWnd, int attribute, out int value, int size);
 
     [StructLayout(LayoutKind.Sequential)]
     struct Rect
@@ -47,20 +53,42 @@ static class Native
         public int Left, Top, Right, Bottom;
     }
 
-    const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
+    const int DWMWA_EXTENDED_FRAME_BOUNDS = 9, DWMWA_CLOAKED = 14;
+
+    public const uint EVENT_SYSTEM_FOREGROUND = 3, WINEVENT_OUTOFCONTEXT = 0;
+
+    public delegate void WinEventProc(IntPtr hook, uint ev, IntPtr hwnd, int obj, int child, uint thread, uint time);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr SetWinEventHook(uint min, uint max, IntPtr module, WinEventProc proc, uint process, uint thread, uint flags);
+
+    [DllImport("user32.dll")]
+    public static extern bool UnhookWinEvent(IntPtr hook);
+
+    static string ClassOf(IntPtr hwnd)
+    {
+        var name = new char[64];
+        return new string(name, 0, GetClassName(hwnd, name, name.Length));
+    }
+
+    // Glance's own windows, the taskbars, the hidden tray icons flyout and the shell flyouts
+    // such as Start and quick settings: the focus passes through these on the way to a read
+    public static bool PassingFocus(IntPtr hwnd)
+    {
+        GetWindowThreadProcessId(hwnd, out uint pid);
+        return pid == Environment.ProcessId || ClassOf(hwnd) is "Shell_TrayWnd" or "Shell_SecondaryTrayWnd"
+            or "NotifyIconOverflowWindow" or "TopLevelWindowForOverflowXamlIsland"
+            or "Windows.UI.Core.CoreWindow" or "XamlExplorerHostIslandWindow";
+    }
 
     public static Rectangle? ReadableWindow(IntPtr hwnd)
     {
-        if (hwnd == IntPtr.Zero || hwnd == GetShellWindow() || IsIconic(hwnd))
+        if (hwnd == IntPtr.Zero || hwnd == GetShellWindow() || !IsWindow(hwnd) || !IsWindowVisible(hwnd) || IsIconic(hwnd))
             return null;
-        GetWindowThreadProcessId(hwnd, out uint pid);
-        if (pid == Environment.ProcessId)
+        // a window left on another virtual desktop is cloaked: nothing of it is on screen
+        if (DwmGetWindowAttribute(hwnd, DWMWA_CLOAKED, out int cloaked, sizeof(int)) == 0 && cloaked != 0)
             return null;
-        var name = new char[64];
-        string cls = new string(name, 0, GetClassName(hwnd, name, name.Length));
-        // the desktop, the taskbars and the hidden tray icons flyout (Windows 10 and 11)
-        if (cls is "Progman" or "WorkerW" or "Shell_TrayWnd" or "Shell_SecondaryTrayWnd"
-            or "NotifyIconOverflowWindow" or "TopLevelWindowForOverflowXamlIsland")
+        if (PassingFocus(hwnd) || ClassOf(hwnd) is "Progman" or "WorkerW")
             return null;
         // the extended bounds leave out the invisible resize borders
         if (DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, out Rect r, Marshal.SizeOf<Rect>()) != 0 && !GetWindowRect(hwnd, out r))
