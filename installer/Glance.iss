@@ -58,8 +58,7 @@ begin
   // the app can switch this value on by itself from its menu, so it is removed whether or not the task was ticked
   if CurUninstallStep = usUninstall then
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'Glance');
-  // a silent uninstall is usually an upgrade or a script, so the settings stay
-  if (CurUninstallStep = usPostUninstall) and not UninstallSilent then
-    if MsgBox(CustomMessage('DeleteSettings'), mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+  if CurUninstallStep = usPostUninstall then
+    if UninstallSilent or (MsgBox(CustomMessage('DeleteSettings'), mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES) then
       DelTree(ExpandConstant('{userappdata}\Glance'), True, True, True);
 end;
