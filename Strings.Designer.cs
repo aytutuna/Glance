@@ -8,6 +8,7 @@ static class Strings
 
     public static string MouseScreen => Get("MouseScreen");
     public static string AllScreens => Get("AllScreens");
+    public static string ActiveWindow => Get("ActiveWindow");
     public static string ScreenPlain => Get("ScreenPlain");
     public static string ScreenPrimary => Get("ScreenPrimary");
     public static string AlreadyRunning => Get("AlreadyRunning");

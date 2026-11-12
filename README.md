@@ -24,7 +24,7 @@ Default hotkeys, changeable in the settings window:
 The tray menu and the settings window cover the same ground:
 
 - Mode: Answer, Explain, Translate or Summarize, plus your own modes. The built-in prompts can be edited.
-- Read from: the screen with the mouse, a specific screen, or all screens.
+- Read from: the screen with the mouse, a specific screen, all screens, or the active window.
 - Show answer on: which screen the popup appears on, and whether it sits in the bottom right or the center. The answer can also go to an area you set.
 - Plain black answer: a pure black popup with white text instead of the dark gray one, with an adjustable text opacity.
 - Keep answers after closing: saves the last ten answers, encrypted, so they are there next time.

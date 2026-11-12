@@ -11,6 +11,7 @@ class TrayApp : ApplicationContext
 {
     const int ReadId = 1, CloseId = 2, RegionId = 3, HideId = 4;
     const string AllScreens = "all";
+    const string ActiveWindow = "window";
 
     readonly Settings settings = Settings.Load();
     readonly NotifyIcon tray = new();
@@ -631,7 +632,10 @@ class TrayApp : ApplicationContext
         var screens = Screen.AllScreens;
         var choices = new List<(string?, string)> { (null, Strings.MouseScreen) };
         if (withAll)
+        {
             choices.Add((AllScreens, Strings.AllScreens));
+            choices.Add((ActiveWindow, Strings.ActiveWindow));
+        }
         for (int i = 0; i < screens.Length; i++)
             choices.Add((screens[i].DeviceName, Describe(screens[i], i)));
         return choices;
@@ -740,27 +744,31 @@ class TrayApp : ApplicationContext
 
     async Task Read(int delayMs, bool area, CancellationToken ct)
     {
-        var screen = Resolve(settings.ReadDevice);
-        // an area is drawn on one screen, so it falls back to the screen with the mouse
+        // taken first: closing the popup or waiting can change the focus
+        var window = settings.ReadDevice == ActiveWindow && !area ? Native.ReadableWindow(Native.GetForegroundWindow()) : null;
+        var screen = window is { } w ? Screen.FromRectangle(w) : Resolve(settings.ReadDevice);
+        // an area is drawn on one screen, so it falls back to the screen with the mouse;
+        // a window that can't be read does too
         bool all = settings.ReadDevice == AllScreens && !area;
         var open = popup is { IsDisposed: false } shownPopup ? shownPopup : null;
         // the pointer can rest on the answer screen (a ScreenPad is also the touchpad);
         // reading that screen would only capture the answer, so read the main one instead
-        if (!all && open != null && open.Device == screen.DeviceName && settings.ReadDevice != open.Device)
+        if (window == null && !all && open != null && open.Device == screen.DeviceName && settings.ReadDevice != open.Device)
         {
             var others = Screen.AllScreens.Where(s => s.DeviceName != open.Device).ToList();
             screen = others.FirstOrDefault(s => s.Primary) ?? others.FirstOrDefault() ?? screen;
         }
         // an answer on another screen stays up while the next one is read;
-        // on the screen being read it would end up in the screenshot
-        bool keep = !all && open != null && open.Device != screen.DeviceName && open.Look == AnswerPopup.LookOf(settings);
+        // on the screen or window being read it would end up in the screenshot
+        bool clear = window is { } wb ? open?.Bounds.IntersectsWith(wb) == false : open?.Device != screen.DeviceName;
+        bool keep = !all && open != null && clear && open.Look == AnswerPopup.LookOf(settings);
         if (!keep)
             ClosePopup();
         CloseLabels();
         var provider = Ai.Create(settings);
         string model = settings.ActiveModel();
         await Task.Delay(Native.CanExcludeFromCapture ? delayMs : delayMs + 150, ct);
-        var bounds = all ? SystemInformation.VirtualScreen : screen.Bounds;
+        var bounds = window ?? (all ? SystemInformation.VirtualScreen : screen.Bounds);
         using var shot = await Task.Run(() => Grabber.Grab(bounds), ct);
         ct.ThrowIfCancellationRequested();
         Rectangle? crop = null;

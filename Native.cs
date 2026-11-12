@@ -24,6 +24,52 @@ static class Native
     public static extern IntPtr GetForegroundWindow();
 
     [DllImport("user32.dll")]
+    public static extern IntPtr GetShellWindow();
+
+    [DllImport("user32.dll")]
+    public static extern bool IsIconic(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    static extern int GetClassName(IntPtr hWnd, char[] text, int max);
+
+    [DllImport("user32.dll")]
+    static extern bool GetWindowRect(IntPtr hWnd, out Rect rect);
+
+    [DllImport("dwmapi.dll")]
+    static extern int DwmGetWindowAttribute(IntPtr hWnd, int attribute, out Rect rect, int size);
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct Rect
+    {
+        public int Left, Top, Right, Bottom;
+    }
+
+    const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
+
+    public static Rectangle? ReadableWindow(IntPtr hwnd)
+    {
+        if (hwnd == IntPtr.Zero || hwnd == GetShellWindow() || IsIconic(hwnd))
+            return null;
+        GetWindowThreadProcessId(hwnd, out uint pid);
+        if (pid == Environment.ProcessId)
+            return null;
+        var name = new char[64];
+        string cls = new string(name, 0, GetClassName(hwnd, name, name.Length));
+        // the desktop, the taskbars and the hidden tray icons flyout (Windows 10 and 11)
+        if (cls is "Progman" or "WorkerW" or "Shell_TrayWnd" or "Shell_SecondaryTrayWnd"
+            or "NotifyIconOverflowWindow" or "TopLevelWindowForOverflowXamlIsland")
+            return null;
+        // the extended bounds leave out the invisible resize borders
+        if (DwmGetWindowAttribute(hwnd, DWMWA_EXTENDED_FRAME_BOUNDS, out Rect r, Marshal.SizeOf<Rect>()) != 0 && !GetWindowRect(hwnd, out r))
+            return null;
+        var bounds = Rectangle.Intersect(Rectangle.FromLTRB(r.Left, r.Top, r.Right, r.Bottom), SystemInformation.VirtualScreen);
+        return bounds.IsEmpty ? null : bounds;
+    }
+
+    [DllImport("user32.dll")]
     public static extern bool SetForegroundWindow(IntPtr hWnd);
 
     [DllImport("user32.dll")]

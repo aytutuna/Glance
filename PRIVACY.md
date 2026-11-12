@@ -4,7 +4,7 @@ Glance has no accounts, no analytics and no telemetry. It talks to the AI you ch
 
 ## What leaves your PC
 
-When you read the screen, Glance takes a screenshot of the screen or area you picked and sends it, together with the prompt of the current mode and any follow-up questions you type, to the AI you selected under Connect an AI. Nothing else is sent, and only to that AI:
+When you read the screen, Glance takes a screenshot of the screen, active window or area you picked and sends it, together with the prompt of the current mode and any follow-up questions you type, to the AI you selected under Connect an AI. Nothing else is sent, and only to that AI:
 
 - Claude API, OpenAI, Gemini: the provider's own API address.
 - OpenAI-compatible: the base URL you entered, which may be a server on your own PC.

@@ -18,6 +18,9 @@
   <data name="AllScreens" xml:space="preserve">
     <value>Tüm ekranlar</value>
   </data>
+  <data name="ActiveWindow" xml:space="preserve">
+    <value>Etkin pencere</value>
+  </data>
   <data name="ScreenPlain" xml:space="preserve">
     <value>Ekran {0} ({1}x{2})</value>
   </data>

@@ -18,6 +18,9 @@
   <data name="AllScreens" xml:space="preserve">
     <value>All screens</value>
   </data>
+  <data name="ActiveWindow" xml:space="preserve">
+    <value>Active window</value>
+  </data>
   <data name="ScreenPlain" xml:space="preserve">
     <value>Screen {0} ({1}x{2})</value>
   </data>
