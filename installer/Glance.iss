@@ -49,11 +49,17 @@ english.StartWithWindows=Start with Windows
 english.LaunchGlance=Start Glance
 turkish.StartWithWindows=Windows ile başlat
 turkish.LaunchGlance=Glance'ı başlat
+english.DeleteSettings=Also delete your Glance settings, saved keys and recent answers?
+turkish.DeleteSettings=Glance ayarlarınız, kayıtlı anahtarlarınız ve son yanıtlarınız da silinsin mi?
 
 [Code]
-// the app can switch this value on by itself from its menu, so it is removed whether or not the task was ticked
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
+  // the app can switch this value on by itself from its menu, so it is removed whether or not the task was ticked
   if CurUninstallStep = usUninstall then
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'Glance');
+  // a silent uninstall is usually an upgrade or a script, so the settings stay
+  if (CurUninstallStep = usPostUninstall) and not UninstallSilent then
+    if MsgBox(CustomMessage('DeleteSettings'), mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES then
+      DelTree(ExpandConstant('{userappdata}\Glance'), True, True, True);
 end;
