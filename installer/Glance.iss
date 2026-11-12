@@ -59,6 +59,6 @@ begin
   if CurUninstallStep = usUninstall then
     RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'Glance');
   if CurUninstallStep = usPostUninstall then
-    if UninstallSilent or (MsgBox(CustomMessage('DeleteSettings'), mbConfirmation, MB_YESNO or MB_DEFBUTTON2) = IDYES) then
+    if UninstallSilent or (MsgBox(CustomMessage('DeleteSettings'), mbConfirmation, MB_YESNO) = IDYES) then
       DelTree(ExpandConstant('{userappdata}\Glance'), True, True, True);
 end;
