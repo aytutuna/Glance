@@ -252,7 +252,7 @@ final class GlanceUITests: XCTestCase {
         tab("Keys", in: window).click()
         wait("the four Change buttons") { window.buttons.matching(identifier: "Change...").count == 4 }
         tab("General", in: window).click()
-        XCTAssertTrue(window.checkBoxes["Open at login"].waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(window.switches["Open at login"].waitForExistence(timeout: 5), app.debugDescription)
         shot("settings", of: window)
         window.buttons["Close"].click()
         closes(window)
@@ -375,6 +375,9 @@ final class GlanceUITests: XCTestCase {
         choose(words["ai"]!, words["connect"]!)
         let connect = dialog(words["connectTitle"]!)
         look("connect", at: connect)
+        app.popUpButtons["connect.provider"].click()
+        app.menuItems["Claude API"].click()
+        look("connect-api", at: connect)
         app.buttons[words["cancel"]!].click()
         closes(connect)
 
