@@ -171,6 +171,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
         do {
             if on {
                 try SMAppService.mainApp.register()
+                if SMAppService.mainApp.status == .requiresApproval {
+                    SMAppService.openSystemSettingsLoginItems()
+                }
             } else {
                 try SMAppService.mainApp.unregister()
             }
