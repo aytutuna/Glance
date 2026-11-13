@@ -29,8 +29,8 @@ final class GlanceUITests: XCTestCase {
         return try JSONSerialization.jsonObject(with: data) as? [[String: Any]] ?? []
     }
 
-    func shot(_ name: String) {
-        let picture = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+    func shot(_ name: String, of element: XCUIElement? = nil) {
+        let picture = XCTAttachment(screenshot: element?.screenshot() ?? XCUIScreen.main.screenshot())
         picture.name = name
         picture.lifetime = .keepAlways
         add(picture)
@@ -207,5 +207,216 @@ final class GlanceUITests: XCTestCase {
         XCTAssertGreaterThan(part, 0)
         XCTAssertLessThan(part, full)
         shot("area answer")
+    }
+
+    func replace(_ field: XCUIElement, with text: String) {
+        XCTAssertTrue(field.waitForExistence(timeout: 10), app.debugDescription)
+        field.click()
+        field.typeKey("a", modifierFlags: .command)
+        field.typeText(text)
+    }
+
+    func dialog(_ title: String) -> XCUIElement {
+        let window = app.windows[title]
+        XCTAssertTrue(window.waitForExistence(timeout: 10), "no window \(title)\n\(app.debugDescription)")
+        return window
+    }
+
+    func closes(_ window: XCUIElement) {
+        wait("the window to close") { !window.exists }
+    }
+
+    func tab(_ name: String, in window: XCUIElement) -> XCUIElement {
+        for query in [window.radioButtons, window.tabs, window.buttons] where query[name].exists {
+            return query[name]
+        }
+        return window.radioButtons[name]
+    }
+
+    // opens the AI submenu and looks for an entry in it
+    func chainItem(_ title: String) {
+        openMenu()
+        choose("AI")
+        XCTAssertTrue(app.menuItems[title].waitForExistence(timeout: 5), "no menu item \(title)\n\(app.debugDescription)")
+        app.typeKey(.escape, modifierFlags: [])
+        app.typeKey(.escape, modifierFlags: [])
+    }
+
+    func testSettingsWindowHasTheTabs() {
+        openMenu()
+        choose("Settings...")
+        let window = dialog("Glance settings")
+        for name in ["Reading", "Answer", "Keys", "AI", "General"] {
+            XCTAssertTrue(tab(name, in: window).waitForExistence(timeout: 5), "no tab \(name)\n\(app.debugDescription)")
+        }
+        tab("Keys", in: window).click()
+        wait("the four Change buttons") { window.buttons.matching(identifier: "Change...").count == 4 }
+        tab("General", in: window).click()
+        XCTAssertTrue(window.checkBoxes["Open at login"].waitForExistence(timeout: 5), app.debugDescription)
+        shot("settings", of: window)
+        window.buttons["Close"].click()
+        closes(window)
+    }
+
+    func testConnectSavesTheCustomAddress() {
+        openMenu()
+        choose("AI", "Connect an AI...")
+        let window = dialog("Connect an AI")
+        replace(app.textFields["connect.url"], with: "http://localhost:8123/v1")
+        shot("connect", of: window)
+        app.buttons["Save"].click()
+        closes(window)
+        chainItem("1. Custom (localhost)")
+    }
+
+    func testConnectRefusesABadAddress() {
+        openMenu()
+        choose("AI", "Connect an AI...")
+        let window = dialog("Connect an AI")
+        replace(app.textFields["connect.url"], with: "ftp://example.com")
+        app.buttons["Save"].click()
+        let status = app.staticTexts["connect.status"]
+        wait("the address to be refused") { (status.value as? String ?? status.label).contains("http://") }
+        XCTAssertTrue(window.exists)
+        app.buttons["Cancel"].click()
+        closes(window)
+    }
+
+    func testNewModeAppearsAndIsUsed() async throws {
+        openMenu()
+        choose("Mode", "Edit modes...")
+        let window = dialog("Edit modes")
+        window.buttons["Add"].click()
+        replace(app.textFields["modes.name"], with: "Pirate")
+        let prompt = window.textViews.firstMatch
+        prompt.click()
+        prompt.typeText("Answer like a pirate.")
+        shot("modes", of: window)
+        window.buttons["OK"].click()
+        closes(window)
+        openMenu()
+        choose("Mode", "Pirate")
+        press("q")
+        waitForAnswer("bytes.")
+        let sent = try await requests()
+        XCTAssertEqual(sent.last?["last"] as? String, "Follow your instructions for this screenshot.")
+    }
+
+    func testOrderMovesAnEntry() {
+        openMenu()
+        choose("AI", "Change order...")
+        let window = dialog("AI order")
+        let cli = window.checkBoxes["Claude CLI"]
+        XCTAssertTrue(cli.waitForExistence(timeout: 5), app.debugDescription)
+        cli.click()
+        window.buttons["Up"].click()
+        shot("order", of: window)
+        window.buttons["Save"].click()
+        closes(window)
+        chainItem("1. Claude CLI")
+        chainItem("2. Custom (127.0.0.1)")
+    }
+
+    func testRecorderChangesTheReadKey() async throws {
+        openMenu()
+        choose("Read key (\u{2303}\u{21E7}Q)...")
+        let window = dialog("Read key")
+        shot("recorder", of: window)
+        app.typeKey("r", modifierFlags: [.control, .option])
+        closes(window)
+        openMenu()
+        XCTAssertTrue(app.menuItems["Read key (\u{2303}\u{2325}R)..."].waitForExistence(timeout: 5), app.debugDescription)
+        app.typeKey(.escape, modifierFlags: [])
+        press("q")
+        try await Task.sleep(for: .seconds(2))
+        let none = try await requests()
+        XCTAssertEqual(none.count, 0)
+        app.typeKey("r", modifierFlags: [.control, .option])
+        waitForAnswer("bytes.")
+    }
+
+    func testRecorderRefusesKeys() {
+        openMenu()
+        choose("Read key (\u{2303}\u{21E7}Q)...")
+        let window = dialog("Read key")
+        let status = app.staticTexts["recorder.status"]
+        press("x")
+        wait("the taken key to be refused") { (status.value as? String ?? status.label).contains("already the Close key") }
+        app.typeKey("a", modifierFlags: [])
+        wait("the bare key to be refused") { (status.value as? String ?? status.label).contains("F-key") }
+        shot("recorder refusing", of: window)
+        app.typeKey(.escape, modifierFlags: [])
+        closes(window)
+    }
+
+    func tour(_ language: String, _ words: [String: String], tabs: [String]) {
+        if language == "tr" {
+            app.terminate()
+            app.launchArguments = ["-AppleLanguages", "(tr)", "-AppleLocale", "tr_TR"]
+            app.launch()
+        }
+        func look(_ name: String, at window: XCUIElement) {
+            shot("\(language)-\(name)", of: window)
+        }
+
+        openMenu()
+        choose(words["settings"]!)
+        let settings = dialog(words["settingsTitle"]!)
+        for name in tabs {
+            let item = tab(name, in: settings)
+            XCTAssertTrue(item.waitForExistence(timeout: 5), "no tab \(name)\n\(app.debugDescription)")
+            item.click()
+            look("settings-\(name)", at: settings)
+        }
+        settings.buttons[words["close"]!].click()
+        closes(settings)
+
+        openMenu()
+        choose(words["ai"]!, words["connect"]!)
+        let connect = dialog(words["connectTitle"]!)
+        look("connect", at: connect)
+        app.buttons[words["cancel"]!].click()
+        closes(connect)
+
+        openMenu()
+        choose(words["ai"]!, words["order"]!)
+        let order = dialog(words["orderTitle"]!)
+        look("order", at: order)
+        app.buttons[words["cancel"]!].click()
+        closes(order)
+
+        openMenu()
+        choose(words["mode"]!, words["modes"]!)
+        let modes = dialog(words["modesTitle"]!)
+        look("modes", at: modes)
+        app.buttons[words["cancel"]!].click()
+        closes(modes)
+
+        openMenu()
+        choose(words["readKey"]!)
+        let recorder = dialog(words["readKeyTitle"]!)
+        look("recorder", at: recorder)
+        app.buttons[words["cancel"]!].click()
+        closes(recorder)
+    }
+
+    func testDialogsInEnglish() {
+        tour("en", [
+            "settings": "Settings...", "settingsTitle": "Glance settings", "close": "Close", "cancel": "Cancel",
+            "ai": "AI", "connect": "Connect an AI...", "connectTitle": "Connect an AI",
+            "order": "Change order...", "orderTitle": "AI order",
+            "mode": "Mode", "modes": "Edit modes...", "modesTitle": "Edit modes",
+            "readKey": "Read key (\u{2303}\u{21E7}Q)...", "readKeyTitle": "Read key",
+        ], tabs: ["Reading", "Answer", "Keys", "AI", "General"])
+    }
+
+    func testDialogsInTurkish() {
+        tour("tr", [
+            "settings": "Ayarlar...", "settingsTitle": "Glance ayarlar\u{0131}", "close": "Kapat", "cancel": "\u{0130}ptal",
+            "ai": "Yapay zek\u{00E2}", "connect": "Yapay zek\u{00E2} ba\u{011F}la...", "connectTitle": "Yapay zek\u{00E2} ba\u{011F}la",
+            "order": "S\u{0131}ray\u{0131} de\u{011F}i\u{015F}tir...", "orderTitle": "Yapay zek\u{00E2} s\u{0131}ras\u{0131}",
+            "mode": "Mod", "modes": "Modlar\u{0131} d\u{00FC}zenle...", "modesTitle": "Modlar\u{0131} d\u{00FC}zenle",
+            "readKey": "Okuma tu\u{015F}u (\u{2303}\u{21E7}Q)...", "readKeyTitle": "Okuma tu\u{015F}u",
+        ], tabs: ["Okuma", "Yan\u{0131}t", "Tu\u{015F}lar", "Yapay zek\u{00E2}", "Genel"])
     }
 }
