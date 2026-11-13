@@ -50,7 +50,15 @@ extension AppDelegate {
         })
     }
 
-    func changeOrder() {}
+    func changeOrder() {
+        let order = OrderModel(app: self)
+        order.close = { [unowned self] in closeDialog(.order) }
+        present(.order, L("OrderTitle"), OrderView(m: order), onClose: { [unowned self] in
+            if order.changed {
+                save()
+            }
+        })
+    }
 
     func editModes() {
         let modes = ModesModel(app: self)
