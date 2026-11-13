@@ -96,6 +96,31 @@ jobs:
           screencapture -x probe/desktop-after1.png || true
           sleep 5
           screencapture -x probe/desktop-after2.png || true
+          osascript -e 'tell application "System Events"
+            set out to ""
+            repeat with p in (every process)
+              try
+                if (count of windows of p) > 0 then set out to out & name of p & ": " & (name of every window of p as text) & " / " & (name of every button of window 1 of p as text) & linefeed
+              end try
+            end repeat
+            return out
+          end tell' >> probe/info.txt 2>&1
+          osascript -e 'tell application "System Events"
+            repeat with p in (every process)
+              try
+                click button "Allow" of window 1 of p
+                return "clicked in " & name of p
+              end try
+            end repeat
+            return "no Allow"
+          end tell' >> probe/info.txt 2>&1
+          sleep 2
+          screencapture -x probe/desktop-clicked.png || true
+          osascript -e 'tell application "System Events" to keystroke "x" using {control down, shift down}'
+          sleep 1
+          osascript -e 'tell application "System Events" to keystroke "q" using {control down, shift down}'
+          sleep 6
+          screencapture -x probe/desktop-again.png || true
           cat probe/server.log >> probe/info.txt 2>&1
           cat "$HOME/Library/Application Support/Glance/glance.log" >> probe/info.txt 2>&1 || true
           defaults read "$plist" >> probe/info.txt 2>&1 || true

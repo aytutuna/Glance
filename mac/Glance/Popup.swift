@@ -18,6 +18,10 @@ private final class Body: NSView {
 
     override var isFlipped: Bool { true }
 
+    override func isAccessibilityElement() -> Bool { true }
+    override func accessibilityRole() -> NSAccessibility.Role? { .staticText }
+    override func accessibilityValue() -> Any? { string }
+
     override func draw(_ dirtyRect: NSRect) {
         let area = NSRect(x: inset, y: inset, width: textWidth, height: max(bounds.height - 2 * inset, 1))
         (string as NSString).draw(with: area, options: Body.options, attributes: [.font: font, .foregroundColor: color])
@@ -109,6 +113,7 @@ final class AnswerPopup: NSPanel, NSTextFieldDelegate {
         root.wantsLayer = true
         root.layer?.backgroundColor = backColor.cgColor
         body.color = fade(settings.textOpacity)
+        body.setAccessibilityIdentifier("answer")
         if plain {
             // nothing but text on black: no buttons, scrollbar or pointer
             body.hidesCursor = true
@@ -244,6 +249,8 @@ final class AnswerPopup: NSPanel, NSTextFieldDelegate {
             style(button, title, AnswerPopup.grey)
             bar.addSubview(button)
         }
+        copyButton.setAccessibilityIdentifier("copy")
+        closeButton.setAccessibilityIdentifier("close")
     }
 
     private func setUpField() {
@@ -259,6 +266,7 @@ final class AnswerPopup: NSPanel, NSTextFieldDelegate {
         field.layer?.borderColor = NSColor(white: 0.4, alpha: 1).cgColor
         field.placeholderAttributedString = NSAttributedString(string: L("FollowUp"), attributes: [.foregroundColor: NSColor(white: 0.6, alpha: 1), .font: font])
         field.delegate = self
+        field.setAccessibilityIdentifier("followup")
         inputBar.addSubview(field)
         access.bezelStyle = .rounded
         access.title = L("OpenSystemSettings")
