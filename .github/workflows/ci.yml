@@ -80,6 +80,12 @@ jobs:
           cat > "$HOME/Library/Application Support/Glance/settings.json" <<JSON
           {"provider":"custom","order":["custom"],"customUrl":"http://127.0.0.1:8123/v1","providerModels":{"custom":"fake-model"},"checkUpdates":false}
           JSON
+          plist="$HOME/Library/Group Containers/group.com.apple.replayd/ScreenCaptureApprovals.plist"
+          bin="$PWD/build/Build/Products/Debug/Glance.app/Contents/MacOS/Glance"
+          defaults write "$plist" "$bin" -date "3024-01-01 00:00:00 +0000"
+          defaults write "$plist" "$PWD/build/Build/Products/Debug/Glance.app" -date "3024-01-01 00:00:00 +0000"
+          defaults write "$plist" "$app" -date "3024-01-01 00:00:00 +0000"
+          killall cfprefsd || true
           open build/Build/Products/Debug/Glance.app
           sleep 5
           pgrep -l Glance >> probe/info.txt
@@ -89,7 +95,8 @@ jobs:
           sleep 5
           screencapture -x probe/desktop-after2.png || true
           cat probe/server.log >> probe/info.txt 2>&1
-          cat "$HOME/Library/Application Support/Glance/glance.log" >> probe/info.txt 2>&1
+          cat "$HOME/Library/Application Support/Glance/glance.log" >> probe/info.txt 2>&1 || true
+          defaults read "$plist" >> probe/info.txt 2>&1 || true
           cat probe/info.txt
         continue-on-error: true
       - uses: actions/upload-artifact@v4
