@@ -22,6 +22,11 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - path: Glance
+    info:
+      path: Info.plist
+      properties:
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.aytutuna.glance

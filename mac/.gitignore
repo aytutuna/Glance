@@ -1,3 +1,4 @@
+Info.plist
 *.xcodeproj
 build/
 .DS_Store

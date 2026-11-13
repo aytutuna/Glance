@@ -175,6 +175,9 @@ enum Api {
         if error is CancellationError || (error as? URLError)?.code == .cancelled {
             return CancellationError()
         }
+        if (error as? URLError)?.code == .appTransportSecurityRequiresSecureConnection {
+            return AiError(L("NeedsHttps"))
+        }
         if (error as? URLError)?.code == .timedOut {
             return AiError(L("TookTooLong", name))
         }
