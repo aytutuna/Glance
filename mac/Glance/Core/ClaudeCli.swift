@@ -237,20 +237,32 @@ struct ClaudeCli: Provider {
             var answer: String?
             var failed = false
             var streamed = ""
+            // only 
+ ends a line: Node leaves U+2028 and U+0085 unescaped inside JSON strings
+            func handle(_ bytes: [UInt8]) {
+                guard let root = try? JSONSerialization.jsonObject(with: Data(bytes)) as? [String: Any],
+                      let type = root["type"] as? String else { return }
+                if type == "stream_event" {
+                    if let chunk = Self.textDelta(root) {
+                        streamed += chunk
+                        onText(streamed)
+                    }
+                } else if type == "result" {
+                    answer = root["result"] as? String ?? ""
+                    failed = root["is_error"] as? Bool == true
+                }
+            }
             do {
-                for try await text in child.output.bytes.lines {
-                    guard let root = try? JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any],
-                          let type = root["type"] as? String else { continue }
-                    if type == "stream_event" {
-                        if let chunk = Self.textDelta(root) {
-                            streamed += chunk
-                            onText(streamed)
-                        }
-                    } else if type == "result" {
-                        answer = root["result"] as? String ?? ""
-                        failed = root["is_error"] as? Bool == true
+                var line: [UInt8] = []
+                for try await byte in child.output.bytes {
+                    if byte == 10 {
+                        handle(line)
+                        line.removeAll(keepingCapacity: true)
+                    } else {
+                        line.append(byte)
                     }
                 }
+                handle(line)
             } catch {
                 child.kill()
                 _ = await child.wait()
