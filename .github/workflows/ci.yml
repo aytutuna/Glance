@@ -37,7 +37,7 @@ jobs:
       - run: xcodegen generate --spec mac/project.yml
       - run: xcodebuild test -project mac/Glance.xcodeproj -scheme Glance -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
 
-  probe:
+  mac-ui:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
@@ -46,88 +46,51 @@ jobs:
       - name: Install XcodeGen
         env:
           XCODEGEN_VERSION: 2.46.0
+          XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
         run: |
-          curl -fsSL -o "$RUNNER_TEMP/xcodegen.zip" "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
-          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP/xcodegen-$XCODEGEN_VERSION"
+          set -euo pipefail
+          zip="$RUNNER_TEMP/xcodegen.zip"
+          curl -fsSL -o "$zip" "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
+          hash=$(shasum -a 256 "$zip" | cut -d ' ' -f 1)
+          if [ "$hash" != "$XCODEGEN_SHA256" ]; then
+            echo "XcodeGen checksum mismatch: $hash"
+            exit 1
+          fi
+          unzip -q "$zip" -d "$RUNNER_TEMP/xcodegen-$XCODEGEN_VERSION"
           echo "$RUNNER_TEMP/xcodegen-$XCODEGEN_VERSION/xcodegen/bin" >> "$GITHUB_PATH"
       - run: xcodegen generate --spec mac/project.yml
-      - run: xcodebuild build -project mac/Glance.xcodeproj -scheme Glance -configuration Debug -derivedDataPath build CODE_SIGN_IDENTITY=- | tail -5
-      - name: Probe
+      - run: xcodebuild build-for-testing -project mac/Glance.xcodeproj -scheme GlanceUI -destination 'platform=macOS' -derivedDataPath build CODE_SIGN_IDENTITY=-
+      - name: Run the UI tests
         run: |
-          mkdir -p probe
-          {
-            csrutil status
-            sw_vers
-            whoami
-            echo "--- tcc"
-            ls -le "/Library/Application Support/com.apple.TCC/" "$HOME/Library/Application Support/com.apple.TCC/"
-            sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" ".schema access" "select service,client,auth_value from access where service='kTCCServiceScreenCapture'"
-            sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" "select service,client,auth_value from access where service='kTCCServiceScreenCapture'"
-            ls -la "$HOME/Library/Group Containers/group.com.apple.replayd/" && defaults read "$HOME/Library/Group Containers/group.com.apple.replayd/ScreenCaptureApprovals.plist"
-            codesign -dv build/Build/Products/Debug/Glance.app
-            codesign -d -r- build/Build/Products/Debug/Glance.app
-          } > probe/info.txt 2>&1 || true
+          mkdir -p ui
+          # SIP is off on the runner image, so Screen Recording can be granted straight in the database
           now=$(date +%s)
-          app=com.aytutuna.glance
-          for db in "$HOME/Library/Application Support/com.apple.TCC/TCC.db"; do
-            sqlite3 "$db" "INSERT OR REPLACE INTO access VALUES('kTCCServiceScreenCapture','$app',0,2,4,1,NULL,NULL,0,'UNUSED',NULL,0,$now,NULL,NULL,'UNUSED',$now);" >> probe/info.txt 2>&1 || echo "user insert failed" >> probe/info.txt
-          done
-          sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT OR REPLACE INTO access VALUES('kTCCServiceScreenCapture','$app',0,2,4,1,NULL,NULL,0,'UNUSED',NULL,0,$now,NULL,NULL,'UNUSED',$now);" >> probe/info.txt 2>&1 || echo "system insert failed" >> probe/info.txt
-          sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" "select service,client,auth_value from access where client='$app'" >> probe/info.txt 2>&1
-          screencapture -x probe/desktop-before.png || true
-          python3 mac/GlanceUITests/fake_ai.py 8123 probe/server.log &
+          sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" "INSERT OR REPLACE INTO access VALUES('kTCCServiceScreenCapture','com.aytutuna.glance',0,2,4,1,NULL,NULL,0,'UNUSED',NULL,0,$now,NULL,NULL,'UNUSED',$now);"
+          python3 mac/GlanceUITests/fake_ai.py 8123 ui/fake-ai.log &
+          app=build/Build/Products/Debug/Glance.app
+          # macOS asks once per app whether it may bypass the window picker; answer it before the tests so it never covers them
           mkdir -p "$HOME/Library/Application Support/Glance"
-          cat > "$HOME/Library/Application Support/Glance/settings.json" <<JSON
-          {"provider":"custom","order":["custom"],"customUrl":"http://127.0.0.1:8123/v1","providerModels":{"custom":"fake-model"},"checkUpdates":false}
-          JSON
-          plist="$HOME/Library/Group Containers/group.com.apple.replayd/ScreenCaptureApprovals.plist"
-          bin="$PWD/build/Build/Products/Debug/Glance.app/Contents/MacOS/Glance"
-          far="3024-01-01 00:00:00 +0000"
-          defaults write "$plist" "file://$PWD/build/Build/Products/Debug/Glance.app/" -dict kScreenCaptureAlertableUsageCount -int 1 kScreenCaptureApprovalLastAlerted -date "$far" kScreenCaptureApprovalLastUsed -date "$far" kScreenCapturePrivacyHintDate -date "$far" kScreenCapturePrivacyHintPolicy -int 2592000
-          killall cfprefsd || true
-          killall replayd || true
-          sleep 2
-          defaults read "$plist" >> probe/info.txt 2>&1
-          open build/Build/Products/Debug/Glance.app
-          sleep 5
-          pgrep -l Glance >> probe/info.txt
-          osascript -e 'tell application "System Events" to keystroke "q" using {control down, shift down}' >> probe/info.txt 2>&1
-          sleep 3
-          screencapture -x probe/desktop-after1.png || true
-          sleep 5
-          screencapture -x probe/desktop-after2.png || true
-          osascript -e 'tell application "System Events"
-            set out to ""
-            repeat with p in (every process)
-              try
-                if (count of windows of p) > 0 then set out to out & name of p & ": " & (name of every window of p as text) & " / " & (name of every button of window 1 of p as text) & linefeed
-              end try
-            end repeat
-            return out
-          end tell' >> probe/info.txt 2>&1
-          osascript -e 'tell application "System Events"
-            repeat with p in (every process)
-              try
-                click button "Allow" of window 1 of p
-                return "clicked in " & name of p
-              end try
-            end repeat
-            return "no Allow"
-          end tell' >> probe/info.txt 2>&1
-          sleep 2
-          screencapture -x probe/desktop-clicked.png || true
-          osascript -e 'tell application "System Events" to keystroke "x" using {control down, shift down}'
-          sleep 1
+          echo '{"provider":"custom","order":["custom"],"customUrl":"http://127.0.0.1:8123/v1","providerModels":{"custom":"fake-model"},"checkUpdates":false}' > "$HOME/Library/Application Support/Glance/settings.json"
+          open "$app"
+          sleep 4
           osascript -e 'tell application "System Events" to keystroke "q" using {control down, shift down}'
-          sleep 6
-          screencapture -x probe/desktop-again.png || true
-          cat probe/server.log >> probe/info.txt 2>&1
-          cat "$HOME/Library/Application Support/Glance/glance.log" >> probe/info.txt 2>&1 || true
-          defaults read "$plist" >> probe/info.txt 2>&1 || true
-          cat probe/info.txt
-        continue-on-error: true
+          for i in $(seq 20); do
+            sleep 1
+            osascript -e 'tell application "System Events" to click button "Allow" of window 1 of process "UserNotificationCenter"' 2>/dev/null && break
+          done
+          sleep 2
+          pkill -x Glance || true
+          set +e
+          xcodebuild test-without-building -project mac/Glance.xcodeproj -scheme GlanceUI -destination 'platform=macOS' -derivedDataPath build -resultBundlePath ui/ui.xcresult
+          status=$?
+          screencapture -x ui/desktop-end.png
+          exit $status
+      - name: Export the screenshots
+        if: always()
+        run: xcrun xcresulttool export attachments --path ui/ui.xcresult --output-path ui/shots
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: probe
-          path: probe
+          name: mac-ui-shots
+          path: ui
+          retention-days: 7
