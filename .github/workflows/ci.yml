@@ -12,3 +12,28 @@ jobs:
           dotnet-version: 10.0.x
       - run: dotnet build Glance.csproj -c Release
       - run: dotnet test tests/Glance.Tests -c Release
+
+  mac:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 26.6
+        run: sudo xcode-select -s /Applications/Xcode_26.6.app
+      - name: Install XcodeGen
+        env:
+          XCODEGEN_VERSION: 2.46.0
+          XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+        run: |
+          set -euo pipefail
+          zip="$RUNNER_TEMP/xcodegen.zip"
+          curl -fsSL -o "$zip" "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
+          hash=$(shasum -a 256 "$zip" | cut -d ' ' -f 1)
+          if [ "$hash" != "$XCODEGEN_SHA256" ]; then
+            echo "XcodeGen checksum mismatch: $hash"
+            exit 1
+          fi
+          unzip -q "$zip" -d "$RUNNER_TEMP/xcodegen-$XCODEGEN_VERSION"
+          echo "$RUNNER_TEMP/xcodegen-$XCODEGEN_VERSION/xcodegen/bin" >> "$GITHUB_PATH"
+      - run: xcodegen generate --spec mac/project.yml
+      - run: xcodebuild build -project mac/Glance.xcodeproj -scheme Glance -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
+      - run: xcodebuild test -project mac/Glance.xcodeproj -scheme Glance -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
