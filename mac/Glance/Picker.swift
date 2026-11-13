@@ -37,8 +37,9 @@ private final class PickerView: NSView {
         guard dragging else { return }
         let end = convert(event.locationInWindow, from: nil)
         let x = min(max(end.x, 0), bounds.width), y = min(max(end.y, 0), bounds.height)
+        let old = selection
         selection = CGRect(x: min(start.x, x), y: min(start.y, y), width: abs(start.x - x), height: abs(start.y - y))
-        needsDisplay = true
+        setNeedsDisplay(old.union(selection).insetBy(dx: -4, dy: -4))
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -60,7 +61,6 @@ private final class PickerView: NSView {
     }
 
     override func draw(_ dirtyRect: NSRect) {
-        NSImage(cgImage: image, size: bounds.size).draw(in: bounds, from: .zero, operation: .copy, fraction: 1, respectFlipped: true, hints: nil)
         let dim = NSBezierPath(rect: bounds)
         if !selection.isEmpty {
             dim.append(NSBezierPath(rect: selection))
@@ -88,7 +88,7 @@ private final class PickerView: NSView {
 
 // A full-screen copy of what was captured, to drag a rectangle over. Losing the focus or pressing Esc cancels.
 @MainActor
-final class AreaPicker: NSWindow {
+final class AreaPicker: NSPanel {
     private let picker: PickerView
     private var done: ((CGRect?) -> Void)?
     private var active = false
@@ -97,12 +97,24 @@ final class AreaPicker: NSWindow {
     init(screen: NSScreen, image: CGImage, hint: String, done: @escaping (CGRect?) -> Void) {
         picker = PickerView(image: image, hint: hint)
         self.done = done
-        super.init(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
+        super.init(contentRect: screen.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         isReleasedWhenClosed = false
+        hidesOnDeactivate = false
         level = .screenSaver
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         backgroundColor = .black
-        contentView = picker
+        // the picture sits in a layer so a drag only repaints the dim and the frame
+        let backdrop = NSView()
+        backdrop.wantsLayer = true
+        backdrop.layer?.contents = image
+        backdrop.layer?.contentsGravity = .resize
+        let root = NSView()
+        for view in [backdrop, picker] {
+            view.frame = NSRect(origin: .zero, size: screen.frame.size)
+            view.autoresizingMask = [.width, .height]
+            root.addSubview(view)
+        }
+        contentView = root
         picker.finish = { [weak self] in self?.end($0) }
         setFrame(screen.frame, display: false)
     }
@@ -112,7 +124,6 @@ final class AreaPicker: NSWindow {
     override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect { frameRect }
 
     func begin() {
-        NSApp.activate()
         makeKeyAndOrderFront(nil)
         makeFirstResponder(picker)
     }
@@ -136,10 +147,10 @@ final class AreaPicker: NSWindow {
     }
 
     func end(_ selection: CGRect?) {
-        guard let finish = done else { return }
-        done = nil
         active = false
         orderOut(nil)
+        guard let finish = done else { return }
+        done = nil
         finish(selection)
     }
 }

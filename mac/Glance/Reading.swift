@@ -277,24 +277,20 @@ extension AppDelegate {
 
     // the frozen picture is shown on top of the screen; nil if it was cancelled
     private func pick(on screen: NSScreen, image: CGImage, hint: String) async -> CGRect? {
-        let before = NSWorkspace.shared.frontmostApplication
-        let picked: CGRect? = await withTaskCancellationHandler {
+        await withTaskCancellationHandler {
             await withCheckedContinuation { done in
-                let shown = AreaPicker(screen: screen, image: image, hint: hint) { done.resume(returning: $0) }
-                picker = shown
-                shown.begin()
+                let frozen = AreaPicker(screen: screen, image: image, hint: hint) {
+                    self.picker = nil
+                    done.resume(returning: $0)
+                }
+                picker = frozen
+                frozen.begin()
                 if Task.isCancelled {
-                    shown.end(nil)
+                    frozen.end(nil)
                 }
             }
         } onCancel: {
             Task { @MainActor in self.picker?.end(nil) }
         }
-        picker = nil
-        if let before, NSApp.isActive {
-            NSApp.yieldActivation(to: before)
-            before.activate()
-        }
-        return picked
     }
 }
