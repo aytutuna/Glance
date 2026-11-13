@@ -6,6 +6,8 @@ Glance is a small Windows tray app. Press a hotkey and it reads your screen, sen
 
 Get the latest build from the Releases page: a portable exe (x64 or arm64) or an installer. The portable exe needs no install and can be run from anywhere.
 
+On a Mac, download the Mac zip from Releases, unzip it and move Glance to Applications. It needs macOS 14 or later. The first time it reads the screen, macOS asks for Screen & System Audio Recording access. The Claude CLI is found if it is installed.
+
 ## First run
 
 Glance sits in the tray. Open its menu and choose Connect an AI... to pick a provider and paste a key. The Claude CLI needs no key if `claude` is installed and signed in.
@@ -39,6 +41,8 @@ You need the .NET 10 SDK.
 
     dotnet build Glance.csproj -c Release
     dotnet test tests/Glance.Tests
+
+For the Mac app, run `xcodegen generate --spec mac/project.yml`, then build the Glance scheme in Xcode.
 
 `scripts/publish.ps1` builds the self-contained x64 and arm64 executables into `publish/` and, if Inno Setup 6 is installed, the installer.
 
