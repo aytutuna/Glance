@@ -353,6 +353,22 @@
         }
       }
     },
+    "CaptureFailed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't capture the screen."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ekran görüntüsü alınamadı."
+          }
+        }
+      }
+    },
     "CenterOfScreen": {
       "localizations": {
         "en": {
@@ -1190,13 +1206,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ can't be used. Windows or another program holds it."
+            "value": "%1$@ can't be used. macOS or another program holds it."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ kullanılamıyor. Windows veya başka bir program bu tuşu kullanıyor."
+            "value": "%1$@ kullanılamıyor. macOS veya başka bir program bu tuşu kullanıyor."
           }
         }
       }
@@ -1238,13 +1254,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ now only works as the %2$@ key in every program. Change it from the tray menu to get it back."
+            "value": "%1$@ now only works as the %2$@ key in every program. Change it from the Glance menu to get it back."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ artık her programda yalnızca %2$@ tuşu olarak çalışıyor. Geri almak için tepsi menüsünden değiştirin."
+            "value": "%1$@ artık her programda yalnızca %2$@ tuşu olarak çalışıyor. Geri almak için Glance menüsünden değiştirin."
           }
         }
       }
@@ -1318,13 +1334,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ can't be used: Windows or another program holds it. Pick another key from the tray menu."
+            "value": "%1$@ can't be used: macOS or another program holds it. Pick another key from the Glance menu."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ kullanılamıyor: Windows veya başka bir program bu tuşu kullanıyor. Tepsi menüsünden başka bir tuş seçin."
+            "value": "%1$@ kullanılamıyor: macOS veya başka bir program bu tuşu kullanıyor. Glance menüsünden başka bir tuş seçin."
           }
         }
       }
@@ -1409,22 +1425,6 @@
         }
       }
     },
-    "MenuExit": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exit"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Çıkış"
-          }
-        }
-      }
-    },
     "MenuHideText": {
       "localizations": {
         "en": {
@@ -1437,6 +1437,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yanıt metnini gizle"
+          }
+        }
+      }
+    },
+    "MenuQuit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit Glance"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance'ten çık"
           }
         }
       }
@@ -1729,6 +1745,22 @@
         }
       }
     },
+    "OpenAtLogin": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open at login"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oturum açılınca aç"
+          }
+        }
+      }
+    },
     "OpenLogFolder": {
       "localizations": {
         "en": {
@@ -1741,6 +1773,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Günlük klasörünü aç"
+          }
+        }
+      }
+    },
+    "OpenSystemSettings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open System Settings"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistem Ayarları'nı aç"
           }
         }
       }
@@ -2305,6 +2353,22 @@
         }
       }
     },
+    "ScreenAccess": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance needs permission to record the screen. Allow it in System Settings, then try again. If it still doesn't work, quit and reopen Glance."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance'in ekranı kaydetmek için izne ihtiyacı var. Sistem Ayarları'ndan izin verin, sonra yeniden deneyin. Yine de çalışmazsa Glance'ten çıkıp yeniden açın."
+          }
+        }
+      }
+    },
     "ScreenPlain": {
       "localizations": {
         "en": {
@@ -2326,13 +2390,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Screen %1$@ (%2$@x%3$@, primary)"
+            "value": "Screen %1$@ (%2$@x%3$@, main)"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ekran %1$@ (%2$@x%3$@, birincil)"
+            "value": "Ekran %1$@ (%2$@x%3$@, ana)"
           }
         }
       }
@@ -2385,34 +2449,34 @@
         }
       }
     },
-    "StartWithWindows": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start with Windows"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Windows ile başlat"
-          }
-        }
-      }
-    },
     "StartupFailed": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Couldn't change the Windows startup setting."
+            "value": "Couldn't change the Open at login setting."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Windows ile başlatma ayarı değiştirilemedi."
+            "value": "Oturum açılınca aç ayarı değiştirilemedi."
+          }
+        }
+      }
+    },
+    "SystemLanguage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System language (%1$@)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistem dili (%1$@)"
           }
         }
       }
@@ -2621,22 +2685,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Windows tuşu tek başına Başlat'ı da açar. Yanına başka bir tuş ekleyin."
-          }
-        }
-      }
-    },
-    "WindowsLanguage": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Windows language (%1$@)"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Windows dili (%1$@)"
           }
         }
       }
