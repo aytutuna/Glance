@@ -109,7 +109,7 @@ final class GlanceUITests: XCTestCase {
 
     func testReadFromMenu() async throws {
         readFromMenu()
-        waitForAnswer("Answer one. Image")
+        waitForAnswer("bytes.")
         XCTAssertGreaterThan(imageBytes(), 0)
         wait("answer to finish") { app.buttons["copy"].isEnabled }
         shot("answer from the menu")
@@ -120,7 +120,7 @@ final class GlanceUITests: XCTestCase {
 
     func testReadAndCloseWithKeys() {
         press("q")
-        waitForAnswer("Answer one. Image")
+        waitForAnswer("bytes.")
         shot("answer from the key")
         press("x")
         wait("popup to close") { !answer.exists }
@@ -129,7 +129,7 @@ final class GlanceUITests: XCTestCase {
 
     func testFollowUp() async throws {
         press("q")
-        waitForAnswer("Answer one. Image")
+        waitForAnswer("bytes.")
         let first = shown
         let field = app.textFields["followup"]
         XCTAssertTrue(field.waitForExistence(timeout: 10))
@@ -147,7 +147,7 @@ final class GlanceUITests: XCTestCase {
 
     func testCopy() {
         press("q")
-        waitForAnswer("Answer one. Image")
+        waitForAnswer("bytes.")
         let copy = app.buttons["copy"]
         wait("copy to be enabled") { copy.isEnabled }
         let expected = shown
@@ -158,7 +158,7 @@ final class GlanceUITests: XCTestCase {
 
     func testHide() {
         press("q")
-        waitForAnswer("Answer one. Image")
+        waitForAnswer("bytes.")
         wait("answer to finish") { app.buttons["copy"].isEnabled }
         press("b")
         wait("the text to go") { shown.isEmpty }
@@ -169,7 +169,7 @@ final class GlanceUITests: XCTestCase {
         openMenu()
         choose("Answer position", "Center of the screen")
         press("q")
-        waitForAnswer("Answer one. Image")
+        waitForAnswer("bytes.")
         let screen = NSScreen.screens[0].frame
         XCTAssertEqual(answer.frame.midX, screen.midX, accuracy: 30)
         XCTAssertEqual(answer.frame.midY, screen.midY, accuracy: 60)
@@ -180,7 +180,7 @@ final class GlanceUITests: XCTestCase {
         openMenu()
         choose("Plain black answer")
         press("q")
-        waitForAnswer("Answer one. Image")
+        waitForAnswer("bytes.")
         let screen = NSScreen.screens[0].frame
         XCTAssertEqual(answer.frame.width, screen.width, accuracy: 2)
         XCTAssertEqual(answer.frame.height, screen.height, accuracy: 2)
@@ -189,7 +189,7 @@ final class GlanceUITests: XCTestCase {
 
     func testAreaRead() {
         press("q")
-        waitForAnswer("Answer one. Image")
+        waitForAnswer("bytes.")
         wait("answer to finish") { app.buttons["copy"].isEnabled }
         let full = imageBytes()
         press("x")
@@ -202,7 +202,7 @@ final class GlanceUITests: XCTestCase {
         shot("picker")
         let from = picker.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.2))
         from.press(forDuration: 0.3, thenDragTo: picker.coordinate(withNormalizedOffset: CGVector(dx: 0.45, dy: 0.4)))
-        waitForAnswer("Answer one. Image")
+        waitForAnswer("bytes.")
         let part = imageBytes()
         XCTAssertGreaterThan(part, 0)
         XCTAssertLessThan(part, full)

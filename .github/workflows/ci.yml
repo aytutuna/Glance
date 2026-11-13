@@ -92,13 +92,23 @@ jobs:
           exit $status
       - name: Export the screenshots
         if: always()
-        run: xcrun xcresulttool export attachments --path ui/ui.xcresult --output-path ui/shots
+        run: |
+          xcrun xcresulttool export attachments --path ui/ui.xcresult --output-path ui/shots
+          python3 - <<'PY'
+          import json, os, re, shutil
+          os.makedirs("ui/pictures", exist_ok=True)
+          for test in json.load(open("ui/shots/manifest.json")):
+              name = re.sub(r"\W+", "", test["testIdentifier"].split("/")[-1])
+              for a in test["attachments"]:
+                  if a["exportedFileName"].endswith(".png"):
+                      shutil.copy("ui/shots/" + a["exportedFileName"], "ui/pictures/%s-%s.png" % (name, re.sub(r"_0_[0-9A-F-]+\.png$|\.png$", "", a["suggestedHumanReadableName"]).replace(" ", "-")))
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mac-ui-shots
           path: |
-            ui/shots
+            ui/pictures
             ui/fake-ai.log
             ui/desktop-end.png
           retention-days: 7
