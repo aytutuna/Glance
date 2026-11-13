@@ -136,7 +136,7 @@ final class AnswerPopup: NSPanel, NSTextFieldDelegate {
 
     // there is no Edit menu in an app without a main menu, so the field would never see paste
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        guard event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command, let key = event.charactersIgnoringModifiers else {
+        guard event.modifierFlags.intersection([.command, .option, .control, .shift]) == .command, let key = event.charactersIgnoringModifiers else {
             return super.performKeyEquivalent(with: event)
         }
         let action: Selector? = switch key {
