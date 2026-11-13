@@ -345,6 +345,8 @@ final class GlanceUITests: XCTestCase {
         wait("the taken key to be refused") { (status.value as? String ?? status.label).contains("already the Close key") }
         app.typeKey("a", modifierFlags: [])
         wait("the bare key to be refused") { (status.value as? String ?? status.label).contains("F-key") }
+        app.typeKey("c", modifierFlags: .command)
+        wait("the command key alone to be refused") { (status.value as? String ?? status.label).contains("every app") }
         shot("recorder refusing", of: window)
         app.typeKey(.escape, modifierFlags: [])
         closes(window)
