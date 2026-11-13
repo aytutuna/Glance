@@ -83,7 +83,7 @@ jobs:
           plist="$HOME/Library/Group Containers/group.com.apple.replayd/ScreenCaptureApprovals.plist"
           bin="$PWD/build/Build/Products/Debug/Glance.app/Contents/MacOS/Glance"
           defaults write "$plist" "$bin" -date "3024-01-01 00:00:00 +0000"
-          defaults write "$plist" "$PWD/build/Build/Products/Debug/Glance.app" -date "3024-01-01 00:00:00 +0000"
+          defaults write "$plist" "file://$PWD/build/Build/Products/Debug/Glance.app/" -date "3024-01-01 00:00:00 +0000"
           defaults write "$plist" "$app" -date "3024-01-01 00:00:00 +0000"
           killall cfprefsd || true
           open build/Build/Products/Debug/Glance.app
