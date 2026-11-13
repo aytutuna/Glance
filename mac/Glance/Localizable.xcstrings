@@ -1329,6 +1329,22 @@
         }
       }
     },
+    "KeychainFailed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save the key to the Keychain."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar, Anahtar Zinciri'ne kaydedilemedi."
+          }
+        }
+      }
+    },
     "KeysFailed": {
       "localizations": {
         "en": {

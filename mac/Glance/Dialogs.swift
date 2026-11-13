@@ -37,7 +37,19 @@ extension AppDelegate {
         present(.settings, L("SettingsTitle"), SettingsView(app: self, live: live), onKey: { live.bump() })
     }
 
-    func connectAI() {}
+    func connectAI() {
+        let connect = ConnectModel(app: self)
+        connect.close = { [unowned self] in closeDialog(.connect) }
+        present(.connect, L("ConnectTitle"), ConnectView(m: connect), onClose: { [unowned self] in
+            connect.stop()
+            if connect.changed {
+                // an open thread holds the old keys, and one may have just been removed
+                closeAnswer()
+                save()
+            }
+        })
+    }
+
     func changeOrder() {}
     func editModes() {}
     func changeKey(_ job: KeyJob) {}
