@@ -22,7 +22,7 @@ extension NSScreen {
 
     static var underMouse: NSScreen {
         let point = NSEvent.mouseLocation
-        return screens.first { $0.frame.contains(point) } ?? primary
+        return screens.first { NSMouseInRect(point, $0.frame, false) } ?? primary
     }
 
     // the screen a window mostly sits on
