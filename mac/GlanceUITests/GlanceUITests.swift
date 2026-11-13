@@ -252,7 +252,8 @@ final class GlanceUITests: XCTestCase {
         tab("Keys", in: window).click()
         wait("the four Change buttons") { window.buttons.matching(identifier: "Change...").count == 4 }
         tab("General", in: window).click()
-        XCTAssertTrue(window.switches["Open at login"].waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(window.staticTexts["Open at login"].waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertEqual(window.switches.count, 3)
         shot("settings", of: window)
         window.buttons["Close"].click()
         closes(window)
