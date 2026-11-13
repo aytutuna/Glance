@@ -74,6 +74,7 @@ final class ConnectModel: ObservableObject {
     func remove() {
         guard saved < (app.settings.apiKeys[id] ?? []).count else { return }
         app.settings.removeKey(id, at: saved)
+        app.save()
         changed = true
         saved = 0
         objectWillChange.send()
@@ -129,6 +130,7 @@ final class ConnectModel: ObservableObject {
             return say(L("PickModel"), true)
         }
         var address: String?
+        var stale: [String] = []
         if id == "custom" {
             let same = s.sameHost(url)
             let (error, normal) = Api.checkUrl(url, withKey: !typed.isEmpty || hasKey && same)
@@ -136,9 +138,11 @@ final class ConnectModel: ObservableObject {
                 return say(error, true)
             }
             address = normal
-            // saved keys belong to the old address
-            while !same && s.hasKey(id) {
-                s.removeKey(id, at: 0)
+            // saved keys belong to the old address; they leave the Keychain only once the new settings are in place
+            if !same {
+                stale = (s.apiKeys[id] ?? []).map { "\(id):\($0)" }
+                s.apiKeys[id] = nil
+                s.order.removeAll { stale.contains($0) }
             }
         }
         if !typed.isEmpty {
@@ -158,6 +162,7 @@ final class ConnectModel: ObservableObject {
             s.include(id)
         }
         app.settings = s
+        stale.forEach(Keychain.delete)
         changed = true
         close()
     }
