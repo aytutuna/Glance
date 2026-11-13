@@ -21,6 +21,8 @@ final class Dialog: NSObject, NSWindowDelegate {
         window.isReleasedWhenClosed = false
         super.init()
         window.delegate = self
+        host.view.layoutSubtreeIfNeeded()
+        window.setContentSize(host.view.fittingSize)
         let area = NSScreen.underMouse.visibleFrame
         window.setFrameOrigin(NSPoint(x: area.midX - window.frame.width / 2, y: area.midY - window.frame.height / 2))
     }

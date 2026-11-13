@@ -166,70 +166,77 @@ final class ConnectModel: ObservableObject {
 struct ConnectView: View {
     @ObservedObject var m: ConnectModel
 
+    private func block(_ caption: String, @ViewBuilder _ content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(caption)
+            content()
+        }
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            Form {
-                Picker(L("AI"), selection: $m.id) {
+        VStack(alignment: .leading, spacing: 12) {
+            block(L("AI")) {
+                Picker("", selection: $m.id) {
                     ForEach(ConnectModel.ids, id: \.self) { id in
                         Text(Settings.providers.first { $0.id == id }?.name ?? id).tag(id)
                     }
                 }
+                .labelsHidden()
                 .accessibilityIdentifier("connect.provider")
-                if m.stored {
-                    Section(L("SavedKeysCaption")) {
-                        HStack {
-                            Picker("", selection: $m.saved) {
-                                ForEach(Array(m.app.settings.keyNames(m.id).enumerated()), id: \.offset) { i, name in
-                                    Text(name).tag(i)
-                                }
-                            }
-                            .labelsHidden()
-                            Button(L("RemoveKey")) { m.remove() }
-                        }
-                    }
-                }
-                Section(m.stored ? L("AddKey") : m.id == "custom" ? L("ApiKeyOptional") : L("ApiKey")) {
-                    SecureField("", text: $m.key, prompt: Text(m.stored ? L("PasteAnotherKey") : m.id == "custom" ? L("Optional") : L("PasteKey")))
-                        .labelsHidden()
-                        .accessibilityIdentifier("connect.key")
-                }
-                if m.id == "custom" {
-                    Section(L("BaseUrl")) {
-                        TextField("", text: $m.url, prompt: Text("http://localhost:11434/v1"))
-                            .labelsHidden()
-                            .accessibilityIdentifier("connect.url")
-                    }
-                }
-                Section(L("Model")) {
+            }
+            if m.stored {
+                block(L("SavedKeysCaption")) {
                     HStack {
-                        TextField("", text: $m.model)
-                            .labelsHidden()
-                            .accessibilityIdentifier("connect.model")
-                        if !m.models.isEmpty {
-                            Menu {
-                                ForEach(m.models, id: \.self) { name in
-                                    Button(name) { m.model = name }
-                                }
-                            } label: {
-                                Image(systemName: "chevron.down")
+                        Picker("", selection: $m.saved) {
+                            ForEach(Array(m.app.settings.keyNames(m.id).enumerated()), id: \.offset) { i, name in
+                                Text(name).tag(i)
                             }
-                            .menuStyle(.borderlessButton)
-                            .fixedSize()
                         }
-                        Button(L("LoadModels")) { m.loadModels() }
-                            .disabled(m.loading)
+                        .labelsHidden()
+                        Button(L("RemoveKey")) { m.remove() }
                     }
-                }
-                Section {
-                    Text(L("ConnectNote")).foregroundStyle(.secondary)
-                    Text(m.status)
-                        .foregroundStyle(m.failed ? Color.red : Color.secondary)
-                        .frame(minHeight: 32, alignment: .topLeading)
-                        .accessibilityIdentifier("connect.status")
                 }
             }
-            .formStyle(.grouped)
-            .frame(height: 330 + (m.id == "custom" ? 78 : 0) + (m.stored ? 78 : 0))
+            block(m.stored ? L("AddKey") : m.id == "custom" ? L("ApiKeyOptional") : L("ApiKey")) {
+                SecureField("", text: $m.key, prompt: Text(m.stored ? L("PasteAnotherKey") : m.id == "custom" ? L("Optional") : L("PasteKey")))
+                    .labelsHidden()
+                    .accessibilityIdentifier("connect.key")
+            }
+            if m.id == "custom" {
+                block(L("BaseUrl")) {
+                    TextField("", text: $m.url, prompt: Text("http://localhost:11434/v1"))
+                        .labelsHidden()
+                        .accessibilityIdentifier("connect.url")
+                }
+            }
+            block(L("Model")) {
+                HStack {
+                    TextField("", text: $m.model)
+                        .labelsHidden()
+                        .accessibilityIdentifier("connect.model")
+                    if !m.models.isEmpty {
+                        Menu {
+                            ForEach(m.models, id: \.self) { name in
+                                Button(name) { m.model = name }
+                            }
+                        } label: {
+                            Image(systemName: "chevron.down")
+                        }
+                        .menuStyle(.borderlessButton)
+                        .fixedSize()
+                    }
+                    Button(L("LoadModels")) { m.loadModels() }
+                        .disabled(m.loading)
+                }
+            }
+            Text(L("ConnectNote"))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(m.status)
+                .foregroundStyle(m.failed ? Color.red : Color.secondary)
+                .frame(maxWidth: .infinity, minHeight: 32, alignment: .topLeading)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("connect.status")
             HStack {
                 Spacer()
                 Button(L("Cancel")) { m.close() }
@@ -237,8 +244,8 @@ struct ConnectView: View {
                 Button(L("Save")) { m.save() }
                     .keyboardShortcut(.defaultAction)
             }
-            .padding(12)
         }
-        .frame(width: 460)
+        .padding(16)
+        .frame(width: 440)
     }
 }
