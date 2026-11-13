@@ -74,7 +74,7 @@ struct Settings: Codable {
     var useArea = false
     var keepHistory = false
     var checkUpdates = true
-    var lastUpdateCheck = Date.distantPast
+    var lastUpdateCheck = Date(timeIntervalSince1970: 0)
     // left, top, width, height as fractions of the screen, so it survives a resolution change
     var answerArea: [Double]?
     var hotkey = Hotkey(code: UInt32(kVK_ANSI_Q), mods: Hotkey.ctrlShift)
