@@ -230,13 +230,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A plain http address would send the API key unencrypted. Use https, or an address on this PC."
+            "value": "A plain http address would send the API key unencrypted. Use https, or an address on this Mac."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Düz http adresi API anahtarını şifrelemeden gönderir. https kullanın veya bu bilgisayardaki bir adres girin."
+            "value": "Düz http adresi API anahtarını şifrelemeden gönderir. https kullanın veya bu Mac'teki bir adres girin."
           }
         }
       }
@@ -1617,6 +1617,22 @@
         }
       }
     },
+    "NeedsHttps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This address needs https. Plain http only works for this Mac and the local network."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu adres https gerektiriyor. Düz http yalnızca bu Mac'te ve yerel ağda çalışır."
+          }
+        }
+      }
+    },
     "NeedsKey": {
       "localizations": {
         "en": {
@@ -1654,13 +1670,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "None of the AIs in the order can be used. Check them under AI in the tray menu."
+            "value": "None of the AIs in the order can be used. Check them under AI in the menu."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sıradaki yapay zekâların hiçbiri kullanılamıyor. Tepsi menüsünde Yapay zekâ altından kontrol edin."
+            "value": "Sıradaki yapay zekâların hiçbiri kullanılamıyor. Menüde Yapay zekâ altından kontrol edin."
           }
         }
       }
