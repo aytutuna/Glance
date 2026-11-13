@@ -98,12 +98,13 @@ final class GlanceUITests: XCTestCase {
 
     func testMenuItems() {
         openMenu()
+        wait("the menu to open") { app.menuItems["Quit Glance"].isHittable }
         for title in ["Read screen now", "Read an area", "Hide answer text", "Answer position", "Quit Glance"] {
-            XCTAssertTrue(app.menuItems[title].waitForExistence(timeout: 5), title)
+            XCTAssertTrue(app.menuItems[title].exists, title)
         }
         shot("menu")
         app.typeKey(.escape, modifierFlags: [])
-        wait("menu to close") { !app.menuItems["Quit Glance"].exists }
+        wait("the menu to close") { !app.menuItems["Quit Glance"].isHittable }
     }
 
     func testReadFromMenu() async throws {
