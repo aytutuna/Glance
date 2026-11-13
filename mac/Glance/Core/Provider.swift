@@ -258,7 +258,7 @@ enum Api {
     private static func loopback(_ host: String) -> Bool {
         let parts = host.split(separator: ".", omittingEmptySubsequences: false)
         let v4 = parts.count == 4 && parts.allSatisfy { UInt8($0) != nil }
-        return host.lowercased() == "localhost" || host == "::1" || v4 && parts[0] == "127"
+        return host.lowercased() == "localhost" || host == "::1" || host == "[::1]" || v4 && parts[0] == "127"
     }
 
     static func checkKey(_ key: String) -> String? {
