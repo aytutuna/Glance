@@ -160,7 +160,7 @@ final class ScreenLabel: NSPanel {
         ignoresMouseEvents = true
         hasShadow = false
         isOpaque = false
-        level = .floating
+        level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 2)
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         backgroundColor = NSColor(white: 32 / 255, alpha: 0.92)
         contentView = NumberView(number: number)

@@ -103,7 +103,8 @@ final class AnswerPopup: NSPanel, NSTextFieldDelegate {
         hidesOnDeactivate = false
         becomesKeyOnlyIfNeeded = true
         isFloatingPanel = true
-        level = plain ? .mainMenu : .floating
+        // the black screen covers the menu bar and the status items too
+        level = plain ? NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 1) : .floating
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         backgroundColor = backColor
         hasShadow = !plain
