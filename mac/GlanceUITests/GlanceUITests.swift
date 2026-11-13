@@ -154,6 +154,18 @@ final class GlanceUITests: XCTestCase {
         shot("hidden")
     }
 
+    func testEscapeClosesThePicker() async throws {
+        press("d")
+        let picker = app.otherElements["picker"]
+        XCTAssertTrue(picker.waitForExistence(timeout: 10), app.debugDescription)
+        shot("picker")
+        app.typeKey(.escape, modifierFlags: [])
+        wait("the picker to close") { !picker.exists }
+        try await Task.sleep(for: .seconds(1))
+        let sent = try await requests()
+        XCTAssertEqual(sent.count, 0)
+    }
+
     func testCenterPosition() {
         openMenu()
         choose("Answer position", "Center of the screen")
