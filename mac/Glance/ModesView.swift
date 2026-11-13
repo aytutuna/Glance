@@ -135,7 +135,6 @@ struct ModesView: View {
                 Button(L("Cancel")) { m.close() }
                     .keyboardShortcut(.cancelAction)
                 Button(L("Ok")) { m.save() }
-                    .keyboardShortcut(.defaultAction)
             }
         }
         .padding(16)
