@@ -67,7 +67,9 @@ jobs:
           now=$(date +%s)
           # the app started by a UI test is held responsible by the test runner, so the runner needs the grant too
           for client in com.aytutuna.glance com.aytutuna.glance.uitests com.aytutuna.glance.uitests.xctrunner; do
-            sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" "INSERT OR REPLACE INTO access VALUES('kTCCServiceScreenCapture','$client',0,2,4,1,NULL,NULL,0,'UNUSED',NULL,0,$now,NULL,NULL,'UNUSED',$now);"
+            row="INSERT OR REPLACE INTO access VALUES('kTCCServiceScreenCapture','$client',0,2,4,1,NULL,NULL,0,'UNUSED',NULL,0,$now,NULL,NULL,'UNUSED',$now);"
+            sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" "$row"
+            sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "$row"
           done
           python3 mac/GlanceUITests/fake_ai.py 8123 ui/fake-ai.log &
           app=build/Build/Products/Debug/Glance.app
