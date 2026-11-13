@@ -229,6 +229,7 @@ struct ConnectView: View {
                 }
             }
             .formStyle(.grouped)
+            .frame(height: 330 + (m.id == "custom" ? 78 : 0) + (m.stored ? 78 : 0))
             HStack {
                 Spacer()
                 Button(L("Cancel")) { m.close() }

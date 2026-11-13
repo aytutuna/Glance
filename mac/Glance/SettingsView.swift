@@ -71,7 +71,7 @@ struct SettingsView: View {
             }
             .padding(12)
         }
-        .frame(width: 520, height: 400)
+        .frame(width: 520, height: 340)
     }
 
     private var reading: some View {

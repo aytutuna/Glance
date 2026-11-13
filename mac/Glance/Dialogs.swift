@@ -12,7 +12,10 @@ final class Dialog: NSObject, NSWindowDelegate {
     var onClose: (() -> Void)?
 
     init(title: String, content: some View) {
-        window = NSWindow(contentViewController: NSHostingController(rootView: content))
+        let host = NSHostingController(rootView: content)
+        // the window follows the view, which grows and shrinks with the choices in it
+        host.sizingOptions = .preferredContentSize
+        window = NSWindow(contentViewController: host)
         window.title = title
         window.styleMask = [.titled, .closable]
         window.isReleasedWhenClosed = false
