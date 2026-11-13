@@ -82,10 +82,12 @@ jobs:
           JSON
           plist="$HOME/Library/Group Containers/group.com.apple.replayd/ScreenCaptureApprovals.plist"
           bin="$PWD/build/Build/Products/Debug/Glance.app/Contents/MacOS/Glance"
-          defaults write "$plist" "$bin" -date "3024-01-01 00:00:00 +0000"
-          defaults write "$plist" "file://$PWD/build/Build/Products/Debug/Glance.app/" -date "3024-01-01 00:00:00 +0000"
-          defaults write "$plist" "$app" -date "3024-01-01 00:00:00 +0000"
+          far="3024-01-01 00:00:00 +0000"
+          defaults write "$plist" "file://$PWD/build/Build/Products/Debug/Glance.app/" -dict kScreenCaptureAlertableUsageCount -int 1 kScreenCaptureApprovalLastAlerted -date "$far" kScreenCaptureApprovalLastUsed -date "$far" kScreenCapturePrivacyHintDate -date "$far" kScreenCapturePrivacyHintPolicy -int 2592000
           killall cfprefsd || true
+          killall replayd || true
+          sleep 2
+          defaults read "$plist" >> probe/info.txt 2>&1
           open build/Build/Products/Debug/Glance.app
           sleep 5
           pgrep -l Glance >> probe/info.txt
