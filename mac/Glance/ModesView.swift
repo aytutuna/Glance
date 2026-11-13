@@ -10,6 +10,8 @@ struct ModeEntry: Identifiable {
 @MainActor
 final class ModesModel: ObservableObject {
     unowned let app: AppDelegate
+    // the prompts shown were filled in with this one's language
+    let start: Settings
     @Published var entries: [ModeEntry]
     @Published var selected: String {
         didSet { status = "" }
@@ -21,6 +23,7 @@ final class ModesModel: ObservableObject {
     init(app: AppDelegate) {
         self.app = app
         let s = app.settings
+        start = s
         let all = Settings.modes.map { ModeEntry(id: $0.id, name: $0.name, prompt: Prompts.instruction(s, $0.id), builtin: true) }
             + s.customModes.map { ModeEntry(id: $0.id, name: $0.name, prompt: $0.prompt) }
         entries = all
@@ -57,7 +60,7 @@ final class ModesModel: ObservableObject {
 
     func reset() {
         if let i = index {
-            entries[i].prompt = Prompts.defaultPrompt(app.settings, entries[i].id)
+            entries[i].prompt = Prompts.defaultPrompt(start, entries[i].id)
         }
     }
 
@@ -75,8 +78,8 @@ final class ModesModel: ObservableObject {
         s.promptOverrides = [:]
         for e in entries where e.builtin {
             let text = e.prompt.trimmingCharacters(in: .whitespacesAndNewlines)
-            if text != Prompts.defaultPrompt(s, e.id) {
-                s.promptOverrides[e.id] = text.replacingOccurrences(of: Prompts.language(s), with: "{language}")
+            if text != Prompts.defaultPrompt(start, e.id) {
+                s.promptOverrides[e.id] = text.replacingOccurrences(of: Prompts.language(start), with: "{language}")
             }
         }
         if !s.allModes().contains(where: { $0.id == s.mode }) {
