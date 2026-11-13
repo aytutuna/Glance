@@ -164,6 +164,9 @@ final class AnswerPopup: NSPanel, NSTextFieldDelegate {
     func setText(_ text: String, copy: String? = nil, ask: Bool = false) {
         copyText = copy ?? text
         self.ask = ask && !plain
+        if !self.ask {
+            giveBackFocus()
+        }
         accessAction = nil
         reading = false
         applyReading()
