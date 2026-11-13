@@ -13,6 +13,7 @@ NSSetUncaughtExceptionHandler { exception in
     Log.write("unhandled", NSError(domain: exception.name.rawValue, code: 0, userInfo: [NSLocalizedDescriptionKey: exception.reason ?? ""]))
 }
 
+let app = NSApplication.shared
 let delegate = AppDelegate()
-NSApplication.shared.delegate = delegate
-NSApplication.shared.run()
+app.delegate = delegate
+app.run()

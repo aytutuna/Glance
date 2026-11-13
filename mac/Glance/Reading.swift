@@ -95,7 +95,7 @@ extension AppDelegate {
             if all {
                 return try await Capture.everything()
             }
-            if let window, let shot = try await Capture.window(window) {
+            if let window, let shot = try? await Capture.window(window) {
                 return shot
             }
             return try await Capture.screen(screen)
@@ -122,6 +122,11 @@ extension AppDelegate {
 
     private func showAccessNeeded() {
         let text = L("ScreenAccess")
+        // the black screen would sit above System Settings
+        if settings.plainAnswer {
+            notify(text)
+            return
+        }
         shown = text
         let shownPopup = popup ?? newPopup(text, reading: false)
         popup = shownPopup
@@ -206,6 +211,7 @@ extension AppDelegate {
     }
 
     func closeAnswer() {
+        serial += 1
         current?.cancel()
         current = nil
         closePopup()
@@ -214,6 +220,7 @@ extension AppDelegate {
 
     // stops any answer and leaves the answer screen up, black and empty
     func hideAnswer() {
+        serial += 1
         current?.cancel()
         current = nil
         setBusy(false)

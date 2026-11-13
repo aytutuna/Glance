@@ -22,8 +22,8 @@ extension Hotkey {
 
     // the key code is a position on the keyboard, so the letter depends on the layout in use
     private static func letter(_ code: UInt32) -> String? {
-        for source in [TISCopyCurrentKeyboardLayoutInputSource(), TISCopyCurrentASCIICapableKeyboardLayoutInputSource()] {
-            guard let source = source?.takeRetainedValue(),
+        for copy in [TISCopyCurrentKeyboardLayoutInputSource, TISCopyCurrentASCIICapableKeyboardLayoutInputSource] {
+            guard let source = copy()?.takeRetainedValue(),
                   let raw = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData) else { continue }
             let layout = Unmanaged<CFData>.fromOpaque(raw).takeUnretainedValue() as Data
             var dead: UInt32 = 0

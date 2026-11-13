@@ -19,7 +19,7 @@ private final class Body: NSView {
     override var isFlipped: Bool { true }
 
     override func draw(_ dirtyRect: NSRect) {
-        let area = NSRect(x: inset, y: inset, width: textWidth, height: max(bounds.height - inset, 1))
+        let area = NSRect(x: inset, y: inset, width: textWidth, height: max(bounds.height - 2 * inset, 1))
         (string as NSString).draw(with: area, options: Body.options, attributes: [.font: font, .foregroundColor: color])
     }
 
@@ -127,6 +127,24 @@ final class AnswerPopup: NSPanel, NSTextFieldDelegate {
     }
 
     override var canBecomeKey: Bool { true }
+
+    // there is no Edit menu in an app without a main menu, so the field would never see paste
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        guard event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command, let key = event.charactersIgnoringModifiers else {
+            return super.performKeyEquivalent(with: event)
+        }
+        let action: Selector? = switch key {
+        case "v": #selector(NSText.paste(_:))
+        case "c": #selector(NSText.copy(_:))
+        case "x": #selector(NSText.cut(_:))
+        case "a": #selector(NSText.selectAll(_:))
+        default: nil
+        }
+        if let action, firstResponder is NSText {
+            return NSApp.sendAction(action, to: nil, from: self)
+        }
+        return super.performKeyEquivalent(with: event)
+    }
 
     // a borderless window is otherwise pushed below the menu bar
     override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect { frameRect }

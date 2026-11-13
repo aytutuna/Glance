@@ -164,6 +164,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
     }
 
     func setOpenAtLogin(_ on: Bool) {
+        if SMAppService.mainApp.status == .requiresApproval {
+            SMAppService.openSystemSettingsLoginItems()
+            return
+        }
         do {
             if on {
                 try SMAppService.mainApp.register()
