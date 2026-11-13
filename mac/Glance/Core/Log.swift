@@ -6,7 +6,11 @@ enum AppDir {
 }
 
 enum Log {
+    private static let lock = NSLock()
+
     static func write(_ what: String, _ error: Error) {
+        lock.lock()
+        defer { lock.unlock() }
         let fm = FileManager.default
         let file = AppDir.url.appendingPathComponent("glance.log")
         let stamp = DateFormatter()
