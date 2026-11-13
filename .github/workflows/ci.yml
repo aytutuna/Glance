@@ -71,11 +71,10 @@ jobs:
             sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" "$row"
             sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "$row"
           done
-          python3 mac/GlanceUITests/fake_ai.py 8123 ui/fake-ai.log &
+          python3 mac/GlanceUITests/fake_ai.py 8123 ui/fake-ai.log "$HOME/Library/Application Support/Glance/settings.json" &
+          sleep 1
           app=build/Build/Products/Debug/Glance.app
           # macOS asks once per app whether it may bypass the window picker; answer it before the tests so it never covers them
-          mkdir -p "$HOME/Library/Application Support/Glance"
-          echo '{"provider":"custom","order":["custom"],"customUrl":"http://127.0.0.1:8123/v1","providerModels":{"custom":"fake-model"},"checkUpdates":false}' > "$HOME/Library/Application Support/Glance/settings.json"
           open "$app"
           sleep 4
           osascript -e 'tell application "System Events" to keystroke "q" using {control down, shift down}'

@@ -1,7 +1,7 @@
 import AppKit
 import XCTest
 
-// Needs fake_ai.py listening on port 8123 and Screen Recording granted to Glance; the CI job sets both up.
+// Needs fake_ai.py on port 8123 (its /reset also restores the settings file) and Screen Recording granted to Glance; the CI job sets both up.
 @MainActor
 final class GlanceUITests: XCTestCase {
     let app = XCUIApplication()
@@ -11,7 +11,6 @@ final class GlanceUITests: XCTestCase {
     override func setUp() async throws {
         continueAfterFailure = false
         _ = try await URLSession.shared.data(for: post("reset"))
-        try writeSettings()
         app.launch()
     }
 
@@ -23,16 +22,6 @@ final class GlanceUITests: XCTestCase {
         var req = URLRequest(url: server.appendingPathComponent(path))
         req.httpMethod = "POST"
         return req
-    }
-
-    func writeSettings() throws {
-        let dir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Glance")
-        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let settings: [String: Any] = [
-            "provider": "custom", "order": ["custom"], "customUrl": "http://127.0.0.1:8123/v1",
-            "providerModels": ["custom": "fake-model"], "checkUpdates": false,
-        ]
-        try JSONSerialization.data(withJSONObject: settings).write(to: dir.appendingPathComponent("settings.json"))
     }
 
     func requests() async throws -> [[String: Any]] {

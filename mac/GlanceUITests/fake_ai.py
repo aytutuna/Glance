@@ -1,13 +1,23 @@
 #!/usr/bin/env python3
-"""OpenAI-compatible stand-in for the UI tests: usage fake_ai.py PORT LOGFILE"""
+"""OpenAI-compatible stand-in for the UI tests: usage fake_ai.py PORT LOGFILE SETTINGS
+
+Also writes the app's settings file, because the UI test runner is sandboxed and cannot."""
 import base64
 import json
+import os
 import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-port, logfile = int(sys.argv[1]), sys.argv[2]
+port, logfile, settings = int(sys.argv[1]), sys.argv[2], sys.argv[3]
 seen = []
+
+
+def write_settings():
+    os.makedirs(os.path.dirname(settings), exist_ok=True)
+    with open(settings, "w") as f:
+        json.dump({"provider": "custom", "order": ["custom"], "customUrl": f"http://127.0.0.1:{port}/v1",
+                   "providerModels": {"custom": "fake-model"}, "checkUpdates": False}, f)
 
 
 def image_size(messages):
@@ -46,6 +56,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/reset":
             seen.clear()
+            write_settings()
             return self.reply_json([])
         data = json.loads(self.rfile.read(int(self.headers["content-length"])))
         messages = data["messages"]
@@ -72,4 +83,5 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.flush()
 
 
+write_settings()
 ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
