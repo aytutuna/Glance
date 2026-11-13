@@ -51,7 +51,16 @@ extension AppDelegate {
     }
 
     func changeOrder() {}
-    func editModes() {}
+
+    func editModes() {
+        let modes = ModesModel(app: self)
+        modes.close = { [unowned self] in closeDialog(.modes) }
+        present(.modes, L("EditModesTitle"), ModesView(m: modes), onClose: { [unowned self] in
+            if modes.changed {
+                save()
+            }
+        })
+    }
     func changeKey(_ job: KeyJob) {
         if let keyDialog {
             raise(keyDialog)
