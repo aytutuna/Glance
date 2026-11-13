@@ -111,7 +111,7 @@ final class AreaPicker: NSPanel {
         backdrop.wantsLayer = true
         backdrop.layer?.contents = image
         backdrop.layer?.contentsGravity = .resize
-        let root = NSView()
+        let root = NSView(frame: NSRect(origin: .zero, size: screen.frame.size))
         for view in [backdrop, picker] {
             view.frame = NSRect(origin: .zero, size: screen.frame.size)
             view.autoresizingMask = [.width, .height]

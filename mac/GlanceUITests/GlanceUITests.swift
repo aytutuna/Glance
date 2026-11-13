@@ -156,7 +156,7 @@ final class GlanceUITests: XCTestCase {
 
     func testEscapeClosesThePicker() async throws {
         press("d")
-        let picker = app.otherElements["picker"]
+        let picker = app.groups["picker"]
         XCTAssertTrue(picker.waitForExistence(timeout: 10), app.debugDescription)
         shot("picker")
         app.typeKey(.escape, modifierFlags: [])
@@ -197,9 +197,8 @@ final class GlanceUITests: XCTestCase {
         wait("popup to close") { !answer.exists }
 
         press("d")
-        let screen = NSScreen.screens[0].frame
-        var picker: XCUIElement { app.windows.allElementsBoundByIndex.first { $0.frame.width == screen.width && $0.frame.height == screen.height }! }
-        wait("the picker") { app.windows.allElementsBoundByIndex.contains { $0.frame.width == screen.width && $0.frame.height == screen.height } }
+        let picker = app.groups["picker"]
+        wait("the picker") { picker.exists }
         shot("picker")
         let from = picker.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: 0.2))
         from.press(forDuration: 0.3, thenDragTo: picker.coordinate(withNormalizedOffset: CGVector(dx: 0.45, dy: 0.4)))
