@@ -9,28 +9,26 @@ final class Child: @unchecked Sendable {
     let output: FileHandle
     let errors: FileHandle
 
-    init(path: String, args: [String], env: [String: String], dir: String) throws {
-        func pipes() throws -> (read: Int32, write: Int32) {
-            var fds: [Int32] = [0, 0]
-            guard pipe(&fds) == 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
-            _ = fcntl(fds[0], F_SETFD, FD_CLOEXEC)
-            _ = fcntl(fds[1], F_SETFD, FD_CLOEXEC)
-            return (fds[0], fds[1])
-        }
-        let stdin = try pipes(), stdout = try pipes(), stderr = try pipes()
-
+    // fds are the child's stdin, stdout and stderr; everything else is closed in the child
+    private static func spawn(_ path: String, _ args: [String], _ env: [String: String], _ dir: String, fds: [Int32]) throws -> pid_t {
         var actions: posix_spawn_file_actions_t?
         posix_spawn_file_actions_init(&actions)
         defer { posix_spawn_file_actions_destroy(&actions) }
-        posix_spawn_file_actions_adddup2(&actions, stdin.read, 0)
-        posix_spawn_file_actions_adddup2(&actions, stdout.write, 1)
-        posix_spawn_file_actions_adddup2(&actions, stderr.write, 2)
+        for (target, fd) in fds.enumerated() {
+            posix_spawn_file_actions_adddup2(&actions, fd, Int32(target))
+        }
         posix_spawn_file_actions_addchdir_np(&actions, dir)
         var attr: posix_spawnattr_t?
         posix_spawnattr_init(&attr)
         defer { posix_spawnattr_destroy(&attr) }
-        posix_spawnattr_setflags(&attr, Int16(POSIX_SPAWN_SETPGROUP))
+        var defaults = sigset_t()
+        sigfillset(&defaults)
+        var mask = sigset_t()
+        sigemptyset(&mask)
+        posix_spawnattr_setsigdefault(&attr, &defaults)
+        posix_spawnattr_setsigmask(&attr, &mask)
         posix_spawnattr_setpgroup(&attr, 0)
+        posix_spawnattr_setflags(&attr, Int16(POSIX_SPAWN_SETPGROUP | POSIX_SPAWN_CLOEXEC_DEFAULT | POSIX_SPAWN_SETSIGDEF | POSIX_SPAWN_SETSIGMASK))
 
         let argv = ([path] + args).map { strdup($0) } + [nil]
         let envp = env.map { strdup("\($0.key)=\($0.value)") } + [nil]
@@ -40,20 +38,50 @@ final class Child: @unchecked Sendable {
         }
         var child: pid_t = 0
         let status = posix_spawn(&child, path, &actions, &attr, argv, envp)
-        close(stdin.read)
-        close(stdout.write)
-        close(stderr.write)
         if status != 0 {
-            close(stdin.write)
-            close(stdout.read)
-            close(stderr.read)
             throw POSIXError(POSIXErrorCode(rawValue: status) ?? .EIO)
         }
+        return child
+    }
+
+    init(path: String, args: [String], env: [String: String], dir: String) throws {
+        func pipes() throws -> (read: Int32, write: Int32) {
+            var fds: [Int32] = [0, 0]
+            guard pipe(&fds) == 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+            return (fds[0], fds[1])
+        }
+        let stdin = try pipes(), stdout = try pipes(), stderr = try pipes()
+        let all = [stdin.read, stdin.write, stdout.read, stdout.write, stderr.read, stderr.write]
+        defer {
+            close(stdin.read)
+            close(stdout.write)
+            close(stderr.write)
+        }
+        do {
+            pid = try Child.spawn(path, args, env, dir, fds: [stdin.read, stdout.write, stderr.write])
+        } catch {
+            all.forEach { close($0) }
+            throw error
+        }
         _ = fcntl(stdin.write, F_SETNOSIGPIPE, 1)
-        pid = child
         input = FileHandle(fileDescriptor: stdin.write, closeOnDealloc: true)
         output = FileHandle(fileDescriptor: stdout.read, closeOnDealloc: true)
         errors = FileHandle(fileDescriptor: stderr.read, closeOnDealloc: true)
+    }
+
+    init(path: String, args: [String], env: [String: String], dir: String, outputFile: String) throws {
+        let none = open("/dev/null", O_RDONLY), sink = open("/dev/null", O_WRONLY)
+        let out = open(outputFile, O_WRONLY | O_CREAT | O_EXCL, 0o600)
+        defer {
+            close(none)
+            close(sink)
+            close(out)
+        }
+        guard none >= 0, sink >= 0, out >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        pid = try Child.spawn(path, args, env, dir, fds: [none, out, sink])
+        input = FileHandle.nullDevice
+        output = try FileHandle(forReadingFrom: URL(fileURLWithPath: outputFile))
+        errors = FileHandle.nullDevice
     }
 
     // never signals a group whose leader has been reaped, since the pid could be someone else's by then
@@ -107,22 +135,15 @@ final class Child: @unchecked Sendable {
         return String(decoding: data, as: UTF8.self)
     }
 
-    // runs a short command; nil when it can't start or doesn't finish in time
+    // runs a short command; nil when it can't start or doesn't finish in time. Its output goes to a file, so a
+    // login profile that leaves a daemon holding stdout can't stall the wait.
     static func capture(_ path: String, _ args: [String], env: [String: String], limit: Double) async -> (out: String, code: Int32)? {
-        guard let child = try? Child(path: path, args: args, env: env, dir: NSTemporaryDirectory()) else { return nil }
-        try? child.input.close()
-        return await withTaskCancellationHandler {
-            await withTaskGroup(of: (String, Int32)?.self) { group in
-                group.addTask {
-                    var data = Data()
-                    do {
-                        for try await b in child.output.bytes where data.count < 1_000_000 {
-                            data.append(b)
-                        }
-                    } catch {
-                    }
-                    return (String(decoding: data, as: UTF8.self), await child.wait())
-                }
+        let file = NSTemporaryDirectory() + "glance-" + shortId()
+        defer { unlink(file) }
+        guard let child = try? Child(path: path, args: args, env: env, dir: NSTemporaryDirectory(), outputFile: file) else { return nil }
+        let code: Int32? = await withTaskCancellationHandler {
+            await withTaskGroup(of: Int32?.self) { group in
+                group.addTask { await child.wait() }
                 group.addTask {
                     try? await Task.sleep(for: .seconds(limit))
                     if !Task.isCancelled {
@@ -137,6 +158,8 @@ final class Child: @unchecked Sendable {
         } onCancel: {
             child.kill()
         }
+        guard let code, let data = try? Data(contentsOf: URL(fileURLWithPath: file)) else { return nil }
+        return (String(decoding: data.prefix(1_000_000), as: UTF8.self), code)
     }
 }
 
@@ -241,8 +264,7 @@ struct ClaudeCli: Provider {
             var answer: String?
             var failed = false
             var streamed = ""
-            // only 
- ends a line: Node leaves U+2028 and U+0085 unescaped inside JSON strings
+            // only a newline ends a line: Node leaves U+2028 and U+0085 unescaped inside JSON strings
             func handle(_ bytes: [UInt8]) {
                 guard let root = try? JSONSerialization.jsonObject(with: Data(bytes)) as? [String: Any],
                       let type = root["type"] as? String else { return }
@@ -257,16 +279,16 @@ struct ClaudeCli: Provider {
                 }
             }
             do {
-                var line: [UInt8] = []
+                var buf: [UInt8] = []
                 for try await byte in child.output.bytes {
                     if byte == 10 {
-                        handle(line)
-                        line.removeAll(keepingCapacity: true)
+                        handle(buf)
+                        buf.removeAll(keepingCapacity: true)
                     } else {
-                        line.append(byte)
+                        buf.append(byte)
                     }
                 }
-                handle(line)
+                handle(buf)
             } catch {
                 child.kill()
                 _ = await child.wait()
