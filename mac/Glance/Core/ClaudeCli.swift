@@ -3,6 +3,8 @@ import Foundation
 // A child process in its own process group, so the whole tree can be stopped; Process can't do that.
 final class Child: @unchecked Sendable {
     let pid: pid_t
+    private let lock = NSLock()
+    private var status: Int32?
     let input: FileHandle
     let output: FileHandle
     let errors: FileHandle
@@ -54,16 +56,28 @@ final class Child: @unchecked Sendable {
         errors = FileHandle(fileDescriptor: stderr.read, closeOnDealloc: true)
     }
 
+    // never signals a group whose leader has been reaped, since the pid could be someone else's by then
     func kill() {
-        Darwin.kill(-pid, SIGKILL)
+        lock.lock()
+        defer { lock.unlock() }
+        if status == nil {
+            Darwin.kill(-pid, SIGKILL)
+        }
     }
 
     func wait() async -> Int32 {
         await withCheckedContinuation { done in
             DispatchQueue.global().async {
-                var status: Int32 = 0
-                while waitpid(self.pid, &status, 0) < 0 && errno == EINTR {}
-                done.resume(returning: status & 0x7f == 0 ? (status >> 8) & 0xff : 128 + (status & 0x7f))
+                var info = siginfo_t()
+                while waitid(P_PID, id_t(self.pid), &info, WEXITED | WNOWAIT) < 0 && errno == EINTR {}
+                self.lock.lock()
+                defer { self.lock.unlock() }
+                if self.status == nil {
+                    var raw: Int32 = 0
+                    _ = waitpid(self.pid, &raw, 0)
+                    self.status = raw & 0x7f == 0 ? (raw >> 8) & 0xff : 128 + (raw & 0x7f)
+                }
+                done.resume(returning: self.status!)
             }
         }
     }
@@ -199,15 +213,6 @@ struct ClaudeCli: Provider {
         }
         let dir = NSTemporaryDirectory() + "Glance"
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
-        let child: Child
-        do {
-            child = try Child(path: path, args: args, env: env, dir: dir)
-        } catch {
-            await Cli.shared.forget()
-            throw AiError(L("CliNotFound"))
-        }
-        defer { child.kill() }
-
         let message: [String: Any] = [
             "type": "user",
             "message": ["role": "user", "content": [
@@ -217,24 +222,39 @@ struct ClaudeCli: Provider {
         ]
         let line = String(decoding: try JSONSerialization.data(withJSONObject: message), as: UTF8.self) + "\n"
 
+        let child: Child
+        do {
+            child = try Child(path: path, args: args, env: env, dir: dir)
+        } catch {
+            await Cli.shared.forget()
+            throw AiError(L("CliNotFound"))
+        }
+        defer { child.kill() }
+
         return try await withTaskCancellationHandler {
             async let errors = child.errorText()
             async let sent: Void = child.send(line)
             var answer: String?
             var failed = false
             var streamed = ""
-            for try await text in child.output.bytes.lines {
-                guard let root = try? JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any],
-                      let type = root["type"] as? String else { continue }
-                if type == "stream_event" {
-                    if let chunk = Self.textDelta(root) {
-                        streamed += chunk
-                        onText(streamed)
+            do {
+                for try await text in child.output.bytes.lines {
+                    guard let root = try? JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any],
+                          let type = root["type"] as? String else { continue }
+                    if type == "stream_event" {
+                        if let chunk = Self.textDelta(root) {
+                            streamed += chunk
+                            onText(streamed)
+                        }
+                    } else if type == "result" {
+                        answer = root["result"] as? String ?? ""
+                        failed = root["is_error"] as? Bool == true
                     }
-                } else if type == "result" {
-                    answer = root["result"] as? String ?? ""
-                    failed = root["is_error"] as? Bool == true
                 }
+            } catch {
+                child.kill()
+                _ = await child.wait()
+                throw error
             }
             await sent
             let code = await child.wait()
