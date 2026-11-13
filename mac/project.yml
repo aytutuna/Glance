@@ -50,6 +50,21 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.aytutuna.glance.tests
         GENERATE_INFOPLIST_FILE: YES
 
+  GlanceUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: GlanceUITests
+        excludes:
+          - fake_ai.py
+    dependencies:
+      - target: Glance
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aytutuna.glance.uitests
+        GENERATE_INFOPLIST_FILE: YES
+
 schemes:
   Glance:
     build:
@@ -58,3 +73,11 @@ schemes:
     test:
       targets:
         - GlanceTests
+  GlanceUI:
+    build:
+      targets:
+        Glance: all
+        GlanceUITests: [test]
+    test:
+      targets:
+        - GlanceUITests
