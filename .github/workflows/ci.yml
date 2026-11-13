@@ -35,5 +35,4 @@ jobs:
           unzip -q "$zip" -d "$RUNNER_TEMP/xcodegen-$XCODEGEN_VERSION"
           echo "$RUNNER_TEMP/xcodegen-$XCODEGEN_VERSION/xcodegen/bin" >> "$GITHUB_PATH"
       - run: xcodegen generate --spec mac/project.yml
-      - run: xcodebuild build -project mac/Glance.xcodeproj -scheme Glance -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
       - run: xcodebuild test -project mac/Glance.xcodeproj -scheme Glance -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
