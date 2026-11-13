@@ -529,22 +529,6 @@
         }
       }
     },
-    "CliTimedOut": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude took too long to answer."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude yanıtlamak için çok uzun sürdü."
-          }
-        }
-      }
-    },
     "Close": {
       "localizations": {
         "en": {
@@ -1181,6 +1165,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@ (yanıtı kapatır)"
+          }
+        }
+      }
+    },
+    "KeyCmdOnly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ with just a letter or number is used by every app. Add ⌃, ⌥ or ⇧."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca ⌘ ile harf veya rakam her uygulamada kullanılır. ⌃, ⌥ veya ⇧ ekleyin."
           }
         }
       }
@@ -2013,22 +2013,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "İstem boş olamaz. Varsayılan metin için Sıfırla'yı kullanın."
-          }
-        }
-      }
-    },
-    "ProviderTimeout": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The provider didn't answer in time."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sağlayıcı zamanında yanıt vermedi."
           }
         }
       }

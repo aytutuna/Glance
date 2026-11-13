@@ -1,3 +1,4 @@
+import AppKit
 import Carbon
 
 enum KeyJob: CaseIterable {
@@ -24,6 +25,23 @@ enum KeyJob: CaseIterable {
     init?(id: UInt32) {
         guard let job = KeyJob.allCases.first(where: { $0.id == id }) else { return nil }
         self = job
+    }
+}
+
+extension Hotkey {
+    // RegisterEventHotKey accepts some of the keys macOS itself uses, such as the screenshot shortcuts, and never delivers them
+    var usedBySystem: Bool {
+        var list: Unmanaged<CFArray>?
+        guard CopySymbolicHotKeys(&list) == noErr, let entries = list?.takeRetainedValue() as? [[String: Any]] else { return false }
+        var flags: UInt = 0
+        for (carbon, flag) in [(controlKey, NSEvent.ModifierFlags.control), (optionKey, .option), (shiftKey, .shift), (cmdKey, .command)] where mods & UInt32(carbon) != 0 {
+            flags |= flag.rawValue
+        }
+        return entries.contains {
+            $0[kHISymbolicHotKeyEnabled as String] as? Bool == true
+                && ($0[kHISymbolicHotKeyCode as String] as? NSNumber)?.uint32Value == code
+                && ($0[kHISymbolicHotKeyModifiers as String] as? NSNumber)?.uintValue == flags
+        }
     }
 }
 

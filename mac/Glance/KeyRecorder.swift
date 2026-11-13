@@ -54,6 +54,8 @@ final class Recorder: ObservableObject {
         let key = Hotkey(code: UInt32(event.keyCode), mods: mods)
         if !key.isValid {
             status = L("KeyNeedsMod")
+        } else if mods == UInt32(cmdKey) && !Hotkey.fKeys.contains(key.code) {
+            status = L("KeyCmdOnly")
         } else if let owner = KeyJob.allCases.first(where: { $0 != job && app.settings.key(for: $0) == key }) {
             status = L("KeyTaken", key.name, owner.name)
         } else if !app.canHold(job, key) {

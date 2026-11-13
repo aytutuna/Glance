@@ -22,6 +22,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
     var labels: [ScreenLabel] = []
     var keyDialog: NSWindow?
     var dialogs: [DialogKind: Dialog] = [:]
+    let settingsReload = Reload()
     // the app that had the focus before one of Glance's windows took it
     var lastApp: NSRunningApplication?
     var chat: Conversation?
@@ -83,6 +84,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
     private func installEditMenu() {
         let edit = NSMenu(title: "Edit")
         edit.addItem(withTitle: "Undo", action: Selector(("undo:")), keyEquivalent: "z")
+        let redo = edit.addItem(withTitle: "Redo", action: Selector(("redo:")), keyEquivalent: "z")
+        redo.keyEquivalentModifierMask = [.command, .shift]
         edit.addItem(.separator())
         edit.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
         edit.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
@@ -144,7 +147,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
 
     // whether the system lets Glance have the key; only meant for while the keys are unbound
     func canHold(_ job: KeyJob, _ key: Hotkey) -> Bool {
-        let ok = hotkeys.register(job, key)
+        let ok = !key.usedBySystem && hotkeys.register(job, key)
         hotkeys.unregisterAll()
         return ok
     }
