@@ -952,7 +952,7 @@ class TrayApp : ApplicationContext
 
             using var font = new Font("Segoe UI", 22, FontStyle.Bold, GraphicsUnit.Pixel);
             using var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-            g.DrawString("Q", font, Brushes.White, new RectangleF(0, 1, 32, 32), format);
+            g.DrawString("G", font, Brushes.White, new RectangleF(0, 1, 32, 32), format);
         }
 
         var handle = bmp.GetHicon();
