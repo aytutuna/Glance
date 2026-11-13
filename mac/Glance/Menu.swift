@@ -28,6 +28,15 @@ private func submenu(_ title: String, _ items: [NSMenuItem]) -> NSMenuItem {
 }
 
 extension AppDelegate {
+    // a choice made in the menu shows in the settings window behind it; the action runs just after the menu closes
+    func menuDidClose(_ menu: NSMenu) {
+        Task { @MainActor in
+            if dialogs[.settings]?.window.isVisible == true {
+                settingsReload.bump()
+            }
+        }
+    }
+
     func menuNeedsUpdate(_ menu: NSMenu) {
         updateTooltip()
         menu.removeAllItems()

@@ -38,8 +38,8 @@ final class Dialog: NSObject, NSWindowDelegate {
 
 extension AppDelegate {
     func openSettings() {
-        let live = Reload()
-        present(.settings, L("SettingsTitle"), SettingsView(app: self, live: live), onKey: { live.bump() })
+        settingsReload.bump()
+        present(.settings, L("SettingsTitle"), SettingsView(app: self, live: settingsReload), onKey: { [settingsReload] in settingsReload.bump() })
     }
 
     func connectAI() {
