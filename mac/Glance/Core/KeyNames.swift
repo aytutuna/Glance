@@ -31,7 +31,7 @@ extension Hotkey {
             var chars = [UniChar](repeating: 0, count: 4)
             let status = layout.withUnsafeBytes { buffer in
                 UCKeyTranslate(buffer.bindMemory(to: UCKeyboardLayout.self).baseAddress!, UInt16(code), UInt16(kUCKeyActionDisplay), 0,
-                               UInt32(LMGetKbdType()), OptionBits(kUCKeyTranslateNoDeadKeysBit), &dead, chars.count, &length, &chars)
+                               UInt32(LMGetKbdType()), OptionBits(kUCKeyTranslateNoDeadKeysMask), &dead, chars.count, &length, &chars)
             }
             let text = String(utf16CodeUnits: chars, count: length).uppercased()
             if status == noErr, let first = text.unicodeScalars.first, first.value > 32 {
