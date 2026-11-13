@@ -41,18 +41,18 @@ extension AppDelegate {
 
     private func read(after delay: Duration, area: Bool) async throws {
         // taken first: closing the popup or waiting can change the frontmost app
-        let window = settings.readDevice == AppDelegate.activeWindow && !area ? activeWindow() : nil
+        let window = settings.readDevice == AppDelegate.windowDevice && !area ? activeWindow() : nil
         var screen = window.map { NSScreen.holding($0.frame) } ?? NSScreen.with(uuid: settings.readDevice) ?? .underMouse
         // an area is drawn on one screen, so it falls back to the screen with the mouse; so does a window that can't be read
         let all = settings.readDevice == AppDelegate.allScreens && !area
         let open = popup
         // the pointer can rest on the answer screen; reading that one would only show the answer, so read another
-        if window == nil, !all, let open, open.device == screen.uuid, settings.readDevice != open.device {
-            let others = NSScreen.screens.filter { $0.uuid != open.device }
+        if window == nil, !all, let open, open.screenID == screen.uuid, settings.readDevice != open.screenID {
+            let others = NSScreen.screens.filter { $0.uuid != open.screenID }
             screen = others.first { $0 == NSScreen.primary } ?? others.first ?? screen
         }
         // an answer on another screen stays up while the next one is read
-        let clear = window.map { open?.frame.intersects($0.frame) == false } ?? (open?.device != screen.uuid)
+        let clear = window.map { open?.frame.intersects($0.frame) == false } ?? (open?.screenID != screen.uuid)
         let keep = !all && open != nil && clear && open?.look == AnswerPopup.lookOf(settings)
         if !keep {
             closePopup()

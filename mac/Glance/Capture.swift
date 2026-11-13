@@ -74,7 +74,7 @@ enum Capture {
         return all
     }
 
-    // nil when the window is gone or can't be captured, so the caller reads the screen instead
+    // nil when the window is not among those that can be captured; the caller then reads its screen
     static func window(_ target: WindowTarget) async throws -> CGImage? {
         let content = try await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true)
         guard let found = content.windows.first(where: { $0.windowID == target.id }) else { return nil }

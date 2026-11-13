@@ -155,8 +155,6 @@ final class AnswerPopup: NSPanel, NSTextFieldDelegate {
     // a borderless window is otherwise pushed below the menu bar
     override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect { frameRect }
 
-    var device: String { screenID }
-
     func present() {
         orderFrontRegardless()
     }

@@ -6,7 +6,7 @@ import UserNotifications
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUserNotificationCenterDelegate {
     nonisolated static let showRunning = Notification.Name("com.aytutuna.glance.show")
     static let allScreens = "all"
-    static let activeWindow = "window"
+    static let windowDevice = "window"
     // apps that can be frontmost without the user having left what they were reading
     private static let passive: Set<String> = [
         "com.apple.systemuiserver", "com.apple.controlcenter", "com.apple.dock", "com.apple.loginwindow",

@@ -14,6 +14,9 @@ private final class PickerView: NSView {
         self.image = image
         self.hint = hint
         super.init(frame: .zero)
+        setAccessibilityElement(true)
+        setAccessibilityRole(.group)
+        setAccessibilityIdentifier("picker")
     }
 
     required init?(coder: NSCoder) { nil }
