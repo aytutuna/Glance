@@ -897,22 +897,6 @@
         }
       }
     },
-    "FnHint": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fn by itself doesn't reach Windows on most laptops."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fn tuşu çoğu dizüstü bilgisayarda tek başına Windows'a ulaşmaz."
-          }
-        }
-      }
-    },
     "FollowUp": {
       "localizations": {
         "en": {
@@ -1233,6 +1217,22 @@
         }
       }
     },
+    "KeyHint": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold ⌃, ⌥ or ⌘ with a key. F1 to F20 also work on their own."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir tuşla birlikte ⌃, ⌥ veya ⌘ basılı tutun. F1-F20 tuşları tek başına da çalışır."
+          }
+        }
+      }
+    },
     "KeyMenu": {
       "localizations": {
         "en": {
@@ -1249,18 +1249,18 @@
         }
       }
     },
-    "KeyOnlyHere": {
+    "KeyNeedsMod": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ now only works as the %2$@ key in every program. Change it from the Glance menu to get it back."
+            "value": "That key needs ⌃, ⌥ or ⌘ held with it, unless it is an F-key."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ artık her programda yalnızca %2$@ tuşu olarak çalışıyor. Geri almak için Glance menüsünden değiştirin."
+            "value": "Bu tuşla birlikte ⌃, ⌥ veya ⌘ basılı tutulmalı; F tuşları hariç."
           }
         }
       }
@@ -2685,22 +2685,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Glance %1$@ sürümüne güncelle"
-          }
-        }
-      }
-    },
-    "WinKeyAlone": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The Windows key alone also opens Start. Add another key to it."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Windows tuşu tek başına Başlat'ı da açar. Yanına başka bir tuş ekleyin."
           }
         }
       }

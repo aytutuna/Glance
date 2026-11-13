@@ -36,6 +36,15 @@ extension Settings {
         case .hide: hideKey
         }
     }
+
+    mutating func setKey(_ key: Hotkey, for job: KeyJob) {
+        switch job {
+        case .read: hotkey = key
+        case .region: regionKey = key
+        case .close: closeKey = key
+        case .hide: hideKey = key
+        }
+    }
 }
 
 // Carbon hot keys need no Accessibility or Input Monitoring permission

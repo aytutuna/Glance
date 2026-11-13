@@ -52,7 +52,28 @@ extension AppDelegate {
 
     func changeOrder() {}
     func editModes() {}
-    func changeKey(_ job: KeyJob) {}
+    func changeKey(_ job: KeyJob) {
+        if let keyDialog {
+            raise(keyDialog)
+            return
+        }
+        // paused so the key being chosen doesn't also fire its job
+        unbindKeys()
+        let rec = Recorder(app: self, job: job)
+        rec.close = { [unowned self] in closeDialog(.key) }
+        present(.key, L("KeyTitle", job.name), RecorderView(rec: rec), onClose: { [unowned self] in
+            rec.stop()
+            keyDialog = nil
+            if let key = rec.chosen {
+                settings.setKey(key, for: job)
+                save()
+                updateTooltip()
+            }
+            bindKeys()
+        })
+        keyDialog = dialogs[.key]?.window
+        rec.start()
+    }
 
     func toggleHistory() {
         settings.keepHistory.toggle()
