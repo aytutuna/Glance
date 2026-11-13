@@ -1,0 +1,55 @@
+# `xcodegen generate --spec mac/project.yml` writes mac/Glance.xcodeproj, which is not checked in.
+# The tests compile Glance/Core directly instead of being hosted in the app.
+name: Glance
+
+options:
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "1.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+targets:
+  Glance:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Glance
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aytutuna.glance
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_NSHumanReadableCopyright: Copyright (c) 2026 Aytu Tuna
+        ENABLE_HARDENED_RUNTIME: YES
+        SUPPORTED_PLATFORMS: macosx
+
+  GlanceTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Glance/Core
+      - path: Glance/Localizable.xcstrings
+      - path: GlanceTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aytutuna.glance.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  Glance:
+    build:
+      targets:
+        Glance: all
+    test:
+      targets:
+        - GlanceTests
