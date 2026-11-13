@@ -95,8 +95,12 @@ final class Child: @unchecked Sendable {
     func errorText() async -> String {
         var data = Data()
         do {
-            for try await b in errors.bytes where data.count < 65536 {
+            for try await b in errors.bytes {
                 data.append(b)
+                // the end is what matters, so only the last 64 KB is kept
+                if data.count >= 131072 {
+                    data.removeFirst(data.count - 65536)
+                }
             }
         } catch {
         }
