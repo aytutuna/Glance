@@ -42,7 +42,8 @@ final class OrderModel: ObservableObject {
             status = L("TickOne")
             return
         }
-        app.settings.order = order
+        // anything connected while this was open stays at the end
+        app.settings.order = order + app.settings.order.filter { e in !items.contains { $0.entry == e } }
         changed = true
         close()
     }
