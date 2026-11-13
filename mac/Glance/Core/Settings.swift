@@ -238,8 +238,9 @@ struct Settings: Codable {
         return list
     }
 
-    func chain() -> [String] {
-        let known = options().map(\.entry)
+    // pass the options when they were just read, since each one is a Keychain lookup
+    func chain(_ options: [(entry: String, label: String)]? = nil) -> [String] {
+        let known = (options ?? self.options()).map(\.entry)
         var seen = Set<String>()
         let chain = order.filter { known.contains($0) && seen.insert($0).inserted }
         if !chain.isEmpty {

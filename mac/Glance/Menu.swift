@@ -31,6 +31,8 @@ extension AppDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         updateTooltip()
         menu.removeAllItems()
+        let options = settings.options()
+        let chain = settings.chain(options)
         var items: [NSMenuItem] = []
         if let url = updateUrl.flatMap(URL.init(string:)) {
             items.append(ActionItem(L("UpdateTo", updateVersion ?? "")) { NSWorkspace.shared.open(url) })
@@ -47,8 +49,8 @@ extension AppDelegate {
             self.save()
         })
         items.append(opacityMenu())
-        items.append(aiMenu())
-        if settings.chain().contains(Settings.claude) {
+        items.append(aiMenu(chain, options))
+        if chain.contains(Settings.claude) {
             items.append(modelMenu())
         }
         items.append(modeMenu())
@@ -82,7 +84,7 @@ extension AppDelegate {
         var choices: [(device: String?, text: String)] = [(nil, L("MouseScreen"))]
         if withAll {
             choices.append((AppDelegate.allScreens, L("AllScreens")))
-            choices.append((AppDelegate.activeWindow, L("ActiveWindow")))
+            choices.append((AppDelegate.windowDevice, L("ActiveWindow")))
         }
         for (i, screen) in NSScreen.screens.enumerated() {
             choices.append((screen.uuid, screen.describe(i)))
@@ -117,9 +119,8 @@ extension AppDelegate {
         })
     }
 
-    private func aiMenu() -> NSMenuItem {
-        let chain = settings.chain()
-        let names = Dictionary(settings.options().map { ($0.entry, $0.label) }, uniquingKeysWith: { first, _ in first })
+    private func aiMenu(_ chain: [String], _ options: [(entry: String, label: String)]) -> NSMenuItem {
+        let names = Dictionary(options.map { ($0.entry, $0.label) }, uniquingKeysWith: { first, _ in first })
         // picking one moves it to the top; the rest keep their order behind it
         var items: [NSMenuItem] = chain.enumerated().map { i, entry in
             ActionItem("\(i + 1). \(names[entry] ?? entry)", checked: i == 0, run: change {
