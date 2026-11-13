@@ -2,6 +2,7 @@ import AppKit
 
 extension AppDelegate {
     func trigger(after delay: Duration, area: Bool = false) {
+        guard !NSScreen.screens.isEmpty else { return }
         if let keyDialog {
             NSApp.activate()
             keyDialog.makeKeyAndOrderFront(nil)
@@ -235,6 +236,7 @@ extension AppDelegate {
     }
 
     func drawArea() {
+        guard !NSScreen.screens.isEmpty else { return }
         if let keyDialog {
             keyDialog.makeKeyAndOrderFront(nil)
             return
@@ -261,6 +263,7 @@ extension AppDelegate {
     }
 
     func identify() {
+        guard !NSScreen.screens.isEmpty else { return }
         closeLabels()
         for (i, screen) in NSScreen.screens.enumerated() {
             let label = ScreenLabel(screen: screen, number: i + 1)
