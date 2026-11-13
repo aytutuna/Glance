@@ -61,10 +61,7 @@ extension AppDelegate {
         }
         let login = opensAtLogin
         items.append(ActionItem(L("OpenAtLogin"), checked: login) { self.setOpenAtLogin(!login) })
-        items.append(ActionItem(L("CheckUpdates"), checked: settings.checkUpdates) {
-            self.settings.checkUpdates.toggle()
-            self.save()
-        })
+        items.append(ActionItem(L("CheckUpdates"), checked: settings.checkUpdates) { self.toggleUpdates() })
         items.append(.separator())
         items.append(recentMenu())
         items.append(.separator())
@@ -80,7 +77,7 @@ extension AppDelegate {
         }
     }
 
-    private func screenMenu(_ title: String, selected: String?, withAll: Bool, choose: @escaping (String?) -> Void) -> NSMenuItem {
+    func screenChoices(withAll: Bool) -> [(device: String?, text: String)] {
         var choices: [(device: String?, text: String)] = [(nil, L("MouseScreen"))]
         if withAll {
             choices.append((AppDelegate.allScreens, L("AllScreens")))
@@ -89,6 +86,17 @@ extension AppDelegate {
         for (i, screen) in NSScreen.screens.enumerated() {
             choices.append((screen.uuid, screen.describe(i)))
         }
+        return choices
+    }
+
+    func translateChoices() -> [(value: String, name: String)] {
+        let id = Locale.preferredLanguages.first ?? "en"
+        let system = Locale(identifier: id).localizedString(forIdentifier: id) ?? id
+        return [("", L("SystemLanguage", system))] + Settings.languages.map { ($0, $0) }
+    }
+
+    private func screenMenu(_ title: String, selected: String?, withAll: Bool, choose: @escaping (String?) -> Void) -> NSMenuItem {
+        let choices = screenChoices(withAll: withAll)
         // a screen that is gone counts as the screen with the mouse
         let on = choices.contains { $0.device == selected } ? selected : nil
         return submenu(title, choices.map { c in
@@ -146,10 +154,7 @@ extension AppDelegate {
     }
 
     private func translateMenu() -> NSMenuItem {
-        let id = Locale.preferredLanguages.first ?? "en"
-        let system = Locale(identifier: id).localizedString(forIdentifier: id) ?? id
-        let choices = [("", L("SystemLanguage", system))] + Settings.languages.map { ($0, $0) }
-        return submenu(L("TranslateTo"), choices.map { value, name in
+        submenu(L("TranslateTo"), translateChoices().map { value, name in
             ActionItem(name, checked: settings.translateTo == value, run: change { self.settings.translateTo = value })
         })
     }
@@ -164,15 +169,7 @@ extension AppDelegate {
         if !history.isEmpty {
             items.append(.separator())
         }
-        items.append(ActionItem(L("KeepAnswers"), checked: settings.keepHistory) {
-            self.settings.keepHistory.toggle()
-            if self.settings.keepHistory {
-                History.save(self.history)
-            } else {
-                History.delete()
-            }
-            self.save()
-        })
+        items.append(ActionItem(L("KeepAnswers"), checked: settings.keepHistory) { self.toggleHistory() })
         items.append(ActionItem(L("ClearRecent"), enabled: !history.isEmpty) {
             self.history = []
             if self.settings.keepHistory {

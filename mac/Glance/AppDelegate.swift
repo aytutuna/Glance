@@ -21,6 +21,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
     var picker: AreaPicker?
     var labels: [ScreenLabel] = []
     var keyDialog: NSWindow?
+    var dialogs: [DialogKind: Dialog] = [:]
+    // the app that had the focus before one of Glance's windows took it
+    var lastApp: NSRunningApplication?
     var chat: Conversation?
     var thread = "", shown = ""
     var updateVersion: String?
@@ -30,7 +33,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
     private let hotkeys = Hotkeys()
     private let idleIcon = AppDelegate.icon(busy: false)
     private let busyIcon = AppDelegate.icon(busy: true)
-    private var lastApp: NSRunningApplication?
 
     func applicationDidFinishLaunching(_ note: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -122,6 +124,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
         hotkeys.unregisterAll()
     }
 
+    // whether the system lets Glance have the key; only meant for while the keys are unbound
+    func canHold(_ job: KeyJob, _ key: Hotkey) -> Bool {
+        let ok = hotkeys.register(job, key)
+        hotkeys.unregisterAll()
+        return ok
+    }
+
     func updateTooltip() {
         item.button?.toolTip = L("Tooltip", settings.hotkey.name, settings.regionKey.name, settings.closeKey.name)
     }
@@ -205,7 +214,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
         picker?.end(nil)
         closePopup()
         closeLabels()
-        keyDialog?.close()
+        dialogs.values.forEach { $0.window.close() }
         hotkeys.unregisterAll()
         NSStatusBar.system.removeStatusItem(item)
         NSApp.terminate(nil)

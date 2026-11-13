@@ -250,9 +250,18 @@ extension AppDelegate {
             self.closeLabels()
             guard self.hasAccess() else { return }
             let screen = NSScreen.with(uuid: self.settings.showDevice) ?? .underMouse
-            // the menu has to be gone before the screen is captured
-            try await Task.sleep(for: .milliseconds(300))
-            guard let shot = try await self.grab(screen: screen, all: false, window: nil) else { return }
+            // the menu and the settings window have to be gone before the screen is captured
+            self.hideSettings()
+            let taken: CGImage?
+            do {
+                try await Task.sleep(for: .milliseconds(300))
+                taken = try await self.grab(screen: screen, all: false, window: nil)
+            } catch {
+                self.showSettings()
+                throw error
+            }
+            self.showSettings()
+            guard let shot = taken else { return }
             try Task.checkCancellation()
             guard let drawn = await self.pick(on: screen, image: shot, hint: L("DragAnswerArea")) else { return }
             self.settings.answerArea = Layout.fractions(of: drawn, in: CGSize(width: shot.width, height: shot.height))
