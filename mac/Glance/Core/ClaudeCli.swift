@@ -214,7 +214,7 @@ private actor Cli {
 }
 
 struct ClaudeCli: Provider {
-    func ask(_ chat: Conversation, onText: @escaping @Sendable (String) -> Void) async throws -> String {
+    func ask(_ chat: ChatRequest, onText: @escaping @Sendable (String) -> Void) async throws -> String {
         do {
             guard let path = await Cli.shared.path() else { throw AiError(L("CliNotFound")) }
             let env = await Cli.shared.env()
@@ -228,12 +228,12 @@ struct ClaudeCli: Provider {
         }
     }
 
-    private func run(_ path: String, _ env: [String: String], _ effort: Bool, _ chat: Conversation,
+    private func run(_ path: String, _ env: [String: String], _ effort: Bool, _ chat: ChatRequest,
                      _ onText: @Sendable (String) -> Void) async throws -> String {
         var args = [
             "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
             "--include-partial-messages", "--model", chat.model, "--tools=", "--no-session-persistence", "--strict-mcp-config",
-            "--setting-sources=", "--disable-slash-commands", "--system-prompt", Prompts.system(chat),
+            "--setting-sources=", "--disable-slash-commands", "--system-prompt", chat.system,
         ]
         if effort {
             args += ["--effort", "high"]
@@ -244,7 +244,7 @@ struct ClaudeCli: Provider {
             "type": "user",
             "message": ["role": "user", "content": [
                 ["type": "image", "source": ["type": "base64", "media_type": "image/jpeg", "data": chat.jpeg.base64EncodedString()]],
-                ["type": "text", "text": Prompts.message(chat)],
+                ["type": "text", "text": chat.message],
             ]],
         ]
         let line = String(decoding: try JSONSerialization.data(withJSONObject: message), as: UTF8.self) + "\n"

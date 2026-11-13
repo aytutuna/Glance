@@ -13,7 +13,7 @@ struct AiError: Error, CustomStringConvertible {
 }
 
 protocol Provider: Sendable {
-    func ask(_ chat: Conversation, onText: @escaping @Sendable (String) -> Void) async throws -> String
+    func ask(_ chat: ChatRequest, onText: @escaping @Sendable (String) -> Void) async throws -> String
 }
 
 // a limit comes back eventually, so the first choice gets another try after this long
@@ -43,14 +43,15 @@ struct Failover: Provider {
     let id: String
     let steps: [(provider: any Provider, model: String)]
 
-    func ask(_ chat: Conversation, onText: @escaping @Sendable (String) -> Void) async throws -> String {
+    func ask(_ chat: ChatRequest, onText: @escaping @Sendable (String) -> Void) async throws -> String {
         let start = await Memory.shared.start(id, count: steps.count)
         var i = 0
         while true {
             let at = (start + i) % steps.count
-            chat.model = steps[at].model
+            var step = chat
+            step.model = steps[at].model
             do {
-                let answer = try await steps[at].provider.ask(chat, onText: onText)
+                let answer = try await steps[at].provider.ask(step, onText: onText)
                 await Memory.shared.worked(id, at: at)
                 return answer
             } catch let e as AiError where e.keyProblem && i + 1 < steps.count {

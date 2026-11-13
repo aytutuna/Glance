@@ -1,9 +1,18 @@
 import Foundation
 
-// one read and its follow-ups; a single run touches it at a time
-final class Conversation: @unchecked Sendable {
+// what a provider needs for one request, copied out of the conversation so a run never shares state
+struct ChatRequest: Sendable {
     let jpeg: Data
     var model: String
+    let system: String
+    let message: String
+    let turns: [(user: Bool, text: String)]
+}
+
+// one read and its follow-ups
+final class Conversation {
+    let jpeg: Data
+    let model: String
     let mode: String
     let instruction: String
     let provider: any Provider
@@ -27,7 +36,11 @@ final class Conversation: @unchecked Sendable {
         done.append((pending, answer))
     }
 
-    func turns() -> [(user: Bool, text: String)] {
+    func request() -> ChatRequest {
+        ChatRequest(jpeg: jpeg, model: model, system: Prompts.system(self), message: Prompts.message(self), turns: turns())
+    }
+
+    private func turns() -> [(user: Bool, text: String)] {
         done.flatMap { [(true, $0.question), (false, $0.answer)] } + [(true, pending)]
     }
 }

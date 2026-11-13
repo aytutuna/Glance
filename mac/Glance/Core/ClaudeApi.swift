@@ -16,10 +16,10 @@ struct ClaudeApi: ChatProvider {
         req.setValue("2026-10-21", forHTTPHeaderField: "anthropic-version")
     }
 
-    func request(_ chat: Conversation) throws -> URLRequest {
+    func request(_ chat: ChatRequest) throws -> URLRequest {
         var messages: [[String: Any]] = []
         var first = true
-        for (user, text) in chat.turns() {
+        for (user, text) in chat.turns {
             if !user {
                 messages.append(["role": "assistant", "content": text])
             } else if first {
@@ -39,7 +39,7 @@ struct ClaudeApi: ChatProvider {
             "model": chat.model,
             "max_tokens": current ? 64000 : 8192,
             "stream": true,
-            "system": Prompts.system(chat),
+            "system": chat.system,
             "messages": messages,
         ]
         if current {

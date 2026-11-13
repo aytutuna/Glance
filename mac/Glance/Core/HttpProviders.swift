@@ -5,7 +5,7 @@ protocol ChatProvider: Provider {
     var key: String? { get }
     var limit: Double { get }
     var heads: [Int: String] { get }
-    func request(_ chat: Conversation) throws -> URLRequest
+    func request(_ chat: ChatRequest) throws -> URLRequest
     // new text in one stream chunk; throws when the chunk is an error or a block
     func delta(_ root: Any, started: Bool) throws -> String?
 }
@@ -13,7 +13,7 @@ protocol ChatProvider: Provider {
 extension ChatProvider {
     var heads: [Int: String] { [:] }
 
-    func ask(_ chat: Conversation, onText: @escaping @Sendable (String) -> Void) async throws -> String {
+    func ask(_ chat: ChatRequest, onText: @escaping @Sendable (String) -> Void) async throws -> String {
         let req = try request(chat)
         let provider = self, name = name, key = key, heads = heads
         return try await withLimit(limit, name: name) {
@@ -99,10 +99,10 @@ struct OpenAiProvider: ChatProvider {
     let key: String?
     let limit: Double
 
-    func request(_ chat: Conversation) throws -> URLRequest {
-        var messages: [[String: Any]] = [["role": "system", "content": Prompts.system(chat)]]
+    func request(_ chat: ChatRequest) throws -> URLRequest {
+        var messages: [[String: Any]] = [["role": "system", "content": chat.system]]
         var first = true
-        for (user, text) in chat.turns() {
+        for (user, text) in chat.turns {
             if !user {
                 messages.append(["role": "assistant", "content": text])
             } else if first {
@@ -159,10 +159,10 @@ struct GeminiProvider: ChatProvider {
     let key: String?
     let limit = 90.0
 
-    func request(_ chat: Conversation) throws -> URLRequest {
+    func request(_ chat: ChatRequest) throws -> URLRequest {
         var contents: [[String: Any]] = []
         var first = true
-        for (user, text) in chat.turns() {
+        for (user, text) in chat.turns {
             if user && first {
                 first = false
                 contents.append(["role": "user", "parts": [
@@ -175,7 +175,7 @@ struct GeminiProvider: ChatProvider {
         }
         let model = chat.model.addingPercentEncoding(withAllowedCharacters: .alphanumerics.union(CharacterSet(charactersIn: "-._~"))) ?? chat.model
         var req = try json("\(Self.baseUrl)/models/\(model):streamGenerateContent?alt=sse", method: "POST", body: [
-            "systemInstruction": ["parts": [["text": Prompts.system(chat)]]],
+            "systemInstruction": ["parts": [["text": chat.system]]],
             "contents": contents,
         ])
         req.setValue(key, forHTTPHeaderField: "x-goog-api-key")

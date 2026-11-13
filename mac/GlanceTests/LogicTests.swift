@@ -2,7 +2,7 @@ import Carbon.HIToolbox
 import XCTest
 
 private struct NoProvider: Provider {
-    func ask(_ chat: Conversation, onText: @escaping @Sendable (String) -> Void) async throws -> String { "" }
+    func ask(_ chat: ChatRequest, onText: @escaping @Sendable (String) -> Void) async throws -> String { "" }
 }
 
 final class LogicTests: XCTestCase {
