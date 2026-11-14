@@ -1,6 +1,6 @@
 # Glance
 
-Glance is a small Windows tray app. Press a hotkey and it reads your screen, sends the screenshot to an AI you choose and shows the answer in a popup in the corner of the screen. It works with the Claude CLI, the Claude API, OpenAI, Gemini and any OpenAI-compatible server.
+Glance is a small tray app for Windows and macOS. Press a hotkey and it reads your screen, sends the screenshot to an AI you choose and shows the answer in a popup in the corner of the screen. It works with the Claude CLI, the Claude API, OpenAI, Gemini and any OpenAI-compatible server.
 
 ## Download
 
@@ -10,7 +10,7 @@ On a Mac, download the Mac zip from Releases, unzip it and move Glance to Applic
 
 ## First run
 
-Glance sits in the tray. Open its menu and choose Connect an AI... to pick a provider and paste a key. The Claude CLI needs no key if `claude` is installed and signed in.
+Glance sits in the tray, or in the menu bar on a Mac. Open its menu and choose Connect an AI... to pick a provider and paste a key. The Claude CLI needs no key if `claude` is installed and signed in.
 
 Default hotkeys, changeable in the settings window:
 
@@ -31,7 +31,7 @@ The tray menu and the settings window cover the same ground:
 - Plain black answer: a pure black popup with white text instead of the dark gray one, with an adjustable text opacity.
 - Keep answers after closing: saves the last ten answers, encrypted, so they are there next time.
 - Connect an AI and Change order: save several keys and providers; Glance moves to the next one when a key fails or a limit runs out.
-- Check for updates, Start with Windows.
+- Check for updates, Start with Windows (Open at login on a Mac).
 
 The interface is in English and Turkish.
 
