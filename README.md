@@ -6,7 +6,7 @@ Glance is a small Windows tray app. Press a hotkey and it reads your screen, sen
 
 Get the latest build from the Releases page: a portable exe (x64 or arm64) or an installer. The portable exe needs no install and can be run from anywhere.
 
-On a Mac, download the Mac zip from Releases, unzip it and move Glance to Applications. It needs macOS 14 or later. The first time it reads the screen, macOS asks for Screen & System Audio Recording access. The Claude CLI is found if it is installed.
+On a Mac, download the Mac zip from Releases, unzip it and move Glance to Applications. It needs macOS 14 or later. The app is not notarized, so macOS blocks it the first time you open it. Open System Settings > Privacy & Security and click Open Anyway (macOS 15 and later no longer offer this from the right-click menu), or run `xattr -dr com.apple.quarantine /Applications/Glance.app`. The first time it reads the screen, macOS asks for Screen & System Audio Recording access, and it asks again after each update because the app has no stable signing identity. The Claude CLI is found if it is installed.
 
 ## First run
 
