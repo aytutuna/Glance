@@ -51,12 +51,15 @@ jobs:
             ONLY_ACTIVE_ARCH=NO \
             CURRENT_PROJECT_VERSION=${{ github.run_number }} \
             CODE_SIGN_IDENTITY=- \
-            CODE_SIGNING_REQUIRED=NO
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO
       - name: Check and pack
         run: |
           app="$RUNNER_TEMP/build/Build/Products/Release/Glance.app"
           codesign --verify --deep --strict --verbose=2 "$app"
           codesign -dv "$app"
+          # ad hoc signing adds get-task-allow, which lets debuggers attach
+          if codesign -d --entitlements - "$app" 2>&1 | grep -q get-task-allow; then exit 1; fi
           lipo -archs "$app/Contents/MacOS/Glance"
           mkdir -p macos
           ditto -c -k --keepParent "$app" "macos/Glance-$VERSION-mac.zip"
