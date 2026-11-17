@@ -42,6 +42,12 @@ static class Prompts
         return text.ToString();
     }
 
+    // for CLIs that take one prompt on stdin instead of a separate system prompt
+    public static string Whole(Conversation chat)
+    {
+        return System(chat) + "\n\n" + Message(chat);
+    }
+
     public static string Instruction(Settings settings, string mode)
     {
         if (settings.PromptOverrides.GetValueOrDefault(mode) is { Length: > 0 } edited)

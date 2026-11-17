@@ -178,4 +178,6 @@ static class Strings
     public static string EffortHigh => Get("EffortHigh");
     public static string EffortXHigh => Get("EffortXHigh");
     public static string EffortMax => Get("EffortMax");
+    public static string CodexNotFound => Get("CodexNotFound");
+    public static string GeminiNotFound => Get("GeminiNotFound");
 }

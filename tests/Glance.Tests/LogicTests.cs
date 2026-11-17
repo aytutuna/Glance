@@ -141,4 +141,34 @@ public class LogicTests
         Assert.Null(ClaudeApi.Params(Chat("claude-old", "")).OutputConfig);
         Assert.Equal("low", ClaudeApi.Params(Chat("claude-old", "low")).OutputConfig!.Effort!.Raw());
     }
+
+    [Fact]
+    public void CodexArgsOnlyUseFlagsTheHelpLists()
+    {
+        var bare = CodexCli.Args("", "", "", "a.txt", "s.jpg");
+        Assert.Equal(new[] { "exec", "-i", "s.jpg", "--sandbox", "read-only", "-o", "a.txt", "-" }, bare);
+
+        var full = CodexCli.Args("--skip-git-repo-check --ephemeral --ignore-rules --color <COLOR>", "gpt-x", "high", "a.txt", "s.jpg");
+        Assert.Equal(new[]
+        {
+            "exec", "--skip-git-repo-check", "--ephemeral", "--ignore-rules", "--color", "never",
+            "-i", "s.jpg", "--sandbox", "read-only", "-o", "a.txt", "-m", "gpt-x", "-c", "model_reasoning_effort=high", "-",
+        }, full);
+    }
+
+    [Fact]
+    public void GeminiArgsAskForJsonAndTheScreenshot()
+    {
+        Assert.Equal(new[] { "-o", "json", "-p", "@shot.jpg" }, GeminiCli.Args(""));
+        Assert.Equal(new[] { "-o", "json", "-m", "flash", "-p", "@shot.jpg" }, GeminiCli.Args("flash"));
+    }
+
+    [Fact]
+    public void GeminiOutputGivesTheResponseOrTheError()
+    {
+        Assert.Equal("B", GeminiCli.Answer("""{"response":"B","stats":{}}"""));
+        Assert.Null(GeminiCli.Answer("not json"));
+        var ex = Assert.Throws<AiException>(() => GeminiCli.Answer("""{"error":{"type":"x","message":"quota used up","code":429}}"""));
+        Assert.Equal("quota used up", ex.Message);
+    }
 }

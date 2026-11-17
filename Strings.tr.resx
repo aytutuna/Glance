@@ -484,16 +484,16 @@
     <value>Glance claude komutunu bulamıyor. Claude CLI'ı kurun, oturum açmak için bir kez claude çalıştırın, sonra yeniden deneyin.</value>
   </data>
   <data name="CliTimedOut" xml:space="preserve">
-    <value>Claude yanıtlamak için çok uzun sürdü.</value>
+    <value>{0} yanıtlamak için çok uzun sürdü.</value>
   </data>
   <data name="CliError" xml:space="preserve">
-    <value>Claude bir hata bildirdi.</value>
+    <value>{0} bir hata bildirdi.</value>
   </data>
   <data name="CliExit" xml:space="preserve">
-    <value>Claude {0} koduyla kapandı.</value>
+    <value>{0} {1} koduyla kapandı.</value>
   </data>
   <data name="CliNoAnswer" xml:space="preserve">
-    <value>Claude yanıt döndürmedi.</value>
+    <value>{0} yanıt döndürmedi.</value>
   </data>
   <data name="CheckUpdates" xml:space="preserve">
     <value>Güncellemeleri denetle</value>
@@ -527,5 +527,11 @@
   </data>
   <data name="EffortMax" xml:space="preserve">
     <value>En yüksek</value>
+  </data>
+  <data name="CodexNotFound" xml:space="preserve">
+    <value>Glance codex komutunu bulamıyor. npm install -g @openai/codex ile kurun, oturum açmak için codex login çalıştırın, sonra yeniden deneyin.</value>
+  </data>
+  <data name="GeminiNotFound" xml:space="preserve">
+    <value>Glance gemini komutunu bulamıyor. npm install -g @google/gemini-cli ile kurun, oturum açmak için bir kez gemini çalıştırın, sonra yeniden deneyin.</value>
   </data>
 </root>

@@ -9,9 +9,15 @@ static class Ai
         var steps = new List<(IProvider, string, string)>();
         foreach (var entry in chain)
         {
-            if (entry == Settings.Claude)
+            if (Settings.IsCli(entry))
             {
-                steps.Add((new ClaudeCli(), s.Model, s.EffortOf(entry)));
+                IProvider cli = entry switch
+                {
+                    Settings.Claude => new ClaudeCli(),
+                    Settings.Codex => new CodexCli(),
+                    _ => new GeminiCli(),
+                };
+                steps.Add((cli, entry == Settings.Claude ? s.Model : s.ProviderModels.GetValueOrDefault(entry) ?? "", s.EffortOf(entry)));
                 continue;
             }
             string id = entry.Split(':')[0];

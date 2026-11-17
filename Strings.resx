@@ -484,16 +484,16 @@
     <value>Glance can't find the claude command. Install the Claude CLI, run claude once to sign in, then try again.</value>
   </data>
   <data name="CliTimedOut" xml:space="preserve">
-    <value>Claude took too long to answer.</value>
+    <value>{0} took too long to answer.</value>
   </data>
   <data name="CliError" xml:space="preserve">
-    <value>Claude reported an error.</value>
+    <value>{0} reported an error.</value>
   </data>
   <data name="CliExit" xml:space="preserve">
-    <value>Claude exited with code {0}.</value>
+    <value>{0} exited with code {1}.</value>
   </data>
   <data name="CliNoAnswer" xml:space="preserve">
-    <value>Claude returned no answer.</value>
+    <value>{0} returned no answer.</value>
   </data>
   <data name="CheckUpdates" xml:space="preserve">
     <value>Check for updates</value>
@@ -527,5 +527,11 @@
   </data>
   <data name="EffortMax" xml:space="preserve">
     <value>Max</value>
+  </data>
+  <data name="CodexNotFound" xml:space="preserve">
+    <value>Glance can't find the codex command. Install it with npm install -g @openai/codex, run codex login to sign in, then try again.</value>
+  </data>
+  <data name="GeminiNotFound" xml:space="preserve">
+    <value>Glance can't find the gemini command. Install it with npm install -g @google/gemini-cli, run gemini once to sign in, then try again.</value>
   </data>
 </root>
