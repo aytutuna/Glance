@@ -329,6 +329,8 @@ class TrayApp : ApplicationContext
         menu.Items.Add(AiMenu());
         if (settings.Chain().Contains(Settings.Claude))
             menu.Items.Add(ModelMenu());
+        if (EffortMenu() is { } effort)
+            menu.Items.Add(effort);
         menu.Items.Add(ModeMenu());
         menu.Items.Add(TranslateMenu());
         menu.Items.Add(Strings.IdentifyScreens, null, (_, _) => Identify());
@@ -547,6 +549,26 @@ class TrayApp : ApplicationContext
                     WarnUnsaved();
             })
             { Checked = settings.Model == id });
+        }
+        return item;
+    }
+
+    // for the AI tried first; none when that one has no levels
+    ToolStripMenuItem? EffortMenu()
+    {
+        string id = settings.FirstProvider();
+        var levels = Settings.EffortLevels(id);
+        if (levels.Length == 0)
+            return null;
+        var item = new ToolStripMenuItem(Strings.Effort);
+        foreach (var level in levels.Prepend(""))
+        {
+            item.DropDownItems.Add(new ToolStripMenuItem(Settings.EffortName(level), null, (_, _) =>
+            {
+                settings.Effort[id] = level;
+                SaveLook();
+            })
+            { Checked = settings.EffortOf(id) == level });
         }
         return item;
     }

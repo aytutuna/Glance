@@ -12,11 +12,12 @@ class SettingsDialog : Form
     readonly TrayApp app;
     readonly double scale;
     readonly Font font;
-    readonly ComboBox readFrom, mode, translate, showOn, position, opacity, model;
+    readonly ComboBox readFrom, mode, translate, showOn, position, opacity, model, effort;
     readonly CheckBox plain, history, autostart, updates;
-    readonly Label order, modelLabel;
+    readonly Label order, modelLabel, effortLabel;
     readonly Dictionary<KeyJob, Label> keyNames = new();
     List<(string? Device, string Text)> readChoices = new(), showChoices = new();
+    List<string> levels = new();
     List<(string Id, string Name)> modes = new();
     List<(string Value, string Name)> languages = new();
     List<(string Name, bool Center, bool Area)> positions = new();
@@ -118,6 +119,14 @@ class SettingsDialog : Form
         model.Items.AddRange(Settings.Models.Select(m => (object)m.Name).ToArray());
         Add(ai, modelLabel, 12, 12 + 144 + 5, 130);
         Add(ai, model, Field, 12 + 144, Wide);
+        effortLabel = new Label { Text = Strings.Effort, AutoSize = false };
+        effort = Combo(() =>
+        {
+            settings.Effort[settings.FirstProvider()] = levels[effort!.SelectedIndex];
+            app.SaveLook();
+        });
+        Add(ai, effortLabel, 12, 12 + 178 + 5, 130);
+        Add(ai, effort, Field, 12 + 178, Wide);
 
         autostart = new CheckBox { Text = Strings.StartWithWindows };
         autostart.Click += (_, _) =>
@@ -218,6 +227,10 @@ class SettingsDialog : Form
         order.Text = string.Join("\n", chain.Select((e, i) => $"{i + 1}. {names[e]}"));
         modelLabel.Visible = model.Visible = chain.Contains(Settings.Claude);
         model.SelectedIndex = Math.Max(0, Array.FindIndex(Settings.Models, m => m.Id == settings.Model));
+        string first = settings.FirstProvider();
+        levels = Settings.EffortLevels(first).Prepend("").ToList();
+        effortLabel.Visible = effort.Visible = levels.Count > 1;
+        Fill(effort, levels.Select(Settings.EffortName), Math.Max(0, levels.IndexOf(settings.EffortOf(first))));
 
         autostart.Checked = TrayApp.StartValue() != null;
         history.Checked = settings.KeepHistory;
