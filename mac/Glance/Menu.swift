@@ -53,6 +53,7 @@ extension AppDelegate {
         items.append(screenMenu(L("ReadFrom"), selected: settings.readDevice, withAll: true) { self.settings.readDevice = $0 })
         items.append(screenMenu(L("ShowAnswerOn"), selected: settings.showDevice, withAll: false) { self.settings.showDevice = $0 })
         items.append(positionMenu())
+        items.append(outputMenu())
         items.append(ActionItem(L("PlainAnswer"), checked: settings.plainAnswer) {
             self.settings.plainAnswer.toggle()
             self.save()
@@ -127,6 +128,12 @@ extension AppDelegate {
             items.append(ActionItem(L("DrawnArea"), checked: settings.useArea, run: change { self.settings.useArea = true }))
         }
         return submenu(L("AnswerPosition"), items + [.separator(), ActionItem(L("DrawAnswerArea")) { self.drawArea() }])
+    }
+
+    private func outputMenu() -> NSMenuItem {
+        submenu(L("AnswerGoesTo"), Settings.outputs.map { id, name in
+            ActionItem(name, checked: settings.output == id, run: change { self.settings.output = id })
+        })
     }
 
     private func opacityMenu() -> NSMenuItem {

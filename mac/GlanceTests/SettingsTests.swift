@@ -95,6 +95,41 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(back.hotkey, s.hotkey)
     }
 
+    func testEffortAndOutputDefaults() throws {
+        let s = try load("{}")
+        XCTAssertTrue(s.effort.isEmpty)
+        XCTAssertEqual(s.output, "show")
+        XCTAssertEqual(s.effortOf("claude"), "")
+    }
+
+    func testEffortAndOutputRoundTrip() {
+        let url = dir.appendingPathComponent("round.json")
+        var s = Settings.load(url)
+        s.effort["codex"] = "xhigh"
+        s.output = "showcopy"
+        XCTAssertTrue(s.save())
+        let back = Settings.load(url)
+        XCTAssertEqual(back.effortOf("codex"), "xhigh")
+        XCTAssertEqual(back.output, "showcopy")
+    }
+
+    func testBadEffortAndOutputFallBack() throws {
+        let s = try load(#"{"output":"loud","effort":{"claude":"huge","gemini":"high"}}"#)
+        XCTAssertEqual(s.output, "show")
+        XCTAssertEqual(s.effortOf("claude"), "")
+        XCTAssertEqual(s.effortOf("gemini"), "high")
+        XCTAssertTrue(try load(#"{"effort":null}"#).effort.isEmpty)
+    }
+
+    func testCliAccountsJoinTheOrderOnceConnected() {
+        var s = Settings.load(dir.appendingPathComponent("order.json"))
+        XCTAssertFalse(s.chain().contains(Settings.codex))
+        s.providerModels[Settings.codex] = ""
+        s.include(Settings.codex)
+        XCTAssertEqual(s.chain(), [Settings.claude, Settings.codex])
+        XCTAssertEqual(s.firstProvider(), Settings.claude)
+    }
+
     func testAreaValidation() {
         XCTAssertTrue(Settings.validArea([0, 0, 1, 1]))
         XCTAssertTrue(Settings.validArea([0.1, 0.1, 0.5, 0.5]))

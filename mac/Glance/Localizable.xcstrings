@@ -161,6 +161,22 @@
         }
       }
     },
+    "AnswerGoesTo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer goes to"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cevap nereye"
+          }
+        }
+      }
+    },
     "AnswerPosition": {
       "localizations": {
         "en": {
@@ -701,6 +717,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Başarısız"
+          }
+        }
+      }
+    },
+    "CopyOnly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy it only"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca kopyala"
           }
         }
       }
@@ -2641,6 +2673,22 @@
         }
       }
     },
+    "ShowAndCopy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show it and copy it"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Göster ve kopyala"
+          }
+        }
+      }
+    },
     "ShowAnswerOn": {
       "localizations": {
         "en": {
@@ -2653,6 +2701,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yanıt ekranı"
+          }
+        }
+      }
+    },
+    "ShowIt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show it"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Göster"
           }
         }
       }

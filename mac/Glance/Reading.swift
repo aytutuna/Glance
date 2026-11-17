@@ -53,7 +53,9 @@ extension AppDelegate {
         }
         // an answer on another screen stays up while the next one is read
         let clear = window.map { open?.frame.intersects($0.frame) == false } ?? (open?.screenID != screen.uuid)
-        let keep = !all && open != nil && clear && open?.look == AnswerPopup.lookOf(settings)
+        // copy only: no popup, so the menu bar icon is the only sign that a read is running
+        let quiet = settings.output == Settings.copy
+        let keep = !quiet && !all && open != nil && clear && open?.look == AnswerPopup.lookOf(settings)
         if !keep {
             closePopup()
         }
@@ -74,14 +76,14 @@ extension AppDelegate {
         let jpeg = try await Task.detached { try Capture.jpeg(shot, crop: crop, maxEdge: edge) }.value
         try Task.checkCancellation()
 
-        let mine: AnswerPopup
+        var mine: AnswerPopup?
         if keep, let kept = popup {
             chat = nil
             thread = ""
             shown = ""
             kept.busy(L("Reading"))
             mine = kept
-        } else {
+        } else if !quiet {
             closePopup()
             mine = newPopup(L("Reading"), reading: true)
             popup = mine
@@ -136,7 +138,8 @@ extension AppDelegate {
         }
     }
 
-    private func reply(_ chat: Conversation, _ mine: AnswerPopup, first: Bool) async throws {
+    // mine is nil when the answer is only copied
+    private func reply(_ chat: Conversation, _ mine: AnswerPopup?, first: Bool) async throws {
         let request = chat.request()
         let provider = chat.provider
         let run = serial
@@ -145,7 +148,7 @@ extension AppDelegate {
         let pump = Task {
             for await partial in partials {
                 let text = clean(partial)
-                if !text.isEmpty && popup === mine && serial == run {
+                if let mine, !text.isEmpty && popup === mine && serial == run {
                     mine.stream(thread + text)
                 }
             }
@@ -165,14 +168,24 @@ extension AppDelegate {
             throw AiError(L("AnswerEmpty"))
         }
         chat.complete(answer)
-        self.chat = chat
         if first {
             history = Array(([answer] + history).prefix(History.limit))
             if settings.keepHistory {
                 History.save(history)
             }
         }
+        let copied = settings.output != Settings.show && copyToClipboard(answer)
+        // the answer is never lost: a failed copy shows it, and so does a switch back to showing
+        if mine == nil && settings.output == Settings.copy && copied {
+            return
+        }
+        self.chat = chat
         showText(thread + answer, copy: answer, ask: true)
+    }
+
+    private func copyToClipboard(_ text: String) -> Bool {
+        NSPasteboard.general.clearContents()
+        return NSPasteboard.general.setString(text, forType: .string)
     }
 
     private func follow(_ question: String) {

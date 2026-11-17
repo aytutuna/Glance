@@ -107,6 +107,9 @@ struct SettingsView: View {
             Picker(L("TextOpacity"), selection: bind(\.textOpacity, then: { app.popup?.setTextOpacity($0) })) {
                 ForEach(opacities, id: \.self) { Text("\($0)%").tag($0) }
             }
+            Picker(L("AnswerGoesTo"), selection: bind(\.output)) {
+                ForEach(Settings.outputs, id: \.id) { Text($0.name).tag($0.id) }
+            }
             Toggle(L("PlainAnswer"), isOn: bind(\.plainAnswer))
         }
         .formStyle(.grouped)
