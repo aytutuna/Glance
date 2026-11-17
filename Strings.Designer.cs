@@ -185,4 +185,8 @@ static class Strings
     public static string SignedIn => Get("SignedIn");
     public static string NotSignedIn => Get("NotSignedIn");
     public static string SignIn => Get("SignIn");
+    public static string AnswerGoesTo => Get("AnswerGoesTo");
+    public static string ShowIt => Get("ShowIt");
+    public static string ShowAndCopy => Get("ShowAndCopy");
+    public static string CopyOnly => Get("CopyOnly");
 }

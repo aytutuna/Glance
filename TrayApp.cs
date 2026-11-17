@@ -319,6 +319,7 @@ class TrayApp : ApplicationContext
         menu.Items.Add(ScreenMenu(Strings.ReadFrom, settings.ReadDevice, d => settings.ReadDevice = d, true));
         menu.Items.Add(ScreenMenu(Strings.ShowAnswerOn, settings.ShowDevice, d => settings.ShowDevice = d));
         menu.Items.Add(PositionMenu());
+        menu.Items.Add(OutputMenu());
         menu.Items.Add(new ToolStripMenuItem(Strings.PlainAnswer, null, (_, _) =>
         {
             settings.PlainAnswer = !settings.PlainAnswer;
@@ -388,6 +389,21 @@ class TrayApp : ApplicationContext
         }
         item.DropDownItems.Add(new ToolStripSeparator());
         item.DropDownItems.Add(Strings.DrawAnswerArea, null, (_, _) => DrawArea());
+        return item;
+    }
+
+    ToolStripMenuItem OutputMenu()
+    {
+        var item = new ToolStripMenuItem(Strings.AnswerGoesTo);
+        foreach (var (id, name) in Settings.Outputs)
+        {
+            item.DropDownItems.Add(new ToolStripMenuItem(name, null, (_, _) =>
+            {
+                settings.Output = id;
+                SaveLook();
+            })
+            { Checked = settings.Output == id });
+        }
         return item;
     }
 
@@ -798,7 +814,9 @@ class TrayApp : ApplicationContext
         // an answer on another screen stays up while the next one is read;
         // on the screen or window being read it would end up in the screenshot
         bool clear = window is { } wb ? open?.Bounds.IntersectsWith(wb) == false : open?.Device != screen.DeviceName;
-        bool keep = !all && open != null && clear && open.Look == AnswerPopup.LookOf(settings);
+        // copy only: no popup, so the tray icon is the only sign that a read is running
+        bool quiet = settings.Output == Settings.Copy;
+        bool keep = !quiet && !all && open != null && clear && open.Look == AnswerPopup.LookOf(settings);
         if (!keep)
             ClosePopup();
         CloseLabels();
@@ -818,7 +836,7 @@ class TrayApp : ApplicationContext
         var jpeg = await Task.Run(() => Grabber.Encode(shot, crop, all ? Grabber.WideEdge : Grabber.MaxEdge), ct);
         ct.ThrowIfCancellationRequested();
 
-        AnswerPopup mine;
+        AnswerPopup? mine = null;
         if (keep && popup is { IsDisposed: false } kept)
         {
             chat = null;
@@ -826,7 +844,7 @@ class TrayApp : ApplicationContext
             kept.Busy(Strings.Reading);
             mine = kept;
         }
-        else
+        else if (!quiet)
         {
             ClosePopup();
             mine = popup = NewPopup(Strings.Reading, true);
@@ -834,24 +852,29 @@ class TrayApp : ApplicationContext
         await Reply(new Conversation(jpeg, model, settings.Mode, Prompts.Instruction(settings, settings.Mode), provider), mine, ct);
     }
 
-    async Task Reply(Conversation c, AnswerPopup mine, CancellationToken ct)
+    // mine is null when the answer is only copied
+    async Task Reply(Conversation c, AnswerPopup? mine, CancellationToken ct)
     {
         string answer = Clean(await c.Provider.AskAsync(c, partial =>
         {
             partial = Clean(partial);
-            if (partial.Length > 0 && !ct.IsCancellationRequested && popup == mine)
+            if (mine != null && partial.Length > 0 && !ct.IsCancellationRequested && popup == mine)
                 mine.Stream(thread + partial);
         }, ct));
         ct.ThrowIfCancellationRequested();
         if (answer.Length == 0)
             throw new AiException(Strings.AnswerEmpty);
         c.Complete(answer);
-        chat = c;
         history.Insert(0, answer);
         if (history.Count > 10)
             history.RemoveAt(10);
         if (settings.KeepHistory)
             Settings.SaveHistory(history);
+        bool copied = settings.Output != Settings.Show && Copy(answer);
+        // the answer is never lost: a failed copy shows it, and so does a switch back to showing
+        if (mine == null && settings.Output == Settings.Copy && copied)
+            return;
+        chat = c;
         ShowText(thread + answer, answer, true);
     }
 

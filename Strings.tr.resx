@@ -549,4 +549,16 @@
   <data name="SignIn" xml:space="preserve">
     <value>Oturum aç</value>
   </data>
+  <data name="AnswerGoesTo" xml:space="preserve">
+    <value>Cevap nereye</value>
+  </data>
+  <data name="ShowIt" xml:space="preserve">
+    <value>Göster</value>
+  </data>
+  <data name="ShowAndCopy" xml:space="preserve">
+    <value>Göster ve kopyala</value>
+  </data>
+  <data name="CopyOnly" xml:space="preserve">
+    <value>Yalnızca kopyala</value>
+  </data>
 </root>

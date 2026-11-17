@@ -43,6 +43,13 @@ class Settings
     public const string Claude = "claude", Codex = "codex", GeminiCli = "geminicli";
     public const string Show = "show", ShowCopy = "showcopy", Copy = "copy";
 
+    public static readonly (string Id, string Name)[] Outputs =
+    {
+        (Show, Strings.ShowIt),
+        (ShowCopy, Strings.ShowAndCopy),
+        (Copy, Strings.CopyOnly),
+    };
+
     public static readonly (string Id, string Name)[] Providers =
     {
         (Claude, "Claude account (Claude CLI)"),

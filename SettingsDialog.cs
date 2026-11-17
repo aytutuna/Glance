@@ -12,7 +12,7 @@ class SettingsDialog : Form
     readonly TrayApp app;
     readonly double scale;
     readonly Font font;
-    readonly ComboBox readFrom, mode, translate, showOn, position, opacity, model, effort;
+    readonly ComboBox readFrom, mode, translate, showOn, position, opacity, model, effort, output;
     readonly CheckBox plain, history, autostart, updates;
     readonly Label order, modelLabel, effortLabel;
     readonly Dictionary<KeyJob, Label> keyNames = new();
@@ -93,8 +93,15 @@ class SettingsDialog : Form
         Row(answer, 0, Strings.ShowAnswerOn, showOn);
         Row(answer, 1, Strings.AnswerPosition, position);
         Add(answer, Button(Strings.DrawAnswerArea, app.DrawArea), Field, 12 + 2 * 34, 150);
+        output = Combo(() =>
+        {
+            settings.Output = Settings.Outputs[output!.SelectedIndex].Id;
+            app.SaveLook();
+        });
+        output.Items.AddRange(Settings.Outputs.Select(o => (object)o.Name).ToArray());
         Row(answer, 3, Strings.TextOpacity, opacity);
-        Add(answer, plain, 12, 12 + 4 * 34, Wide);
+        Row(answer, 4, Strings.AnswerGoesTo, output);
+        Add(answer, plain, 12, 12 + 5 * 34, Wide);
 
         var jobs = new[] { KeyJob.Read, KeyJob.Region, KeyJob.Close, KeyJob.Hide };
         for (int i = 0; i < jobs.Length; i++)
@@ -217,6 +224,7 @@ class SettingsDialog : Form
         int at = settings.UseArea && settings.AnswerArea != null ? positions.Count - 1 : settings.CenterAnswer ? 1 : 0;
         Fill(position, positions.Select(p => p.Name), at);
         opacity.SelectedIndex = Array.IndexOf(Opacities, settings.TextOpacity);
+        output.SelectedIndex = Math.Max(0, Array.FindIndex(Settings.Outputs, o => o.Id == settings.Output));
         plain.Checked = settings.PlainAnswer;
 
         foreach (var (job, label) in keyNames)
