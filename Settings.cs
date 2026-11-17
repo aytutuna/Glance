@@ -40,11 +40,14 @@ class Settings
         "Russian", "Arabic", "Chinese (Simplified)", "Japanese", "Korean", "Hindi",
     };
 
-    public const string Claude = "claude";
+    public const string Claude = "claude", Codex = "codex", GeminiCli = "geminicli";
+    public const string Show = "show", ShowCopy = "showcopy", Copy = "copy";
 
     public static readonly (string Id, string Name)[] Providers =
     {
-        (Claude, "Claude CLI"),
+        (Claude, "Claude account (Claude CLI)"),
+        (Codex, "ChatGPT account (Codex CLI)"),
+        (GeminiCli, "Google account (Gemini CLI)"),
         ("anthropic", "Claude API"),
         ("openai", "OpenAI"),
         ("gemini", "Gemini"),
@@ -81,10 +84,57 @@ class Settings
     public Dictionary<string, string> PromptOverrides { get; set; } = new();
     public string? CustomUrl { get; set; }
     public Dictionary<string, string> ProviderModels { get; set; } = new();
+    // thinking level by provider id; a missing or empty entry means the provider's default
+    public Dictionary<string, string> Effort { get; set; } = new();
+    // show, showcopy or copy: whether the answer goes to the popup, the clipboard or both
+    public string Output { get; set; } = Show;
     // DPAPI-encrypted for this Windows account, base64; never stored as plain text
     public Dictionary<string, List<string>> ApiKeys { get; set; } = new();
     // tried from the top: "claude" is the CLI, provider:tag is one saved key, a bare provider a keyless one
     public List<string> Order { get; set; } = new();
+
+    public static bool IsCli(string id)
+    {
+        return id is Claude or Codex or GeminiCli;
+    }
+
+    public static string[] EffortLevels(string id)
+    {
+        return id switch
+        {
+            Claude or "anthropic" => new[] { "low", "medium", "high", "xhigh", "max" },
+            "openai" or "custom" => new[] { "minimal", "low", "medium", "high" },
+            "gemini" => new[] { "low", "high" },
+            Codex => new[] { "minimal", "low", "medium", "high", "xhigh" },
+            _ => Array.Empty<string>(),
+        };
+    }
+
+    public static string EffortName(string level)
+    {
+        return level switch
+        {
+            "minimal" => Strings.EffortMinimal,
+            "low" => Strings.EffortLow,
+            "medium" => Strings.EffortMedium,
+            "high" => Strings.EffortHigh,
+            "xhigh" => Strings.EffortXHigh,
+            "max" => Strings.EffortMax,
+            _ => Strings.EffortDefault,
+        };
+    }
+
+    public string EffortOf(string id)
+    {
+        string level = Effort.GetValueOrDefault(id) ?? "";
+        return EffortLevels(id).Contains(level) ? level : "";
+    }
+
+    // the provider that is tried first, whose effort the menu and the settings window edit
+    public string FirstProvider()
+    {
+        return Chain().FirstOrDefault()?.Split(':')[0] ?? Claude;
+    }
 
     // names a saved key without revealing anything about the key itself
     static string Tag(string stored)
@@ -99,9 +149,15 @@ class Settings
 
     public List<(string Entry, string Label)> Options()
     {
-        var list = new List<(string, string)> { (Claude, "Claude CLI") };
+        var list = new List<(string, string)> { Providers[0] };
         foreach (var (id, name) in Providers.Skip(1))
         {
+            if (id is Codex or GeminiCli)
+            {
+                if (Configured(id))
+                    list.Add((id, name));
+                continue;
+            }
             if (id != "anthropic" && !Configured(id))
                 continue;
             var stored = ApiKeys.GetValueOrDefault(id) ?? new();
@@ -211,6 +267,8 @@ class Settings
     {
         if (id == Claude)
             return true;
+        if (IsCli(id))
+            return ProviderModels.ContainsKey(id);
         if (!ProviderModels.TryGetValue(id, out var model) || model.Length == 0)
             return false;
         return id == "custom" ? !string.IsNullOrEmpty(CustomUrl) : HasKey(id);
@@ -298,6 +356,9 @@ class Settings
             }
             settings.ApiKeys ??= new();
             settings.ProviderModels ??= new();
+            settings.Effort ??= new();
+            if (settings.Output is not (Show or ShowCopy or Copy))
+                settings.Output = Show;
             settings.Order ??= new();
             settings.TranslateTo ??= "";
             settings.TextOpacity = Math.Clamp(settings.TextOpacity, 10, 100);

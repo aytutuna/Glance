@@ -504,4 +504,28 @@
   <data name="UpdateReady" xml:space="preserve">
     <value>Glance {0} is available.</value>
   </data>
+  <data name="Effort" xml:space="preserve">
+    <value>Effort</value>
+  </data>
+  <data name="EffortDefault" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="EffortMinimal" xml:space="preserve">
+    <value>Minimal</value>
+  </data>
+  <data name="EffortLow" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="EffortMedium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="EffortHigh" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="EffortXHigh" xml:space="preserve">
+    <value>Extra high</value>
+  </data>
+  <data name="EffortMax" xml:space="preserve">
+    <value>Max</value>
+  </data>
 </root>

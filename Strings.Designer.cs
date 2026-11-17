@@ -170,4 +170,12 @@ static class Strings
     public static string CheckUpdates => Get("CheckUpdates");
     public static string UpdateTo => Get("UpdateTo");
     public static string UpdateReady => Get("UpdateReady");
+    public static string Effort => Get("Effort");
+    public static string EffortDefault => Get("EffortDefault");
+    public static string EffortMinimal => Get("EffortMinimal");
+    public static string EffortLow => Get("EffortLow");
+    public static string EffortMedium => Get("EffortMedium");
+    public static string EffortHigh => Get("EffortHigh");
+    public static string EffortXHigh => Get("EffortXHigh");
+    public static string EffortMax => Get("EffortMax");
 }

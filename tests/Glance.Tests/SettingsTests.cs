@@ -100,6 +100,49 @@ public class SettingsTests : IDisposable
         Assert.True(JsonSerializer.Deserialize<Settings>(File.ReadAllText(path))!.CenterAnswer);
     }
 
+    [Fact]
+    public void EffortAndOutputDefaults()
+    {
+        var s = Load("{}");
+        Assert.Empty(s.Effort);
+        Assert.Equal("show", s.Output);
+        Assert.Equal("", s.EffortOf("claude"));
+    }
+
+    [Fact]
+    public void EffortAndOutputRoundTrip()
+    {
+        string path = Write("round.json", "{}");
+        var s = Settings.Load(path, Path.Combine(dir, "old.json"));
+        s.Effort["codex"] = "xhigh";
+        s.Output = "showcopy";
+        Assert.True(s.Save());
+        var back = Settings.Load(path, Path.Combine(dir, "old.json"));
+        Assert.Equal("xhigh", back.EffortOf("codex"));
+        Assert.Equal("showcopy", back.Output);
+    }
+
+    [Fact]
+    public void BadEffortAndOutputFallBack()
+    {
+        var s = Load("""{"Output":"loud","Effort":{"claude":"huge","gemini":"high"}}""");
+        Assert.Equal("show", s.Output);
+        Assert.Equal("", s.EffortOf("claude"));
+        Assert.Equal("high", s.EffortOf("gemini"));
+        Assert.Empty(Load("""{"Effort":null}""").Effort);
+    }
+
+    [Fact]
+    public void CliAccountsJoinTheOrderOnceConnected()
+    {
+        var s = new Settings();
+        Assert.DoesNotContain(Settings.Codex, s.Chain());
+        s.ProviderModels[Settings.Codex] = "";
+        s.Include(Settings.Codex);
+        Assert.Equal(new[] { Settings.Claude, Settings.Codex }, s.Chain());
+        Assert.Equal(Settings.Claude, s.FirstProvider());
+    }
+
     [Theory]
     [InlineData(new double[] { 0, 0, 1, 1 }, true)]
     [InlineData(new double[] { 0.1, 0.1, 0.5, 0.5 }, true)]
