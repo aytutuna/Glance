@@ -17,6 +17,8 @@ class GeminiCli() : CliProvider("gemini", "Gemini")
             var (output, exit, errors) = await Exec(Args(chat.Model), dir, Prompts.Whole(chat), stdout => stdout.ReadToEndAsync(), ct);
             if (Answer(output) is { Length: > 0 } answer)
                 return answer;
+            // the CLI may print its error JSON on stderr instead
+            Answer(errors);
             throw exit != 0 ? Exited(exit, errors) : NoAnswer(errors);
         });
     }

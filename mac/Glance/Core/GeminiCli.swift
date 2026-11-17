@@ -15,6 +15,8 @@ struct GeminiCli: CliProvider {
             if let answer = try Self.answer(result.output), !answer.isEmpty {
                 return answer
             }
+            // the CLI may print its error JSON on stderr instead
+            _ = try Self.answer(result.errors)
             throw result.code != 0 ? exited(result.code, result.errors) : noAnswer(result.errors)
         }
     }

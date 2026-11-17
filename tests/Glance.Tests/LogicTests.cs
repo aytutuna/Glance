@@ -170,5 +170,7 @@ public class LogicTests
         Assert.Null(GeminiCli.Answer("not json"));
         var ex = Assert.Throws<AiException>(() => GeminiCli.Answer("""{"error":{"type":"x","message":"quota used up","code":429}}"""));
         Assert.Equal("quota used up", ex.Message);
+        ex = Assert.Throws<AiException>(() => GeminiCli.Answer("{\n  \"error\": {\n    \"message\": \"quota used up\",\n    \"code\": 429\n  }\n}\n"));
+        Assert.Equal("quota used up", ex.Message);
     }
 }
