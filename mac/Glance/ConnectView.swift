@@ -111,17 +111,24 @@ final class ConnectModel: ObservableObject {
 
     // a script in Terminal, since a sign-in needs a real terminal to answer in
     func signIn() {
-        guard let login = ConnectModel.accounts[id]?.login else { return }
-        let script = FileManager.default.temporaryDirectory.appendingPathComponent("Glance-signin-" + shortId() + ".command")
-        do {
-            try "#!/bin/zsh -l\nrm -f -- \"$0\"\n\(login)\n".write(to: script, atomically: true, encoding: .utf8)
-            try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: script.path)
-        } catch {
-            Log.write("sign in", error)
-            return say(L("Crashed"), true)
+        guard let cli = ConnectModel.accounts[id] else { return }
+        Task {
+            // the folder it was found in may be on no login PATH, so run that very file
+            var login = cli.login
+            if let path = await Cli.shared.path(cli.exe) {
+                login = "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'" + login.dropFirst(cli.exe.count)
+            }
+            let script = FileManager.default.temporaryDirectory.appendingPathComponent("Glance-signin-" + shortId() + ".command")
+            do {
+                try "#!/bin/zsh -l\nrm -f -- \"$0\"\n\(login)\n".write(to: script, atomically: true, encoding: .utf8)
+                try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: script.path)
+            } catch {
+                Log.write("sign in", error)
+                return say(L("Crashed"), true)
+            }
+            NSWorkspace.shared.open([script], withApplicationAt: URL(fileURLWithPath: "/System/Applications/Utilities/Terminal.app"),
+                                    configuration: NSWorkspace.OpenConfiguration())
         }
-        NSWorkspace.shared.open([script], withApplicationAt: URL(fileURLWithPath: "/System/Applications/Utilities/Terminal.app"),
-                                configuration: NSWorkspace.OpenConfiguration())
     }
 
     private func saveEffort(_ s: inout Settings) {
