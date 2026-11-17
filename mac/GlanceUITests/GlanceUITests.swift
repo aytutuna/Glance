@@ -307,14 +307,14 @@ final class GlanceUITests: XCTestCase {
         openMenu()
         choose("AI", "Change order...")
         let window = dialog("AI order")
-        let cli = window.checkBoxes["Claude CLI"]
+        let cli = window.checkBoxes["Claude account (Claude CLI)"]
         XCTAssertTrue(cli.waitForExistence(timeout: 5), app.debugDescription)
         cli.click()
         window.buttons["Up"].click()
         shot("order", of: window)
         window.buttons["Save"].click()
         closes(window)
-        chainItem("1. Claude CLI")
+        chainItem("1. Claude account (Claude CLI)")
         chainItem("2. Custom (127.0.0.1)")
     }
 

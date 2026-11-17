@@ -57,10 +57,44 @@ struct Settings: Codable {
         "Russian", "Arabic", "Chinese (Simplified)", "Japanese", "Korean", "Hindi",
     ]
 
-    static let claude = "claude"
+    static let claude = "claude", codex = "codex", geminiCli = "geminicli"
+    static let show = "show", showCopy = "showcopy", copy = "copy"
 
     static var providers: [(id: String, name: String)] {
-        [(claude, "Claude CLI"), ("anthropic", "Claude API"), ("openai", "OpenAI"), ("gemini", "Gemini"), ("custom", L("CustomName"))]
+        [
+            (claude, "Claude account (Claude CLI)"), (codex, "ChatGPT account (Codex CLI)"), (geminiCli, "Google account (Gemini CLI)"),
+            ("anthropic", "Claude API"), ("openai", "OpenAI"), ("gemini", "Gemini"), ("custom", L("CustomName")),
+        ]
+    }
+
+    static var outputs: [(id: String, name: String)] {
+        [(show, L("ShowIt")), (showCopy, L("ShowAndCopy")), (copy, L("CopyOnly"))]
+    }
+
+    static func isCli(_ id: String) -> Bool {
+        id == claude || id == codex || id == geminiCli
+    }
+
+    static func effortLevels(_ id: String) -> [String] {
+        switch id {
+        case claude, "anthropic": ["low", "medium", "high", "xhigh", "max"]
+        case "openai", "custom": ["minimal", "low", "medium", "high"]
+        case "gemini": ["low", "high"]
+        case codex: ["minimal", "low", "medium", "high", "xhigh"]
+        default: []
+        }
+    }
+
+    static func effortName(_ level: String) -> String {
+        switch level {
+        case "minimal": L("EffortMinimal")
+        case "low": L("EffortLow")
+        case "medium": L("EffortMedium")
+        case "high": L("EffortHigh")
+        case "xhigh": L("EffortXHigh")
+        case "max": L("EffortMax")
+        default: L("EffortDefault")
+        }
     }
 
     static let file = AppDir.url.appendingPathComponent("settings.json")
@@ -91,6 +125,10 @@ struct Settings: Codable {
     var promptOverrides: [String: String] = [:]
     var customUrl: String?
     var providerModels: [String: String] = [:]
+    // thinking level by provider id; a missing or empty entry means the provider's default
+    var effort: [String: String] = [:]
+    // show, showcopy or copy: whether the answer goes to the popup, the clipboard or both
+    var output = show
     // the keys themselves are in the Keychain under the account "<provider>:<tag>"
     var apiKeys: [String: [String]] = [:]
     // tried from the top: "claude" is the CLI, provider:tag is one saved key, a bare provider a keyless one
@@ -103,7 +141,7 @@ struct Settings: Codable {
     enum CodingKeys: String, CodingKey {
         case readDevice, showDevice, centerAnswer, plainAnswer, textOpacity, useArea, keepHistory, checkUpdates, lastUpdateCheck
         case answerArea, hotkey, closeKey, regionKey, hideKey, model, mode, translateTo, provider, customModes, promptOverrides
-        case customUrl, providerModels, apiKeys, order
+        case customUrl, providerModels, effort, output, apiKeys, order
     }
 
     init() {}
@@ -138,6 +176,8 @@ struct Settings: Codable {
         try get(.promptOverrides, &promptOverrides)
         try get(.customUrl, &customUrl)
         try get(.providerModels, &providerModels)
+        try get(.effort, &effort)
+        try get(.output, &output)
         try get(.apiKeys, &apiKeys)
         try get(.order, &order)
     }
@@ -188,6 +228,9 @@ struct Settings: Codable {
             s.useArea = false
         }
         s.textOpacity = min(max(s.textOpacity, 10), 100)
+        if ![show, showCopy, copy].contains(s.output) {
+            s.output = show
+        }
         if !providers.contains(where: { $0.id == s.provider }) || !s.configured(s.provider) {
             s.provider = claude
         }
@@ -215,8 +258,14 @@ struct Settings: Codable {
     }
 
     func options() -> [(entry: String, label: String)] {
-        var list = [(entry: Settings.claude, label: "Claude CLI")]
+        var list = [(entry: Settings.claude, label: Settings.providers[0].name)]
         for (id, name) in Settings.providers.dropFirst() {
+            if Settings.isCli(id) {
+                if configured(id) {
+                    list.append((id, name))
+                }
+                continue
+            }
             if id != "anthropic" && !configured(id) {
                 continue
             }
@@ -258,6 +307,16 @@ struct Settings: Codable {
         if !order.contains(entry) {
             order.append(entry)
         }
+    }
+
+    func effortOf(_ id: String) -> String {
+        let level = effort[id] ?? ""
+        return Settings.effortLevels(id).contains(level) ? level : ""
+    }
+
+    // the provider that is tried first, whose effort the menu and the settings window edit
+    func firstProvider(_ chain: [String]? = nil) -> String {
+        (chain ?? self.chain()).first.map { String($0.split(separator: ":", omittingEmptySubsequences: false)[0]) } ?? Settings.claude
     }
 
     func keyFor(_ entry: String) -> String? {
@@ -319,6 +378,9 @@ struct Settings: Codable {
     func configured(_ id: String) -> Bool {
         if id == Settings.claude {
             return true
+        }
+        if Settings.isCli(id) {
+            return providerModels[id] != nil
         }
         guard let model = providerModels[id], !model.isEmpty else { return false }
         return id == "custom" ? !(customUrl ?? "").isEmpty : hasKey(id)
