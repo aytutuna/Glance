@@ -6,8 +6,8 @@ enum Ai {
         let chain = s.chain()
         var steps: [(provider: any Provider, model: String, effort: String)] = []
         for entry in chain {
-            if entry == Settings.claude {
-                steps.append((ClaudeCli(), s.model, s.effortOf(entry)))
+            if Settings.isCli(entry) {
+                steps.append((cli(entry), entry == Settings.claude ? s.model : s.providerModels[entry] ?? "", s.effortOf(entry)))
                 continue
             }
             let id = String(entry.split(separator: ":", omittingEmptySubsequences: false)[0])
@@ -26,6 +26,14 @@ enum Ai {
             throw AiError(L("NoAiUsable"))
         }
         return Failover(id: chain.joined(separator: "|"), steps: steps)
+    }
+
+    private static func cli(_ id: String) -> any Provider {
+        switch id {
+        case Settings.codex: CodexCli()
+        case Settings.geminiCli: GeminiCli()
+        default: ClaudeCli()
+        }
     }
 
     private static func make(_ id: String, url: String, key: String?) -> any Provider {

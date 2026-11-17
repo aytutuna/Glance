@@ -470,13 +470,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Claude reported an error."
+            "value": "%1$@ reported an error."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Claude bir hata bildirdi."
+            "value": "%1$@ bir hata bildirdi."
           }
         }
       }
@@ -486,13 +486,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Claude exited with code %1$@."
+            "value": "%1$@ exited with code %2$@."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Claude %1$@ koduyla kapandı."
+            "value": "%1$@ %2$@ koduyla kapandı."
           }
         }
       }
@@ -502,13 +502,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Claude returned no answer."
+            "value": "%1$@ returned no answer."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Claude yanıt döndürmedi."
+            "value": "%1$@ yanıt döndürmedi."
           }
         }
       }
@@ -541,6 +541,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kapat"
+          }
+        }
+      }
+    },
+    "CodexNotFound": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance can't find the codex command. Install it with npm install -g @openai/codex, run codex login to sign in, then try again."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance codex komutunu bulamıyor. npm install -g @openai/codex ile kurun, oturum açmak için codex login çalıştırın, sonra yeniden deneyin."
           }
         }
       }
@@ -909,6 +925,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gemini ekran görüntüsünü engelledi (%1$@) ve metin döndürmedi."
+          }
+        }
+      }
+    },
+    "GeminiNotFound": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance can't find the gemini command. Install it with npm install -g @google/gemini-cli, run gemini once to sign in, then try again."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glance gemini komutunu bulamıyor. npm install -g @google/gemini-cli ile kurun, oturum açmak için bir kez gemini çalıştırın, sonra yeniden deneyin."
           }
         }
       }

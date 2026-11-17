@@ -163,73 +163,14 @@ final class Child: @unchecked Sendable {
     }
 }
 
-// What is found about the CLI is kept, except a missing CLI, so installing it works without restarting Glance.
-private actor Cli {
-    static let shared = Cli()
-    private var found: String?
-    private var loginPath: String?
-    private var effort: Bool?
+struct ClaudeCli: CliProvider {
+    let exe = "claude"
+    let label = "Claude"
+    var notFound: String { L("CliNotFound") }
 
-    private func shell(_ script: String) async -> String? {
-        let sh = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh"
-        guard let result = await Child.capture(sh, ["-lc", script], env: ProcessInfo.processInfo.environment, limit: 5), result.code == 0 else { return nil }
-        return result.out.split(separator: "\n").last.map { $0.trimmingCharacters(in: .whitespaces) }
-    }
-
-    func path() async -> String? {
-        if found == nil {
-            let home = NSHomeDirectory()
-            let dirs = [home + "/.local/bin", home + "/.claude/local", "/opt/homebrew/bin", "/usr/local/bin", home + "/.npm-global/bin", home + "/.bun/bin"]
-            found = dirs.map { $0 + "/claude" }.first { FileManager.default.isExecutableFile(atPath: $0) }
-            if found == nil, let p = await shell("command -v claude"), p.hasPrefix("/"), FileManager.default.isExecutableFile(atPath: p) {
-                found = p
-            }
-        }
-        return found
-    }
-
-    func forget() {
-        found = nil
-    }
-
-    // a script that starts with #!/usr/bin/env node needs the login shell's PATH to find node
-    func env() async -> [String: String] {
-        var env = ProcessInfo.processInfo.environment
-        if loginPath == nil {
-            loginPath = await shell("printf %s \"$PATH\"") ?? ""
-        }
-        if !loginPath!.isEmpty {
-            env["PATH"] = loginPath! + ":" + (env["PATH"] ?? "")
-        }
-        return env
-    }
-
-    // an unfinished probe is not remembered, so the next read tries again
-    func supportsEffort(_ path: String, _ env: [String: String]) async -> Bool {
-        if effort == nil, let result = await Child.capture(path, ["--help"], env: env, limit: 15), result.code == 0 {
-            effort = result.out.contains("--effort")
-        }
-        return effort ?? false
-    }
-}
-
-struct ClaudeCli: Provider {
-    func ask(_ chat: ChatRequest, onText: @escaping @Sendable (String) -> Void) async throws -> String {
-        do {
-            guard let path = await Cli.shared.path() else { throw AiError(L("CliNotFound")) }
-            let env = await Cli.shared.env()
-            let effort = await Cli.shared.supportsEffort(path, env)
-            try Task.checkCancellation()
-            return try await withLimit(90, name: "Claude") { try await run(path, env, effort, chat, onText) }
-        } catch let e as AiError {
-            // its limit and sign-in messages are plain text that changes between versions,
-            // so any failure counts as a reason to move on rather than matching their wording
-            throw AiError(e.message, keyProblem: true)
-        }
-    }
-
-    private func run(_ path: String, _ env: [String: String], _ effort: Bool, _ chat: ChatRequest,
-                     _ onText: @Sendable (String) -> Void) async throws -> String {
+    func run(_ path: String, _ env: [String: String], _ chat: ChatRequest, _ onText: @escaping @Sendable (String) -> Void) async throws -> String {
+        let effort = await help(path, env, ["--help"]).contains("--effort")
+        try Task.checkCancellation()
         var args = [
             "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
             "--include-partial-messages", "--model", chat.model, "--tools=", "--no-session-persistence", "--strict-mcp-config",
@@ -249,13 +190,7 @@ struct ClaudeCli: Provider {
         ]
         let line = String(decoding: try JSONSerialization.data(withJSONObject: message), as: UTF8.self) + "\n"
 
-        let child: Child
-        do {
-            child = try Child(path: path, args: args, env: env, dir: dir)
-        } catch {
-            await Cli.shared.forget()
-            throw AiError(L("CliNotFound"))
-        }
+        let child = try await start(path, args, env, dir)
         defer { child.kill() }
 
         return try await withTaskCancellationHandler {
@@ -300,17 +235,12 @@ struct ClaudeCli: Provider {
             try Task.checkCancellation()
 
             if failed {
-                throw AiError(answer?.isEmpty == false ? answer! : L("CliError"))
+                throw AiError(answer?.isEmpty == false ? answer! : L("CliError", label))
             }
             if let answer, !answer.isEmpty {
                 return answer
             }
-            if code != 0 {
-                let tail = stderr.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\n", omittingEmptySubsequences: false)
-                    .suffix(5).joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
-                throw AiError(tail.isEmpty ? L("CliExit", code) : String(tail.suffix(600)))
-            }
-            throw AiError(L("CliNoAnswer"))
+            throw code != 0 ? exited(code, stderr) : noAnswer(stderr)
         } onCancel: {
             child.kill()
         }

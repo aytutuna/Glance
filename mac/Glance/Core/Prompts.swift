@@ -37,6 +37,11 @@ enum Prompts {
         return text + "</transcript>\nLatest message, to answer now: \(chat.pending)"
     }
 
+    // the CLIs that take one text on stdin get the system prompt and the message together
+    static func whole(_ chat: ChatRequest) -> String {
+        chat.system + "\n\n" + chat.message + "\n"
+    }
+
     static func instruction(_ settings: Settings, _ mode: String) -> String {
         if let edited = settings.promptOverrides[mode], !edited.isEmpty {
             return edited.replacingOccurrences(of: "{language}", with: language(settings))

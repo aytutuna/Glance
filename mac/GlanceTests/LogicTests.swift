@@ -155,6 +155,29 @@ final class LogicTests: XCTestCase {
         XCTAssertEqual((try body(api.request(chat("claude-old", "low")))["output_config"] as? [String: String])?["effort"], "low")
     }
 
+    func testCodexArgsOnlyUseFlagsTheHelpLists() {
+        XCTAssertEqual(CodexCli.args(help: "", model: "", effort: "", answer: "a.txt", shot: "s.jpg"),
+                       ["exec", "-i", "s.jpg", "--sandbox", "read-only", "-o", "a.txt", "-"])
+        let help = "--skip-git-repo-check --ephemeral --ignore-rules --color <COLOR>"
+        XCTAssertEqual(CodexCli.args(help: help, model: "gpt-x", effort: "high", answer: "a.txt", shot: "s.jpg"), [
+            "exec", "--skip-git-repo-check", "--ephemeral", "--ignore-rules", "--color", "never",
+            "-i", "s.jpg", "--sandbox", "read-only", "-o", "a.txt", "-m", "gpt-x", "-c", "model_reasoning_effort=high", "-",
+        ])
+    }
+
+    func testGeminiArgsAskForJsonAndTheScreenshot() {
+        XCTAssertEqual(GeminiCli.args(""), ["-o", "json", "-p", "@shot.jpg"])
+        XCTAssertEqual(GeminiCli.args("flash"), ["-o", "json", "-m", "flash", "-p", "@shot.jpg"])
+    }
+
+    func testGeminiOutputGivesTheResponseOrTheError() {
+        XCTAssertEqual(try GeminiCli.answer(#"{"response":"B","stats":{}}"#), "B")
+        XCTAssertNil(try GeminiCli.answer("not json"))
+        XCTAssertThrowsError(try GeminiCli.answer(#"{"error":{"type":"x","message":"quota used up","code":429}}"#)) {
+            XCTAssertEqual(($0 as? AiError)?.message, "quota used up")
+        }
+    }
+
     func testOpenAiSendsEffortOnlyWhenChosen() throws {
         let api = OpenAiProvider(name: "OpenAI", baseUrl: OpenAiProvider.defaultUrl, key: "k", limit: 90)
         XCTAssertNil(try body(api.request(chat("gpt-x", "")))["reasoning_effort"])
