@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glance: press a key, get an answer about your screen</title>
+<meta name="description" content="Glance is a small tray app for Windows and macOS. Press a hotkey, it reads your screen, asks the AI you chose and shows the answer in a popup, on this screen or another one.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Glance">
+<meta property="og:description" content="Press a key and get an answer about what is on your screen. Works with Claude, OpenAI, Gemini and local servers.">
+<meta property="og:image" content="https://aytutuna.github.io/Glance/img/og.png">
+<meta property="og:url" content="https://aytutuna.github.io/Glance/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="img/icon.png">
+<style>
+:root {
+  --bg: #fafaf8;
+  --fg: #1c2027;
+  --muted: #5b6270;
+  --card: #ffffff;
+  --line: #e1e3e8;
+  --accent: #2f5fd0;
+  --accent-fg: #ffffff;
+  --code: #eef0f4;
+  --shell: #cfd3da;
+  --shell-dark: #aeb3bd;
+  --page: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14171d;
+    --fg: #e8eaee;
+    --muted: #9aa1ae;
+    --card: #1b1f27;
+    --line: #2a303b;
+    --accent: #7ea4ff;
+    --accent-fg: #0f1523;
+    --code: #232834;
+    --shell: #3a3f4a;
+    --shell-dark: #2b2f38;
+    --page: #20242d;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+.wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+a { color: var(--accent); }
+h1, h2, h3 { line-height: 1.2; margin: 0; }
+h2 { font-size: 1.6rem; margin-bottom: 14px; }
+h3 { font-size: 1.05rem; }
+p { margin: 0 0 14px; }
+code { background: var(--code); padding: 1px 6px; border-radius: 5px; font-size: .9em; overflow-wrap: anywhere; }
+kbd {
+  font: inherit; font-size: .85em; background: var(--code); border: 1px solid var(--line);
+  border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; white-space: nowrap;
+}
+section { padding: 44px 0 8px; }
+.narrow { max-width: 680px; }
+
+header { padding: 56px 0 24px; }
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.brand img { width: 40px; height: 40px; border-radius: 9px; }
+.brand span { font-size: 1.3rem; font-weight: 650; }
+h1 { font-size: clamp(2rem, 5.5vw, 3.2rem); letter-spacing: -.02em; max-width: 18ch; margin-bottom: 16px; }
+.lead { font-size: 1.15rem; color: var(--muted); max-width: 40em; margin-bottom: 24px; }
+.buttons { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn {
+  display: inline-block; padding: 11px 20px; border-radius: 9px; font-weight: 600; text-decoration: none;
+  background: var(--accent); color: var(--accent-fg);
+}
+.btn:hover { filter: brightness(1.08); }
+.link { font-weight: 600; }
+
+/* two-screen laptop */
+.rig { max-width: 600px; margin: 36px auto 0; }
+.lid {
+  background: var(--shell-dark); padding: 2.2% 2.2% 2.6%; border-radius: 12px 12px 3px 3px;
+}
+.main {
+  background: var(--page); aspect-ratio: 16 / 7; border-radius: 3px; padding: 5% 7%; overflow: hidden;
+  border: 1px solid var(--line);
+}
+.bar { height: 7px; border-radius: 4px; background: var(--line); margin-bottom: 7%; width: 38%; }
+.main h4 { margin: 0 0 3%; font-size: clamp(.7rem, 2.2vw, 1.05rem); }
+.main p { font-size: clamp(.55rem, 1.9vw, .95rem); line-height: 1.55; color: var(--muted); margin: 0; }
+.hinge { height: 10px; background: var(--shell); border-radius: 0 0 4px 4px; margin: 0 -2%; }
+.deck { background: var(--shell); margin: 0 -2%; padding: 2.5% 14% 3%; border-radius: 0 0 14px 14px; }
+.pad {
+  background: #000; border-radius: 5px; padding: 2.5%; display: flex; justify-content: center; align-items: center;
+}
+.pad img { display: block; width: 100%; max-width: 420px; height: auto; border-radius: 3px; }
+.cap { text-align: center; color: var(--muted); font-size: .9rem; margin-top: 14px; }
+
+ol.steps { padding-left: 1.2em; margin: 0 0 14px; }
+ol.steps li { margin-bottom: 6px; }
+
+table { border-collapse: collapse; width: 100%; max-width: 680px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; font-size: .9rem; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr)); gap: 18px; margin-top: 18px; }
+figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+figure .shot { display: flex; justify-content: center; align-items: flex-start; min-height: 0; }
+figure img { max-width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); }
+figcaption { margin-top: 10px; font-size: .9rem; color: var(--muted); }
+figcaption b { color: var(--fg); }
+.tag { display: inline-block; font-size: .75rem; font-weight: 600; padding: 0 7px; border-radius: 99px; background: var(--code); margin-right: 6px; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; }
+.cols > div p:last-child { margin-bottom: 0; }
+
+footer { margin-top: 56px; padding: 28px 0 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: .95rem; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+
+@media (max-width: 480px) {
+  header { padding-top: 36px; }
+  body { font-size: 16px; }
+  .deck { padding-left: 6%; padding-right: 6%; }
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="wrap">
+  <div class="brand"><img src="img/icon.png" width="40" height="40" alt=""><span>Glance</span></div>
+  <h1>Press a key and get an answer about what is on your screen.</h1>
+  <p class="lead">Glance is a small tray app for Windows and macOS. It takes a screenshot, sends it to the AI you picked and shows the answer in a small popup in the corner, or on another screen if you choose one.</p>
+  <div class="buttons">
+    <a class="btn" href="https://github.com/aytutuna/Glance/releases/latest">Download for Windows</a>
+    <a class="btn" href="https://github.com/aytutuna/Glance/releases/latest">Download for Mac</a>
+    <a class="link" href="https://github.com/aytutuna/Glance">Source on GitHub</a>
+  </div>
+
+  <div class="rig" role="img" aria-label="A laptop with a second screen under the main one. The main screen shows a German notice about library opening hours; the lower screen shows Glance's English translation.">
+    <div class="lid">
+      <div class="main" aria-hidden="true">
+        <div class="bar"></div>
+        <h4>Neue Öffnungszeiten der Bibliothek</h4>
+        <p>Ab dem 1. Dezember ist die Bibliothek montags bis freitags von 9 bis 18 Uhr geöffnet, samstags bleibt sie geschlossen. Zurückgegebene Bücher können weiterhin in den Rückgabekasten am Eingang gelegt werden.</p>
+      </div>
+    </div>
+    <div class="hinge"></div>
+    <div class="deck">
+      <div class="pad"><img src="img/popup.png" width="420" height="176" alt=""></div>
+    </div>
+  </div>
+  <p class="cap">The answer on the ScreenPad, under the main screen.</p>
+</div>
+</header>
+
+<main class="wrap">
+
+<section>
+  <h2>Why I made it</h2>
+  <div class="narrow">
+    <p>I have an ASUS Zenbook with a ScreenPad, a second small touch screen built into the laptop. It is a good place for an answer: you can see it, and it doesn't cover what you are working on. Glance reads the main screen and puts the answer on the ScreenPad.</p>
+    <p>The use turned out to be wider than that. Ask what an error message means or what a chart shows, translate a page or a menu, or summarize the email in front of you. Any second screen works, and with one screen the answer sits in the corner.</p>
+  </div>
+</section>
+
+<section>
+  <h2>How it works</h2>
+  <div class="narrow">
+    <ol class="steps">
+      <li>Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Q</kbd>. Glance takes a screenshot.</li>
+      <li>It sends the screenshot with the prompt of the current mode to the AI you picked.</li>
+      <li>The answer appears in a small popup.</li>
+    </ol>
+    <p>To read only part of the screen, press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> and drag out an area. You can type a follow-up question in the popup, and it keeps the conversation going. You can also read the screen under the mouse, a specific screen, all screens, or the active window.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Answer on a second screen</h2>
+  <div class="narrow">
+    <p>In the menu, Show answer on picks the screen that gets the popup, which is how I send it to the ScreenPad. Identify screens shows a big number on each display for two seconds so you know which is which. Answer position puts the popup in the bottom right or the center, or in an area you draw yourself.</p>
+    <p>The Plain black answer option swaps the dark gray panel for pure black with white text, and Text opacity turns the text down if it is too bright. The hide key (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) blanks the text and leaves the screen black.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Modes</h2>
+  <div class="narrow">
+    <p>A mode is a prompt. Answer, Explain, Translate and Summarize come built in, and you can edit their prompts or add your own, for example one that always replies in two lines or always in your own language.</p>
+  </div>
+</section>
+
+<section>
+  <h2>AI providers</h2>
+  <div class="narrow">
+    <p>Glance works with the Claude CLI, the Claude API, OpenAI, Gemini and any OpenAI-compatible server, including one running on your own computer. The Claude CLI needs no key if <code>claude</code> is installed and signed in.</p>
+    <p>You can save several keys and providers and put them in order. When a key fails or a limit runs out, Glance moves on to the next one.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Privacy</h2>
+  <div class="narrow">
+    <p>Glance has no accounts, no analytics and no telemetry. When you read the screen, it sends the screenshot, the mode's prompt and any follow-up questions you type to the AI you selected. Nothing else is sent to it. With the Claude CLI, Glance hands the screenshot to the <code>claude</code> program on your computer, which talks to Anthropic itself. If you list more than one AI, the same screenshot can go to each in turn when one fails.</p>
+    <p>API keys are encrypted for your user account, with DPAPI on Windows and in the Keychain on a Mac. Screenshots stay in memory while they are sent and are not written to disk. Keeping the last ten answers is optional, and they are encrypted too. Once a day Glance asks GitHub for the latest release to tell you about updates; you can turn that off. The full text is in <a href="https://github.com/aytutuna/Glance/blob/main/PRIVACY.md">PRIVACY.md</a>.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Hotkeys</h2>
+  <table>
+    <thead><tr><th>Keys</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Q</kbd></td><td>Read the screen</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Read an area you drag out</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd></td><td>Close the answer</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd></td><td>Hide the answer text and keep the screen black</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:12px;color:var(--muted)">These are the defaults; change them in the settings window.</p>
+</section>
+
+<section>
+  <h2>Install</h2>
+  <div class="cols">
+    <div>
+      <h3>Windows</h3>
+      <p>Get the portable exe (x64 or arm64) or the installer from <a href="https://github.com/aytutuna/Glance/releases/latest">Releases</a>. The portable exe needs no install and runs from anywhere.</p>
+      <p>The app is not signed. SmartScreen will show "Windows protected your PC": choose More info, then Run anyway. If Smart App Control is on, Windows blocks unsigned apps entirely and Glance will not start.</p>
+    </div>
+    <div>
+      <h3>Mac</h3>
+      <p>Download the Mac zip from Releases, unzip it and move Glance to Applications. It needs macOS 14 or later.</p>
+      <p>The app is not notarized, so macOS blocks it the first time. Open System Settings > Privacy &amp; Security and click Open Anyway (macOS 15 and later no longer offer this from the right-click menu), or run <code>xattr -dr com.apple.quarantine /Applications/Glance.app</code>.</p>
+      <p>The first time it reads the screen, macOS asks for Screen &amp; System Audio Recording access. It asks again after each update because the app has no stable signing identity.</p>
+    </div>
+  </div>
+  <p style="margin-top:14px">After that, open the tray menu (the menu bar on a Mac), choose Connect an AI... and pick a provider. The interface is in English and Turkish.</p>
+</section>
+
+<section>
+  <h2>Screenshots</h2>
+  <div class="grid">
+    <figure>
+      <div class="shot"><img src="img/win-menu.png" width="211" height="500" loading="lazy" alt="Glance tray menu on Windows"></div>
+      <figcaption><span class="tag">Windows</span>The tray menu.</figcaption>
+    </figure>
+    <figure>
+      <div class="shot"><img src="img/mac-menu.png" width="180" height="541" loading="lazy" alt="Glance menu bar menu on macOS"></div>
+      <figcaption><span class="tag">Mac</span>The same menu in the menu bar.</figcaption>
+    </figure>
+    <figure>
+      <div class="shot"><img src="img/win-answer.png" width="460" height="387" loading="lazy" alt="Settings, Answer tab, on Windows"></div>
+      <figcaption><span class="tag">Windows</span>Settings, Answer tab: which screen, position, opacity, plain black.</figcaption>
+    </figure>
+    <figure>
+      <div class="shot"><img src="img/mac-answer.png" width="520" height="372" loading="lazy" alt="Settings, Answer tab, on macOS"></div>
+      <figcaption><span class="tag">Mac</span>Settings, Answer tab.</figcaption>
+    </figure>
+    <figure>
+      <div class="shot"><img src="img/win-reading.png" width="460" height="387" loading="lazy" alt="Settings, Reading tab, on Windows"></div>
+      <figcaption><span class="tag">Windows</span>Settings, Reading tab: mode and where to read from.</figcaption>
+    </figure>
+    <figure>
+      <div class="shot"><img src="img/mac-reading.png" width="520" height="372" loading="lazy" alt="Settings, Reading tab, on macOS"></div>
+      <figcaption><span class="tag">Mac</span>Settings, Reading tab.</figcaption>
+    </figure>
+    <figure>
+      <div class="shot"><img src="img/win-connect.png" width="420" height="351" loading="lazy" alt="Connect an AI dialog on Windows"></div>
+      <figcaption><span class="tag">Windows</span>Connect an AI: provider, key and model.</figcaption>
+    </figure>
+    <figure>
+      <div class="shot"><img src="img/mac-connect.png" width="440" height="384" loading="lazy" alt="Connect an AI dialog on macOS"></div>
+      <figcaption><span class="tag">Mac</span>Connect an AI.</figcaption>
+    </figure>
+    <figure>
+      <div class="shot"><img src="img/win-ai.png" width="460" height="387" loading="lazy" alt="Settings, AI tab, on Windows"></div>
+      <figcaption><span class="tag">Windows</span>Settings, AI tab: the order Glance tries your providers in.</figcaption>
+    </figure>
+    <figure>
+      <div class="shot"><img src="img/mac-modes.png" width="180" height="414" loading="lazy" alt="The list of modes on macOS"></div>
+      <figcaption><span class="tag">Mac</span>Modes: the built-in list, with Add and Delete.</figcaption>
+    </figure>
+  </div>
+</section>
+
+</main>
+
+<footer>
+<div class="wrap">
+  <span>Made by Aytu Tuna</span>
+  <a href="https://github.com/aytutuna/Glance">Source</a>
+  <a href="https://github.com/aytutuna/Glance/blob/main/LICENSE">MIT licence</a>
+  <a href="https://github.com/aytutuna/Glance/blob/main/PRIVACY.md">Privacy</a>
+  <a href="https://github.com/aytutuna/Glance/releases">Releases</a>
+</div>
+</footer>
+
+</body>
+</html>

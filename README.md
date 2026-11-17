@@ -2,6 +2,8 @@
 
 Glance is a small tray app for Windows and macOS. Press a hotkey and it reads your screen, sends the screenshot to an AI you choose and shows the answer in a popup in the corner of the screen. It works with the Claude CLI, the Claude API, OpenAI, Gemini and any OpenAI-compatible server.
 
+Project page: https://aytutuna.github.io/Glance/
+
 ## Download
 
 Get the latest build from the Releases page: a portable exe (x64 or arm64) or an installer. The portable exe needs no install and can be run from anywhere.
