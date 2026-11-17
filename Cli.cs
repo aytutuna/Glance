@@ -29,6 +29,11 @@ abstract class CliProvider(string exe, string label) : IProvider
             // so any failure counts as a reason to move on rather than matching their wording
             throw new AiException(ex.Message) { KeyProblem = true };
         }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // the temp folder or the answer file, so the next provider still gets a turn
+            throw new AiException(ex.Message) { KeyProblem = true };
+        }
     }
 
     // null when the probe did not finish, so the next read tries again

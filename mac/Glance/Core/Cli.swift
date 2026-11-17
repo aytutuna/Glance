@@ -83,6 +83,9 @@ extension CliProvider {
             // their limit and sign-in messages are plain text that changes between versions,
             // so any failure counts as a reason to move on rather than matching their wording
             throw AiError(e.message, keyProblem: true)
+        } catch let e as CocoaError {
+            // the temp folder or the answer file, so the next provider still gets a turn
+            throw AiError(e.localizedDescription, keyProblem: true)
         }
     }
 
