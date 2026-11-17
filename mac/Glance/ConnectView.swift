@@ -126,8 +126,8 @@ final class ConnectModel: ObservableObject {
                 Log.write("sign in", error)
                 return say(L("Crashed"), true)
             }
-            NSWorkspace.shared.open([script], withApplicationAt: URL(fileURLWithPath: "/System/Applications/Utilities/Terminal.app"),
-                                    configuration: NSWorkspace.OpenConfiguration())
+            _ = try? await NSWorkspace.shared.open([script], withApplicationAt: URL(fileURLWithPath: "/System/Applications/Utilities/Terminal.app"),
+                                                   configuration: NSWorkspace.OpenConfiguration())
         }
     }
 
