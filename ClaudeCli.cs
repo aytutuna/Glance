@@ -46,7 +46,7 @@ class ClaudeCli() : CliProvider("claude", "Claude")
             return result;
         if (exit != 0)
             throw Exited(exit, errors);
-        throw new AiException(string.Format(Strings.CliNoAnswer, Label));
+        throw NoAnswer(errors);
     }
 
     static async Task<(string? Answer, bool Failed)> ReadResult(StreamReader stdout, Action<string> onText)
