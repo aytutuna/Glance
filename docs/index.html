@@ -97,6 +97,28 @@ h1 { font-size: clamp(2rem, 5.5vw, 3.2rem); letter-spacing: -.02em; max-width: 1
 .pad img { display: block; width: 100%; max-width: 420px; height: auto; border-radius: 3px; }
 .cap { text-align: center; color: var(--muted); font-size: .9rem; margin-top: 14px; }
 
+/* one screen, two monitors, ScreenPad */
+.setups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 18px; margin: 22px 0 26px; }
+.scene { min-height: 190px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.mon { width: 100%; max-width: 230px; }
+.two .mon { width: 50%; }
+.scr {
+  position: relative; aspect-ratio: 16 / 10; background: var(--page); border: 6px solid var(--shell-dark);
+  border-radius: 6px; padding: 9% 10%; overflow: hidden;
+}
+.scr.black { background: #000; display: flex; align-items: flex-end; justify-content: flex-end; padding: 7%; }
+.ln { height: 5px; border-radius: 3px; background: var(--shell); margin-bottom: 7px; }
+.ln.s { width: 60%; }
+.stand { width: 8%; height: 12px; margin: 0 auto 5px; background: var(--shell); position: relative; }
+.stand::after { content: ""; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%); width: 450%; height: 5px; background: var(--shell); border-radius: 3px; }
+.pop { position: absolute; right: 5%; bottom: 7%; width: 54%; height: auto; border-radius: 3px; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); }
+.scr.black .pop { position: static; width: 100%; box-shadow: none; }
+.lap { width: 100%; max-width: 180px; }
+.lap .scr { border-radius: 6px 6px 2px 2px; }
+.lapdeck { background: var(--shell); margin: 0 -5%; padding: 5% 16% 6%; border-radius: 0 0 10px 10px; }
+.lapdeck div { background: #000; border-radius: 3px; padding: 4%; }
+.lapdeck img { display: block; width: 100%; height: auto; }
+
 ol.steps { padding-left: 1.2em; margin: 0 0 14px; }
 ol.steps li { margin-bottom: 6px; }
 
@@ -177,10 +199,44 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; }
   </div>
 </section>
 
-<section>
-  <h2>Answer on a second screen</h2>
+<section id="screens">
+  <h2>One screen, two screens or a ScreenPad</h2>
+  <p class="narrow">You don't need a second screen. The ScreenPad is just how I use it; Glance works the same on a single laptop screen or a desk with two monitors.</p>
+  <div class="setups">
+    <figure>
+      <div class="scene">
+        <div class="mon">
+          <div class="scr"><div class="ln"></div><div class="ln"></div><div class="ln s"></div><div class="ln"></div><img class="pop" src="img/popup.png" width="420" height="176" alt=""></div>
+          <div class="stand"></div>
+        </div>
+      </div>
+      <figcaption><b>One screen.</b> The answer opens in the bottom right corner, on top of whatever is there, and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> closes it. You can move it to the center or draw the area it should use.</figcaption>
+    </figure>
+    <figure>
+      <div class="scene two">
+        <div class="mon">
+          <div class="scr"><div class="ln"></div><div class="ln"></div><div class="ln s"></div><div class="ln"></div></div>
+          <div class="stand"></div>
+        </div>
+        <div class="mon">
+          <div class="scr black"><img class="pop" src="img/popup.png" width="420" height="176" alt=""></div>
+          <div class="stand"></div>
+        </div>
+      </div>
+      <figcaption><b>A second monitor.</b> Pick it under Show answer on. The answer goes there and nothing covers the screen you are working on.</figcaption>
+    </figure>
+    <figure>
+      <div class="scene">
+        <div class="lap">
+          <div class="scr"><div class="ln"></div><div class="ln"></div><div class="ln s"></div></div>
+          <div class="lapdeck"><div><img src="img/popup.png" width="420" height="176" alt=""></div></div>
+        </div>
+      </div>
+      <figcaption><b>A ScreenPad.</b> The same setting with the small screen built into the laptop. This is the setup I made it for.</figcaption>
+    </figure>
+  </div>
   <div class="narrow">
-    <p>In the menu, Show answer on picks the screen that gets the popup, which is how I send it to the ScreenPad. Identify screens shows a big number on each display for two seconds so you know which is which. Answer position puts the popup in the bottom right or the center, or in an area you draw yourself.</p>
+    <p>In the menu, Show answer on picks the screen that gets the popup. Identify screens shows a big number on each display for two seconds so you know which is which. Answer position puts the popup in the bottom right or the center, or in an area you draw yourself.</p>
     <p>The Plain black answer option swaps the dark gray panel for pure black with white text, and Text opacity turns the text down if it is too bright. The hide key (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) blanks the text and leaves the screen black.</p>
   </div>
 </section>
