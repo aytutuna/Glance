@@ -131,7 +131,7 @@ struct Settings: Codable {
     var output = show
     // the keys themselves are in the Keychain under the account "<provider>:<tag>"
     var apiKeys: [String: [String]] = [:]
-    // tried from the top: "claude" is the CLI, provider:tag is one saved key, a bare provider a keyless one
+    // tried from the top: claude, codex and geminicli are CLI accounts, provider:tag is one saved key, a bare provider a keyless one
     var order: [String] = []
 
     // the file exists but couldn't be read, so saving now would overwrite saved settings

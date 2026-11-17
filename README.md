@@ -16,7 +16,7 @@ Glance sits in the tray, or in the menu bar on a Mac. Open its menu and choose C
 
 To use an account instead of a key, install the tool and sign in from the same dialog: the Claude CLI (`npm install -g @anthropic-ai/claude-code`, then `claude`), the Codex CLI for a ChatGPT account (`npm install -g @openai/codex`, then `codex login`) or the Gemini CLI for a Google account (`npm install -g @google/gemini-cli`, then `gemini`). No key is needed, and the usage limits of the account's plan apply.
 
-Each provider's reasoning effort can be set in Connect an AI, in the tray menu or in the settings window, where the provider supports it. The Gemini CLI uses the model choice instead.
+Reasoning effort can be set for each provider in Connect an AI. The tray menu and the settings window change it for the first AI in the order. The Gemini CLI has no effort setting; it uses the model choice instead.
 
 Answer goes to, in the menu and the settings window, can also copy the answer to the clipboard, or only copy it without showing anything, so you can paste it where you need it.
 

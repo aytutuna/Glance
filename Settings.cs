@@ -97,7 +97,7 @@ class Settings
     public string Output { get; set; } = Show;
     // DPAPI-encrypted for this Windows account, base64; never stored as plain text
     public Dictionary<string, List<string>> ApiKeys { get; set; } = new();
-    // tried from the top: "claude" is the CLI, provider:tag is one saved key, a bare provider a keyless one
+    // tried from the top: claude, codex and geminicli are CLI accounts, provider:tag is one saved key, a bare provider a keyless one
     public List<string> Order { get; set; } = new();
 
     public static bool IsCli(string id)
