@@ -71,7 +71,7 @@ struct SettingsView: View {
             }
             .padding(12)
         }
-        .frame(width: 520, height: 340)
+        .frame(width: 520, height: 380)
     }
 
     private var reading: some View {
@@ -145,6 +145,16 @@ struct SettingsView: View {
             if chain.contains(Settings.claude) {
                 Picker(L("ClaudeCliModel"), selection: bind(\.model)) {
                     ForEach(Settings.models, id: \.id) { Text($0.name).tag($0.id) }
+                }
+            }
+            let first = app.settings.firstProvider(chain)
+            if !Settings.effortLevels(first).isEmpty {
+                Picker(L("Effort"), selection: Binding(get: { app.settings.effortOf(first) }, set: {
+                    app.settings.effort[first] = $0
+                    app.save()
+                    live.bump()
+                })) {
+                    ForEach([""] + Settings.effortLevels(first), id: \.self) { Text(Settings.effortName($0)).tag($0) }
                 }
             }
         }

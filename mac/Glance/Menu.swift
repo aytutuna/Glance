@@ -62,6 +62,9 @@ extension AppDelegate {
         if chain.contains(Settings.claude) {
             items.append(modelMenu())
         }
+        if let effort = effortMenu(chain) {
+            items.append(effort)
+        }
         items.append(modeMenu())
         items.append(translateMenu())
         items.append(ActionItem(L("IdentifyScreens")) { self.identify() })
@@ -151,6 +154,18 @@ extension AppDelegate {
     private func modelMenu() -> NSMenuItem {
         submenu(L("ClaudeCliModel"), Settings.models.map { model in
             ActionItem(model.name, checked: settings.model == model.id, run: change { self.settings.model = model.id })
+        })
+    }
+
+    // for the AI tried first; none when that one has no levels
+    private func effortMenu(_ chain: [String]) -> NSMenuItem? {
+        let id = settings.firstProvider(chain)
+        let levels = Settings.effortLevels(id)
+        if levels.isEmpty {
+            return nil
+        }
+        return submenu(L("Effort"), ([""] + levels).map { level in
+            ActionItem(Settings.effortName(level), checked: settings.effortOf(id) == level, run: change { self.settings.effort[id] = level })
         })
     }
 
