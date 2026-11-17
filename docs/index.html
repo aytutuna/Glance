@@ -7,7 +7,7 @@
 <meta name="description" content="Glance is a small tray app for Windows and macOS. Press a hotkey, it reads your screen, asks the AI you chose and shows the answer in a popup, on this screen or another one.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Glance">
-<meta property="og:description" content="Press a key and get an answer about what is on your screen. Works with Claude, OpenAI, Gemini and local servers.">
+<meta property="og:description" content="Press a key and get an answer about what is on your screen. Sign in with a ChatGPT, Claude or Google account, or use an API key or a local server.">
 <meta property="og:image" content="https://aytutuna.github.io/Glance/img/og.png">
 <meta property="og:url" content="https://aytutuna.github.io/Glance/">
 <meta name="twitter:card" content="summary_large_image">
@@ -237,6 +237,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; }
   </div>
   <div class="narrow">
     <p>In the menu, Show answer on picks the screen that gets the popup. Identify screens shows a big number on each display for two seconds so you know which is which. Answer position puts the popup in the bottom right or the center, or in an area you draw yourself.</p>
+    <p>Answer goes to can also copy the answer to the clipboard, or only copy it without showing anything, so you can paste it where you need it.</p>
     <p>The Plain black answer option swaps the dark gray panel for pure black with white text, and Text opacity turns the text down if it is too bright. The hide key (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) blanks the text and leaves the screen black.</p>
   </div>
 </section>
@@ -251,7 +252,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; }
 <section>
   <h2>AI providers</h2>
   <div class="narrow">
-    <p>Glance works with the Claude CLI, the Claude API, OpenAI, Gemini and any OpenAI-compatible server, including one running on your own computer. The Claude CLI needs no key if <code>claude</code> is installed and signed in.</p>
+    <p>You can sign in with a ChatGPT, Claude or Google account through the official command-line tools (Codex CLI, Claude CLI and Gemini CLI), with no API key, or use an API key for the Claude API, OpenAI, Gemini or any OpenAI-compatible server, including one running on your own computer. The usage limits of the account's plan apply.</p>
+    <p>Each provider's reasoning effort can be set in Connect an AI, in the menu or in Settings, where the provider supports it. The Gemini CLI uses the model choice instead.</p>
     <p>You can save several keys and providers and put them in order. When a key fails or a limit runs out, Glance moves on to the next one.</p>
   </div>
 </section>
@@ -259,8 +261,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; }
 <section>
   <h2>Privacy</h2>
   <div class="narrow">
-    <p>Glance has no accounts, no analytics and no telemetry. When you read the screen, it sends the screenshot, the mode's prompt and any follow-up questions you type to the AI you selected. Nothing else is sent to it. With the Claude CLI, Glance hands the screenshot to the <code>claude</code> program on your computer, which talks to Anthropic itself. If you list more than one AI, the same screenshot can go to each in turn when one fails.</p>
-    <p>API keys are encrypted for your user account, with DPAPI on Windows and in the Keychain on a Mac. Screenshots stay in memory while they are sent and are not written to disk. Keeping the last ten answers is optional, and they are encrypted too. Once a day Glance asks GitHub for the latest release to tell you about updates; you can turn that off. The full text is in <a href="https://github.com/aytutuna/Glance/blob/main/PRIVACY.md">PRIVACY.md</a>.</p>
+    <p>Glance has no accounts, no analytics and no telemetry. When you read the screen, it sends the screenshot, the mode's prompt and any follow-up questions you type to the AI you selected. Nothing else is sent to it. With the Claude, Codex and Gemini CLIs, Glance hands the screenshot to the <code>claude</code>, <code>codex</code> or <code>gemini</code> program on your computer, which talks to Anthropic, OpenAI or Google itself. If you list more than one AI, the same screenshot can go to each in turn when one fails.</p>
+    <p>API keys are encrypted for your user account, with DPAPI on Windows and in the Keychain on a Mac. Screenshots stay in memory while they are sent and are not written to disk, except for the Codex and Gemini CLIs, which get the screenshot in a private temporary folder that is deleted right after the request. If you choose to copy the answer, it sits on the clipboard where other apps can read it. Keeping the last ten answers is optional, and they are encrypted too. Once a day Glance asks GitHub for the latest release to tell you about updates; you can turn that off. The full text is in <a href="https://github.com/aytutuna/Glance/blob/main/PRIVACY.md">PRIVACY.md</a>.</p>
   </div>
 </section>
 
