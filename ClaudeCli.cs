@@ -39,7 +39,7 @@ class ClaudeCli : IProvider
         if (supportsEffort == true)
         {
             args.Add("--effort");
-            args.Add("high");
+            args.Add(chat.Effort.Length > 0 ? chat.Effort : "high");
         }
 
         using var proc = Launch(args);

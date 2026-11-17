@@ -6,12 +6,12 @@ static class Ai
     public static IProvider Create(Settings s)
     {
         var chain = s.Chain();
-        var steps = new List<(IProvider, string)>();
+        var steps = new List<(IProvider, string, string)>();
         foreach (var entry in chain)
         {
             if (entry == Settings.Claude)
             {
-                steps.Add((new ClaudeCli(), s.Model));
+                steps.Add((new ClaudeCli(), s.Model, s.EffortOf(entry)));
                 continue;
             }
             string id = entry.Split(':')[0];
@@ -22,7 +22,7 @@ static class Ai
                 continue;
             try
             {
-                steps.Add((Make(id, BaseOf(id, s.CustomUrl, key != null), key), model));
+                steps.Add((Make(id, BaseOf(id, s.CustomUrl, key != null), key), model, s.EffortOf(id)));
             }
             catch (AiException)
             {

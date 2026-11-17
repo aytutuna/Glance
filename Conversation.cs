@@ -4,6 +4,7 @@ class Conversation(byte[] jpeg, string model, string mode, string instruction, I
 {
     public byte[] Jpeg { get; } = jpeg;
     public string Model { get; set; } = model;
+    public string Effort { get; set; } = "";
     public string Mode { get; } = mode;
     public string Instruction { get; } = instruction;
     public IProvider Provider { get; } = provider;

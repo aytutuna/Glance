@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Glance;
 
 namespace Glance.Tests;
@@ -109,5 +110,35 @@ public class LogicTests
         Assert.Equal("Ctrl+Shift+Q", KeyDialog.KeyName(Keys.Control | Keys.Shift | Keys.Q));
         Assert.Equal("Left Ctrl", KeyDialog.KeyName(Keys.LControlKey));
         Assert.False(KeyDialog.IsValid(Keys.Control | Keys.Shift));
+    }
+
+    static Conversation Chat(string model, string effort)
+    {
+        return new Conversation(new byte[] { 1 }, model, "answer", "Answer it.", null!) { Effort = effort };
+    }
+
+    [Fact]
+    public void OpenAiSendsEffortOnlyWhenChosen()
+    {
+        Assert.False(OpenAiProvider.Body(Chat("gpt-x", "")).ContainsKey("reasoning_effort"));
+        Assert.Equal("minimal", OpenAiProvider.Body(Chat("gpt-x", "minimal"))["reasoning_effort"]);
+    }
+
+    [Fact]
+    public void GeminiMapsEffortByModelFamily()
+    {
+        Assert.False(GeminiProvider.Body(Chat("gemini-3-pro", "")).ContainsKey("generationConfig"));
+        Assert.Contains("\"thinkingBudget\":1024", JsonSerializer.Serialize(GeminiProvider.Body(Chat("gemini-2.5-flash", "low"))));
+        Assert.Contains("\"thinkingBudget\":24576", JsonSerializer.Serialize(GeminiProvider.Body(Chat("gemini-2.5-flash", "high"))));
+        Assert.Contains("\"thinkingLevel\":\"low\"", JsonSerializer.Serialize(GeminiProvider.Body(Chat("gemini-3-pro", "low"))));
+    }
+
+    [Fact]
+    public void ClaudeApiEffortDefaultsToHighForCurrentModels()
+    {
+        Assert.Equal("high", ClaudeApi.Params(Chat(Settings.Models[0].Id, "")).OutputConfig!.Effort!.Raw());
+        Assert.Equal("max", ClaudeApi.Params(Chat(Settings.Models[0].Id, "max")).OutputConfig!.Effort!.Raw());
+        Assert.Null(ClaudeApi.Params(Chat("claude-old", "")).OutputConfig);
+        Assert.Equal("low", ClaudeApi.Params(Chat("claude-old", "low")).OutputConfig!.Effort!.Raw());
     }
 }

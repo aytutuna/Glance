@@ -16,7 +16,7 @@ class AiException(string message) : Exception(message)
 }
 
 // Tries each option in turn without asking, for when a limit or a budget runs out.
-class Failover(string id, (IProvider Provider, string Model)[] steps) : IProvider
+class Failover(string id, (IProvider Provider, string Model, string Effort)[] steps) : IProvider
 {
     // a limit comes back eventually, so the first choice gets another try after this long
     const long RetryMs = 30 * 60 * 1000;
@@ -33,6 +33,7 @@ class Failover(string id, (IProvider Provider, string Model)[] steps) : IProvide
         {
             int at = (start + i) % steps.Length;
             chat.Model = steps[at].Model;
+            chat.Effort = steps[at].Effort;
             try
             {
                 string answer = await steps[at].Provider.AskAsync(chat, onText, ct);

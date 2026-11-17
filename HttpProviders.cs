@@ -112,6 +112,16 @@ class OpenAiProvider(string name, string baseUrl, string? key, TimeSpan limit) :
 
     protected override HttpRequestMessage Request(Conversation chat)
     {
+        var req = new HttpRequestMessage(HttpMethod.Post, baseUrl + "/chat/completions")
+        {
+            Content = Json(Body(chat)),
+        };
+        Authorize(req, Key);
+        return req;
+    }
+
+    internal static Dictionary<string, object> Body(Conversation chat)
+    {
         var messages = new List<object> { new { role = "system", content = Prompts.System(chat) } };
         bool first = true;
         foreach (var (user, text) in chat.Turns())
@@ -138,12 +148,10 @@ class OpenAiProvider(string name, string baseUrl, string? key, TimeSpan limit) :
                 messages.Add(new { role = "user", content = text });
             }
         }
-        var req = new HttpRequestMessage(HttpMethod.Post, baseUrl + "/chat/completions")
-        {
-            Content = Json(new { model = chat.Model, stream = true, messages }),
-        };
-        Authorize(req, Key);
-        return req;
+        var body = new Dictionary<string, object> { ["model"] = chat.Model, ["stream"] = true, ["messages"] = messages };
+        if (chat.Effort.Length > 0)
+            body["reasoning_effort"] = chat.Effort;
+        return body;
     }
 
     protected override string? Delta(JsonElement root, bool any)
@@ -196,6 +204,17 @@ class GeminiProvider(string? key) : ChatProvider("Gemini", key, TimeSpan.FromSec
 
     protected override HttpRequestMessage Request(Conversation chat)
     {
+        var req = new HttpRequestMessage(HttpMethod.Post,
+            $"{BaseUrl}/models/{Uri.EscapeDataString(chat.Model)}:streamGenerateContent?alt=sse")
+        {
+            Content = Json(Body(chat)),
+        };
+        req.Headers.Add("x-goog-api-key", Key!);
+        return req;
+    }
+
+    internal static Dictionary<string, object> Body(Conversation chat)
+    {
         var contents = new List<object>();
         bool first = true;
         foreach (var (user, text) in chat.Turns())
@@ -218,13 +237,20 @@ class GeminiProvider(string? key) : ChatProvider("Gemini", key, TimeSpan.FromSec
                 contents.Add(new { role = user ? "user" : "model", parts = new[] { new { text } } });
             }
         }
-        var req = new HttpRequestMessage(HttpMethod.Post,
-            $"{BaseUrl}/models/{Uri.EscapeDataString(chat.Model)}:streamGenerateContent?alt=sse")
+        var body = new Dictionary<string, object>
         {
-            Content = Json(new { systemInstruction = new { parts = new[] { new { text = Prompts.System(chat) } } }, contents }),
+            ["systemInstruction"] = new { parts = new[] { new { text = Prompts.System(chat) } } },
+            ["contents"] = contents,
         };
-        req.Headers.Add("x-goog-api-key", Key!);
-        return req;
+        if (chat.Effort.Length > 0)
+        {
+            // 2.5 models take a token budget, newer ones a named level
+            object thinking = chat.Model.Contains("2.5")
+                ? new { thinkingBudget = chat.Effort == "low" ? 1024 : 24576 }
+                : new { thinkingLevel = chat.Effort };
+            body["generationConfig"] = new { thinkingConfig = thinking };
+        }
+        return body;
     }
 
     protected override string? Delta(JsonElement root, bool any)

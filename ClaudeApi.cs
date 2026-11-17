@@ -58,7 +58,7 @@ class ClaudeApi(string url, string key) : IProvider
         return answer.ToString();
     }
 
-    static MessageCreateParams Params(Conversation chat)
+    internal static MessageCreateParams Params(Conversation chat)
     {
         var messages = new List<BetaMessageParam>();
         bool first = true;
@@ -102,7 +102,10 @@ class ClaudeApi(string url, string key) : IProvider
             System = Prompts.System(chat),
             Messages = messages,
         };
-        if (current)
+        // a chosen level is sent for any model; the default is only for the current ones
+        if (chat.Effort.Length > 0)
+            request = request with { OutputConfig = new BetaOutputConfig { Effort = Level(chat.Effort) } };
+        else if (current)
             request = request with { OutputConfig = new BetaOutputConfig { Effort = Effort.High } };
         if (chat.Model is "claude-opus-5-5" or "claude-sonnet-5-5")
         {
@@ -113,6 +116,18 @@ class ClaudeApi(string url, string key) : IProvider
             };
         }
         return request;
+    }
+
+    static Effort Level(string level)
+    {
+        return level switch
+        {
+            "low" => Effort.Low,
+            "medium" => Effort.Medium,
+            "xhigh" => Effort.Xhigh,
+            "max" => Effort.Max,
+            _ => Effort.High,
+        };
     }
 
     public static async Task<string[]> Models(string url, string key, CancellationToken ct)
