@@ -534,4 +534,19 @@
   <data name="GeminiNotFound" xml:space="preserve">
     <value>Glance gemini komutunu bulamıyor. npm install -g @google/gemini-cli ile kurun, oturum açmak için bir kez gemini çalıştırın, sonra yeniden deneyin.</value>
   </data>
+  <data name="AccountFound" xml:space="preserve">
+    <value>Bulundu: {0}</value>
+  </data>
+  <data name="AccountMissing" xml:space="preserve">
+    <value>Kurulu değil. Şununla kurun: {0}</value>
+  </data>
+  <data name="SignedIn" xml:space="preserve">
+    <value>Oturum açık</value>
+  </data>
+  <data name="NotSignedIn" xml:space="preserve">
+    <value>Oturum açık değil</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Oturum aç</value>
+  </data>
 </root>

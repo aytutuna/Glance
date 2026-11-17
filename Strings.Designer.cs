@@ -180,4 +180,9 @@ static class Strings
     public static string EffortMax => Get("EffortMax");
     public static string CodexNotFound => Get("CodexNotFound");
     public static string GeminiNotFound => Get("GeminiNotFound");
+    public static string AccountFound => Get("AccountFound");
+    public static string AccountMissing => Get("AccountMissing");
+    public static string SignedIn => Get("SignedIn");
+    public static string NotSignedIn => Get("NotSignedIn");
+    public static string SignIn => Get("SignIn");
 }

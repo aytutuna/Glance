@@ -534,4 +534,19 @@
   <data name="GeminiNotFound" xml:space="preserve">
     <value>Glance can't find the gemini command. Install it with npm install -g @google/gemini-cli, run gemini once to sign in, then try again.</value>
   </data>
+  <data name="AccountFound" xml:space="preserve">
+    <value>Found: {0}</value>
+  </data>
+  <data name="AccountMissing" xml:space="preserve">
+    <value>Not installed. Install with: {0}</value>
+  </data>
+  <data name="SignedIn" xml:space="preserve">
+    <value>Signed in</value>
+  </data>
+  <data name="NotSignedIn" xml:space="preserve">
+    <value>Not signed in</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
 </root>

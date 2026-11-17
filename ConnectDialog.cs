@@ -1,21 +1,33 @@
+using System.Diagnostics;
+
 namespace Glance;
 
 class ConnectDialog : Form
 {
-    static readonly string[] Ids = { "anthropic", "openai", "gemini", "custom" };
+    static readonly string[] Ids = { Settings.Claude, Settings.Codex, Settings.GeminiCli, "anthropic", "openai", "gemini", "custom" };
+
+    // the command, how to install it and how to sign in, for the accounts that work through a CLI
+    static readonly Dictionary<string, (string Exe, string Install, string Login)> Accounts = new()
+    {
+        [Settings.Claude] = ("claude", "npm install -g @anthropic-ai/claude-code", "claude"),
+        [Settings.Codex] = ("codex", "npm install -g @openai/codex", "codex login"),
+        [Settings.GeminiCli] = ("gemini", "npm install -g @google/gemini-cli", "gemini"),
+    };
     const int Wide = 388, Narrow = 276;
 
     readonly Settings settings;
     readonly double scale;
     readonly Font font;
-    readonly Label providerLabel, savedLabel, keyLabel, urlLabel, modelLabel, note, status;
+    readonly Label providerLabel, savedLabel, keyLabel, urlLabel, modelLabel, effortLabel, note, status, info;
     readonly ComboBox provider = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     readonly ComboBox saved = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     readonly ComboBox model = new();
+    readonly ComboBox effort = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     readonly TextBox key = new() { UseSystemPasswordChar = true };
     readonly TextBox url = new();
-    readonly Button remove, load, save, cancel;
+    readonly Button remove, load, signIn, save, cancel;
     CancellationTokenSource? loading;
+    List<string> levels = new();
 
     public bool Changed { get; private set; }
 
@@ -42,6 +54,9 @@ class ConnectDialog : Form
         keyLabel = Caption(Strings.ApiKey);
         urlLabel = Caption(Strings.BaseUrl);
         modelLabel = Caption(Strings.Model);
+        effortLabel = Caption(Strings.Effort);
+        info = Caption("");
+        info.ForeColor = SystemColors.GrayText;
         note = Caption(Strings.ConnectNote);
         note.ForeColor = SystemColors.GrayText;
         status = Caption("");
@@ -51,6 +66,7 @@ class ConnectDialog : Form
 
         remove = MakeButton(Strings.RemoveKey, Remove);
         load = MakeButton(Strings.LoadModels, () => _ = LoadModels());
+        signIn = MakeButton(Strings.SignIn, SignIn);
         save = MakeButton(Strings.Save, Save);
         cancel = MakeButton(Strings.Cancel, Close);
         AcceptButton = save;
@@ -58,11 +74,12 @@ class ConnectDialog : Form
 
         foreach (var id in Ids)
             provider.Items.Add(Settings.Providers.First(p => p.Id == id).Name);
-        int start = Array.IndexOf(Ids, settings.Provider);
+        // the CLI account is the default provider, so a first visit starts on the Claude API instead
+        int start = Array.IndexOf(Ids, settings.Provider == Settings.Claude ? "anthropic" : settings.Provider);
         provider.SelectedIndex = Math.Max(start, 0);
         provider.SelectedIndexChanged += (_, _) => Pick();
 
-        Controls.AddRange(new Control[] { providerLabel, provider, savedLabel, saved, remove, keyLabel, key, urlLabel, url, modelLabel, model, load, note, status, save, cancel });
+        Controls.AddRange(new Control[] { providerLabel, provider, savedLabel, saved, remove, keyLabel, key, urlLabel, url, info, signIn, modelLabel, model, load, effortLabel, effort, note, status, save, cancel });
         Pick();
         var area = screen.WorkingArea;
         Location = new Point(area.X + (area.Width - Width) / 2, area.Y + (area.Height - Height) / 2);
@@ -92,15 +109,23 @@ class ConnectDialog : Form
         ShowKeys();
         url.Text = settings.CustomUrl ?? "";
         model.Items.Clear();
-        model.Text = settings.ProviderModels.GetValueOrDefault(id) ?? "";
-        if (id == "anthropic")
-        {
+        model.DropDownStyle = id == Settings.Claude ? ComboBoxStyle.DropDownList : ComboBoxStyle.DropDown;
+        if (id is Settings.Claude or "anthropic")
             model.Items.AddRange(Settings.Models.Select(m => (object)m.Id).ToArray());
-            if (model.Text.Length == 0)
-                model.Text = Settings.Models[0].Id;
-        }
+        else if (id == Settings.GeminiCli)
+            model.Items.AddRange(GeminiCli.Aliases);
+        model.Text = id == Settings.Claude ? settings.Model : settings.ProviderModels.GetValueOrDefault(id) ?? "";
+        if (id == "anthropic" && model.Text.Length == 0)
+            model.Text = Settings.Models[0].Id;
+        levels = Settings.EffortLevels(id).Prepend("").ToList();
+        effort.Items.Clear();
+        effort.Items.AddRange(levels.Select(l => (object)Settings.EffortName(l)).ToArray());
+        effort.SelectedIndex = Math.Max(0, levels.IndexOf(settings.EffortOf(id)));
+        info.Text = "";
         Say("", false);
         Arrange();
+        if (Accounts.ContainsKey(id))
+            _ = ShowAccount(id, loading = new CancellationTokenSource(TimeSpan.FromSeconds(20)));
     }
 
     void ShowKeys()
@@ -117,16 +142,26 @@ class ConnectDialog : Form
 
     void Arrange()
     {
+        bool account = Accounts.ContainsKey(Id);
         int y = Px(14);
         y = Row(providerLabel, provider, y, Wide, true);
-        bool stored = settings.HasKey(Id);
+        bool stored = !account && settings.HasKey(Id);
         y = Row(savedLabel, saved, y, Narrow, stored);
         remove.Visible = stored;
         remove.Bounds = new Rectangle(Px(16 + Narrow + 12), saved.Top - Px(1), Px(Wide - Narrow - 12), Px(26));
-        y = Row(keyLabel, key, y, Wide, true);
+        y = Row(keyLabel, key, y, Wide, !account);
         y = Row(urlLabel, url, y, Wide, Id == "custom");
+        info.Visible = signIn.Visible = account;
+        if (account)
+        {
+            info.Bounds = new Rectangle(Px(16), y, Px(Wide - 112), Px(34));
+            signIn.Bounds = new Rectangle(Px(16 + Wide - 100), y, Px(100), Px(26));
+            y += Px(46);
+        }
         y = Row(modelLabel, model, y, Narrow, true);
+        load.Visible = !account;
         load.Bounds = new Rectangle(Px(16 + Narrow + 12), model.Top - Px(1), Px(Wide - Narrow - 12), Px(26));
+        y = Row(effortLabel, effort, y, Narrow, levels.Count > 1);
         note.Bounds = new Rectangle(Px(16), y, Px(Wide), Px(34));
         status.Bounds = new Rectangle(Px(16), y + Px(36), Px(Wide), Px(48));
         y += Px(90);
@@ -144,6 +179,42 @@ class ConnectDialog : Form
         field.Location = new Point(Px(16), y + Px(20));
         field.Width = Px(width);
         return y + Px(20) + field.Height + Px(12);
+    }
+
+    async Task ShowAccount(string id, CancellationTokenSource cts)
+    {
+        try
+        {
+            if (Cli.Find(Accounts[id].Exe) is not { } at)
+            {
+                info.Text = string.Format(Strings.AccountMissing, Accounts[id].Install);
+                return;
+            }
+            string found = string.Format(Strings.AccountFound, at.Script ?? at.Program);
+            info.Text = found;
+            bool? signed = id switch
+            {
+                Settings.Codex => await Cli.Probe("codex", new[] { "login", "status" }, cts.Token) is { Exit: 0 },
+                Settings.GeminiCli => File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".gemini", "oauth_creds.json")),
+                _ => null,
+            };
+            if (signed != null && Id == id)
+                info.Text = found + "\n" + (signed == true ? Strings.SignedIn : Strings.NotSignedIn);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            if (loading == cts)
+                loading = null;
+            cts.Dispose();
+        }
+    }
+
+    void SignIn()
+    {
+        Process.Start(new ProcessStartInfo("cmd.exe", "/k " + Accounts[Id].Login) { UseShellExecute = true });
     }
 
     void Say(string text, bool error)
@@ -206,9 +277,43 @@ class ConnectDialog : Form
         }
     }
 
+    void SaveEffort(string id)
+    {
+        if (levels.Count > 1)
+            settings.Effort[id] = levels[effort.SelectedIndex];
+    }
+
+    void SaveAccount(string id)
+    {
+        string picked = model.Text.Trim();
+        if (id == Settings.Claude)
+        {
+            if (!Settings.Models.Any(m => m.Id == picked))
+            {
+                Say(Strings.PickModel, true);
+                return;
+            }
+            settings.Model = picked;
+        }
+        else
+        {
+            settings.ProviderModels[id] = picked;
+        }
+        SaveEffort(id);
+        settings.Provider = id;
+        settings.Include(id);
+        Changed = true;
+        Close();
+    }
+
     void Save()
     {
         string id = Id, typed = key.Text.Trim();
+        if (Accounts.ContainsKey(id))
+        {
+            SaveAccount(id);
+            return;
+        }
         if (typed.Length > 0 && Api.CheckKey(typed) is string bad)
         {
             Say(bad, true);
@@ -251,6 +356,7 @@ class ConnectDialog : Form
         if (address != null)
             settings.CustomUrl = address;
         settings.ProviderModels[id] = picked;
+        SaveEffort(id);
         settings.Provider = id;
         if (!settings.HasKey(id))
             settings.Include(id);
