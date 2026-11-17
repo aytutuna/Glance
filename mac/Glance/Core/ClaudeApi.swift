@@ -42,8 +42,8 @@ struct ClaudeApi: ChatProvider {
             "system": chat.system,
             "messages": messages,
         ]
-        if current {
-            body["output_config"] = ["effort": "high"]
+        if current || !chat.effort.isEmpty {
+            body["output_config"] = ["effort": chat.effort.isEmpty ? "high" : chat.effort]
         }
         let fallback = chat.model == "claude-opus-5-5" || chat.model == "claude-sonnet-5-5"
         if fallback {

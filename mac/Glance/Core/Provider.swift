@@ -41,7 +41,7 @@ private actor Memory {
 // It starts from what last worked, so a spent option isn't retried on every read.
 struct Failover: Provider {
     let id: String
-    let steps: [(provider: any Provider, model: String)]
+    let steps: [(provider: any Provider, model: String, effort: String)]
 
     func ask(_ chat: ChatRequest, onText: @escaping @Sendable (String) -> Void) async throws -> String {
         let start = await Memory.shared.start(id, count: steps.count)
@@ -50,6 +50,7 @@ struct Failover: Provider {
             let at = (start + i) % steps.count
             var step = chat
             step.model = steps[at].model
+            step.effort = steps[at].effort
             do {
                 let answer = try await steps[at].provider.ask(step, onText: onText)
                 await Memory.shared.worked(id, at: at)

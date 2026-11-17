@@ -4,10 +4,10 @@ enum Ai {
     // Each entry in the order has its own limit, so when one runs out the next carries on.
     static func create(_ s: Settings) throws -> any Provider {
         let chain = s.chain()
-        var steps: [(provider: any Provider, model: String)] = []
+        var steps: [(provider: any Provider, model: String, effort: String)] = []
         for entry in chain {
             if entry == Settings.claude {
-                steps.append((ClaudeCli(), s.model))
+                steps.append((ClaudeCli(), s.model, s.effortOf(entry)))
                 continue
             }
             let id = String(entry.split(separator: ":", omittingEmptySubsequences: false)[0])
@@ -19,7 +19,7 @@ enum Ai {
             }
             if let url = try? baseOf(id, s.customUrl, withKey: key != nil) {
                 let provider = make(id, url: url, key: key)
-                steps.append((provider, model))
+                steps.append((provider, model, s.effortOf(id)))
             }
         }
         if steps.isEmpty {

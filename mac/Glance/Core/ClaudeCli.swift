@@ -236,7 +236,7 @@ struct ClaudeCli: Provider {
             "--setting-sources=", "--disable-slash-commands", "--system-prompt", chat.system,
         ]
         if effort {
-            args += ["--effort", "high"]
+            args += ["--effort", chat.effort.isEmpty ? "high" : chat.effort]
         }
         let dir = NSTemporaryDirectory() + "Glance"
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)

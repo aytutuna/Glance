@@ -115,7 +115,11 @@ struct OpenAiProvider: ChatProvider {
                 messages.append(["role": "user", "content": text])
             }
         }
-        var req = try json(baseUrl + "/chat/completions", method: "POST", body: ["model": chat.model, "stream": true, "messages": messages])
+        var body: [String: Any] = ["model": chat.model, "stream": true, "messages": messages]
+        if !chat.effort.isEmpty {
+            body["reasoning_effort"] = chat.effort
+        }
+        var req = try json(baseUrl + "/chat/completions", method: "POST", body: body)
         authorize(&req, key)
         return req
     }
@@ -174,10 +178,17 @@ struct GeminiProvider: ChatProvider {
             }
         }
         let model = chat.model.addingPercentEncoding(withAllowedCharacters: .alphanumerics.union(CharacterSet(charactersIn: "-._~"))) ?? chat.model
-        var req = try json("\(Self.baseUrl)/models/\(model):streamGenerateContent?alt=sse", method: "POST", body: [
+        var body: [String: Any] = [
             "systemInstruction": ["parts": [["text": chat.system]]],
             "contents": contents,
-        ])
+        ]
+        if !chat.effort.isEmpty {
+            // 2.5 models take a token budget, newer ones a level
+            let thinking: [String: Any] = chat.model.contains("2.5")
+                ? ["thinkingBudget": chat.effort == "low" ? 1024 : 24576] : ["thinkingLevel": chat.effort]
+            body["generationConfig"] = ["thinkingConfig": thinking]
+        }
+        var req = try json("\(Self.baseUrl)/models/\(model):streamGenerateContent?alt=sse", method: "POST", body: body)
         req.setValue(key, forHTTPHeaderField: "x-goog-api-key")
         return req
     }

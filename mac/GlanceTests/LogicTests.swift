@@ -137,4 +137,39 @@ final class LogicTests: XCTestCase {
             XCTAssertEqual(($0 as? AiError)?.keyProblem, false)
         }
     }
+
+    private func chat(_ model: String, _ effort: String) -> ChatRequest {
+        ChatRequest(jpeg: Data([1]), model: model, system: "sys", message: "q", turns: [(true, "q")], effort: effort)
+    }
+
+    private func body(_ req: URLRequest) throws -> [String: Any] {
+        try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(req.httpBody)) as? [String: Any])
+    }
+
+    func testClaudeApiEffortDefaultsToHighForCurrentModels() throws {
+        let api = ClaudeApi(key: "k")
+        let current = Settings.models[0].id
+        XCTAssertEqual((try body(api.request(chat(current, "")))["output_config"] as? [String: String])?["effort"], "high")
+        XCTAssertEqual((try body(api.request(chat(current, "max")))["output_config"] as? [String: String])?["effort"], "max")
+        XCTAssertNil(try body(api.request(chat("claude-old", "")))["output_config"])
+        XCTAssertEqual((try body(api.request(chat("claude-old", "low")))["output_config"] as? [String: String])?["effort"], "low")
+    }
+
+    func testOpenAiSendsEffortOnlyWhenChosen() throws {
+        let api = OpenAiProvider(name: "OpenAI", baseUrl: OpenAiProvider.defaultUrl, key: "k", limit: 90)
+        XCTAssertNil(try body(api.request(chat("gpt-x", "")))["reasoning_effort"])
+        XCTAssertEqual(try body(api.request(chat("gpt-x", "minimal")))["reasoning_effort"] as? String, "minimal")
+    }
+
+    func testGeminiMapsEffortByModelFamily() throws {
+        let api = GeminiProvider(key: "k")
+        func thinking(_ model: String, _ effort: String) throws -> [String: Any]? {
+            let config = try body(api.request(chat(model, effort)))["generationConfig"] as? [String: Any]
+            return config?["thinkingConfig"] as? [String: Any]
+        }
+        XCTAssertNil(try thinking("gemini-3-pro", ""))
+        XCTAssertEqual(try thinking("gemini-2.5-flash", "low")?["thinkingBudget"] as? Int, 1024)
+        XCTAssertEqual(try thinking("gemini-2.5-flash", "high")?["thinkingBudget"] as? Int, 24576)
+        XCTAssertEqual(try thinking("gemini-3-pro", "low")?["thinkingLevel"] as? String, "low")
+    }
 }

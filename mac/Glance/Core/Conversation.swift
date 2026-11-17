@@ -7,6 +7,7 @@ struct ChatRequest: Sendable {
     let system: String
     let message: String
     let turns: [(user: Bool, text: String)]
+    var effort = ""
 }
 
 // one read and its follow-ups
