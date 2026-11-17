@@ -6,7 +6,14 @@ private extension String {
 
 @MainActor
 final class ConnectModel: ObservableObject {
-    static let ids = ["anthropic", "openai", "gemini", "custom"]
+    static let ids = [Settings.claude, Settings.codex, Settings.geminiCli, "anthropic", "openai", "gemini", "custom"]
+
+    // the command, how to install it and how to sign in, for the accounts that work through a CLI
+    static let accounts: [String: (exe: String, install: String, login: String)] = [
+        Settings.claude: ("claude", "npm install -g @anthropic-ai/claude-code", "claude"),
+        Settings.codex: ("codex", "npm install -g @openai/codex", "codex login"),
+        Settings.geminiCli: ("gemini", "npm install -g @google/gemini-cli", "gemini"),
+    ]
 
     unowned let app: AppDelegate
     @Published var id: String {
@@ -20,6 +27,8 @@ final class ConnectModel: ObservableObject {
     @Published var url = ""
     @Published var model = ""
     @Published var models: [String] = []
+    @Published var effort = ""
+    @Published var info = ""
     @Published var saved = 0
     @Published var status = ""
     @Published var failed = false
@@ -31,7 +40,9 @@ final class ConnectModel: ObservableObject {
 
     init(app: AppDelegate) {
         self.app = app
-        id = ConnectModel.ids.contains(app.settings.provider) ? app.settings.provider : ConnectModel.ids[0]
+        // the CLI account is the default provider, so a first visit starts on the Claude API instead
+        let current = app.settings.provider
+        id = current != Settings.claude && ConnectModel.ids.contains(current) ? current : "anthropic"
         pick()
     }
 
@@ -43,20 +54,95 @@ final class ConnectModel: ObservableObject {
         app.settings.hasKey(id)
     }
 
+    var account: Bool {
+        ConnectModel.accounts[id] != nil
+    }
+
+    var levels: [String] {
+        [""] + Settings.effortLevels(id)
+    }
+
     func pick() {
         stop()
         key = ""
         saved = 0
         url = app.settings.customUrl ?? ""
-        model = app.settings.providerModels[id] ?? ""
+        model = id == Settings.claude ? app.settings.model : app.settings.providerModels[id] ?? ""
         models = []
         if id == "anthropic" {
             models = Settings.models.map(\.id)
             if model.isEmpty {
                 model = models[0]
             }
+        } else if id == Settings.geminiCli {
+            models = GeminiCli.aliases
         }
+        effort = app.settings.effortOf(id)
+        info = ""
         say("", false)
+        showAccount()
+    }
+
+    private func showAccount() {
+        guard let cli = ConnectModel.accounts[id] else { return }
+        let mine = run, id = id
+        load = Task {
+            guard let path = await Cli.shared.path(cli.exe) else {
+                if run == mine {
+                    info = L("AccountMissing", cli.install)
+                }
+                return
+            }
+            guard run == mine else { return }
+            let found = L("AccountFound", path)
+            info = found
+            var signedIn: Bool?
+            if id == Settings.codex {
+                let env = await Cli.shared.env()
+                signedIn = await Child.capture(path, ["login", "status"], env: env, limit: 20)?.code == 0
+            } else if id == Settings.geminiCli {
+                signedIn = FileManager.default.fileExists(atPath: NSHomeDirectory() + "/.gemini/oauth_creds.json")
+            }
+            if let signedIn, run == mine {
+                info = found + "\n" + L(signedIn ? "SignedIn" : "NotSignedIn")
+            }
+        }
+    }
+
+    // a script in Terminal, since a sign-in needs a real terminal to answer in
+    func signIn() {
+        guard let login = ConnectModel.accounts[id]?.login else { return }
+        let script = FileManager.default.temporaryDirectory.appendingPathComponent("Glance-signin-" + shortId() + ".command")
+        do {
+            try "#!/bin/zsh -l\nrm -f -- \"$0\"\n\(login)\n".write(to: script, atomically: true, encoding: .utf8)
+            try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: script.path)
+        } catch {
+            Log.write("sign in", error)
+            return say(L("Crashed"), true)
+        }
+        NSWorkspace.shared.open([script], withApplicationAt: URL(fileURLWithPath: "/System/Applications/Utilities/Terminal.app"),
+                                configuration: NSWorkspace.OpenConfiguration())
+    }
+
+    private func saveEffort(_ s: inout Settings) {
+        if !Settings.effortLevels(id).isEmpty {
+            s.effort[id] = effort
+        }
+    }
+
+    private func saveAccount() {
+        var s = app.settings
+        if id == Settings.claude {
+            s.model = model
+        } else {
+            s.providerModels[id] = model.trimmed
+        }
+        saveEffort(&s)
+        s.provider = id
+        s.include(id)
+        app.settings = s
+        changed = true
+        close()
     }
 
     func stop() {
@@ -113,6 +199,9 @@ final class ConnectModel: ObservableObject {
     }
 
     func save() {
+        if account {
+            return saveAccount()
+        }
         var s = app.settings
         let typed = key.trimmed
         if !typed.isEmpty, let bad = Api.checkKey(typed) {
@@ -157,6 +246,7 @@ final class ConnectModel: ObservableObject {
             s.customUrl = address
         }
         s.providerModels[id] = picked
+        saveEffort(&s)
         s.provider = id
         if !s.hasKey(id) {
             s.include(id)
@@ -189,49 +279,79 @@ struct ConnectView: View {
                 .labelsHidden()
                 .accessibilityIdentifier("connect.provider")
             }
-            if m.stored {
-                block(L("SavedKeysCaption")) {
-                    HStack {
-                        Picker("", selection: $m.saved) {
-                            ForEach(Array(m.app.settings.keyNames(m.id).enumerated()), id: \.offset) { i, name in
-                                Text(name).tag(i)
+            if m.account {
+                HStack(alignment: .top) {
+                    Text(m.info)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("connect.info")
+                    Button(L("SignIn")) { m.signIn() }
+                }
+            } else {
+                if m.stored {
+                    block(L("SavedKeysCaption")) {
+                        HStack {
+                            Picker("", selection: $m.saved) {
+                                ForEach(Array(m.app.settings.keyNames(m.id).enumerated()), id: \.offset) { i, name in
+                                    Text(name).tag(i)
+                                }
                             }
+                            .labelsHidden()
+                            Button(L("RemoveKey")) { m.remove() }
                         }
-                        .labelsHidden()
-                        Button(L("RemoveKey")) { m.remove() }
                     }
                 }
-            }
-            block(m.stored ? L("AddKey") : m.id == "custom" ? L("ApiKeyOptional") : L("ApiKey")) {
-                SecureField("", text: $m.key, prompt: Text(m.stored ? L("PasteAnotherKey") : m.id == "custom" ? L("Optional") : L("PasteKey")))
-                    .labelsHidden()
-                    .accessibilityIdentifier("connect.key")
-            }
-            if m.id == "custom" {
-                block(L("BaseUrl")) {
-                    TextField("", text: $m.url, prompt: Text("http://localhost:11434/v1"))
+                block(m.stored ? L("AddKey") : m.id == "custom" ? L("ApiKeyOptional") : L("ApiKey")) {
+                    SecureField("", text: $m.key, prompt: Text(m.stored ? L("PasteAnotherKey") : m.id == "custom" ? L("Optional") : L("PasteKey")))
                         .labelsHidden()
-                        .accessibilityIdentifier("connect.url")
+                        .accessibilityIdentifier("connect.key")
+                }
+                if m.id == "custom" {
+                    block(L("BaseUrl")) {
+                        TextField("", text: $m.url, prompt: Text("http://localhost:11434/v1"))
+                            .labelsHidden()
+                            .accessibilityIdentifier("connect.url")
+                    }
                 }
             }
             block(L("Model")) {
-                HStack {
-                    TextField("", text: $m.model)
-                        .labelsHidden()
-                        .accessibilityIdentifier("connect.model")
-                    if !m.models.isEmpty {
-                        Menu {
-                            ForEach(m.models, id: \.self) { name in
-                                Button(name) { m.model = name }
-                            }
-                        } label: {
-                            Image(systemName: "chevron.down")
-                        }
-                        .menuStyle(.borderlessButton)
-                        .fixedSize()
+                if m.id == Settings.claude {
+                    Picker("", selection: $m.model) {
+                        ForEach(Settings.models, id: \.id) { Text($0.name).tag($0.id) }
                     }
-                    Button(L("LoadModels")) { m.loadModels() }
-                        .disabled(m.loading)
+                    .labelsHidden()
+                    .accessibilityIdentifier("connect.model")
+                } else {
+                    HStack {
+                        TextField("", text: $m.model)
+                            .labelsHidden()
+                            .accessibilityIdentifier("connect.model")
+                        if !m.models.isEmpty {
+                            Menu {
+                                ForEach(m.models, id: \.self) { name in
+                                    Button(name) { m.model = name }
+                                }
+                            } label: {
+                                Image(systemName: "chevron.down")
+                            }
+                            .menuStyle(.borderlessButton)
+                            .fixedSize()
+                        }
+                        if !m.account {
+                            Button(L("LoadModels")) { m.loadModels() }
+                                .disabled(m.loading)
+                        }
+                    }
+                }
+            }
+            if m.levels.count > 1 {
+                block(L("Effort")) {
+                    Picker("", selection: $m.effort) {
+                        ForEach(m.levels, id: \.self) { Text(Settings.effortName($0)).tag($0) }
+                    }
+                    .labelsHidden()
+                    .accessibilityIdentifier("connect.effort")
                 }
             }
             Text(L("ConnectNote"))
