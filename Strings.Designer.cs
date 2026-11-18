@@ -110,6 +110,7 @@ static class Strings
     public static string OptKeyUnreadable => Get("OptKeyUnreadable");
     public static string OptKeyEnding => Get("OptKeyEnding");
     public static string OptKey => Get("OptKey");
+    public static string AccountName => Get("AccountName");
     public static string CustomName => Get("CustomName");
     public static string CustomHost => Get("CustomHost");
     public static string OrderTitle => Get("OrderTitle");

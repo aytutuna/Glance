@@ -324,6 +324,9 @@
   <data name="OptKey" xml:space="preserve">
     <value>kunci</value>
   </data>
+  <data name="AccountName" xml:space="preserve">
+    <value>Akun {0} ({1})</value>
+  </data>
   <data name="CustomName" xml:space="preserve">
     <value>Kustom</value>
   </data>

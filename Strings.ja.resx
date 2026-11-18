@@ -324,6 +324,9 @@
   <data name="OptKey" xml:space="preserve">
     <value>キー</value>
   </data>
+  <data name="AccountName" xml:space="preserve">
+    <value>{0} アカウント（{1}）</value>
+  </data>
   <data name="CustomName" xml:space="preserve">
     <value>カスタム</value>
   </data>

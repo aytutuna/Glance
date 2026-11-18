@@ -52,9 +52,9 @@ class Settings
 
     public static readonly (string Id, string Name)[] Providers =
     {
-        (Claude, "Claude account (Claude CLI)"),
-        (Codex, "ChatGPT account (Codex CLI)"),
-        (GeminiCli, "Google account (Gemini CLI)"),
+        (Claude, string.Format(Strings.AccountName, "Claude", "Claude CLI")),
+        (Codex, string.Format(Strings.AccountName, "ChatGPT", "Codex CLI")),
+        (GeminiCli, string.Format(Strings.AccountName, "Google", "Gemini CLI")),
         ("anthropic", "Claude API"),
         ("openai", "OpenAI"),
         ("gemini", "Gemini"),

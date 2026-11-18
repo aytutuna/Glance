@@ -324,6 +324,9 @@
   <data name="OptKey" xml:space="preserve">
     <value>密钥</value>
   </data>
+  <data name="AccountName" xml:space="preserve">
+    <value>{0} 账户（{1}）</value>
+  </data>
   <data name="CustomName" xml:space="preserve">
     <value>自定义</value>
   </data>

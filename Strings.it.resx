@@ -324,6 +324,9 @@
   <data name="OptKey" xml:space="preserve">
     <value>chiave</value>
   </data>
+  <data name="AccountName" xml:space="preserve">
+    <value>Account {0} ({1})</value>
+  </data>
   <data name="CustomName" xml:space="preserve">
     <value>Personalizzato</value>
   </data>

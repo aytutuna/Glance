@@ -324,6 +324,9 @@
   <data name="OptKey" xml:space="preserve">
     <value>키</value>
   </data>
+  <data name="AccountName" xml:space="preserve">
+    <value>{0} 계정 ({1})</value>
+  </data>
   <data name="CustomName" xml:space="preserve">
     <value>사용자 지정</value>
   </data>

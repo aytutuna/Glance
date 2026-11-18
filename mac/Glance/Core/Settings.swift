@@ -62,7 +62,9 @@ struct Settings: Codable {
 
     static var providers: [(id: String, name: String)] {
         [
-            (claude, "Claude account (Claude CLI)"), (codex, "ChatGPT account (Codex CLI)"), (geminiCli, "Google account (Gemini CLI)"),
+            (claude, String(format: L("AccountName"), "Claude", "Claude CLI")),
+            (codex, String(format: L("AccountName"), "ChatGPT", "Codex CLI")),
+            (geminiCli, String(format: L("AccountName"), "Google", "Gemini CLI")),
             ("anthropic", "Claude API"), ("openai", "OpenAI"), ("gemini", "Gemini"), ("custom", L("CustomName")),
         ]
     }
