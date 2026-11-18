@@ -48,7 +48,7 @@ class OrderDialog : Form
         var chain = settings.Chain();
         items = chain.Select(e => options.First(o => o.Entry == e)).Concat(options.Where(o => !chain.Contains(o.Entry))).ToList();
         foreach (var (entry, label) in items)
-            list.Items.Add(label, chain.Contains(entry));
+            list.Items.Add(Native.Isolate(label), chain.Contains(entry));
         if (list.Items.Count > 0)
             list.SelectedIndex = 0;
 

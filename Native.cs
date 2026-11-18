@@ -215,6 +215,10 @@ static class Native
         return false;
     }
 
+    // keeps brackets and numbers of Latin names in place inside right-to-left controls
+    public static string Isolate(string text) =>
+        System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft ? "⁦" + text + "⁩" : text;
+
     // the dialogs place controls by left-to-right coordinates, so the window mirrors them instead
     public static void Mirror(Form form)
     {

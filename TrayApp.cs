@@ -480,7 +480,7 @@ class TrayApp : ApplicationContext
         {
             string entry = chain[i];
             // picking one moves it to the top; the rest keep their order behind it
-            item.DropDownItems.Add(new ToolStripMenuItem($"{i + 1}. {names[entry]}", null, (_, _) =>
+            item.DropDownItems.Add(new ToolStripMenuItem(Native.Isolate($"{i + 1}. {names[entry]}"), null, (_, _) =>
             {
                 settings.Order = chain.Where(e => e != entry).Prepend(entry).ToList();
                 SaveLook();
