@@ -406,8 +406,10 @@ final class AnswerPopup: NSPanel, NSTextFieldDelegate {
 
         bar.frame = NSRect(x: 0, y: 0, width: width, height: barHeight)
         let closeWidth = 30 * unit, copyWidth = 90 * unit
-        closeButton.frame = NSRect(x: width - pad - closeWidth, y: 0, width: closeWidth, height: barHeight)
-        copyButton.frame = NSRect(x: closeButton.frame.minX - copyWidth, y: 0, width: copyWidth, height: barHeight)
+        // frames are set by hand, so a right-to-left language has to be mirrored here
+        let rtl = NSApp.userInterfaceLayoutDirection == .rightToLeft
+        closeButton.frame = NSRect(x: rtl ? pad : width - pad - closeWidth, y: 0, width: closeWidth, height: barHeight)
+        copyButton.frame = NSRect(x: rtl ? closeButton.frame.maxX : closeButton.frame.minX - copyWidth, y: 0, width: copyWidth, height: barHeight)
         for button in [copyButton, closeButton] {
             button.font = font
         }
@@ -421,7 +423,7 @@ final class AnswerPopup: NSPanel, NSTextFieldDelegate {
         field.frame = NSRect(x: pad, y: (inputHeight - fieldHeight) / 2, width: width - 2 * pad, height: fieldHeight)
         access.isHidden = accessAction == nil
         access.sizeToFit()
-        access.frame.origin = CGPoint(x: pad, y: (inputHeight - access.frame.height) / 2)
+        access.frame.origin = CGPoint(x: rtl ? width - pad - access.frame.width : pad, y: (inputHeight - access.frame.height) / 2)
 
         scroll.frame = NSRect(x: 0, y: barHeight, width: width, height: target.height - barHeight - inputHeight)
         body.frame = NSRect(x: 0, y: 0, width: width, height: max(textHeight + 2 * pad, scroll.frame.height))
