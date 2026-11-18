@@ -118,7 +118,14 @@ class SettingsDialog : Form
         Add(ai, order, Field, 12 + 5, Wide, 88);
         var changeOrder = Button(Strings.ChangeOrder, app.ChangeOrder);
         Add(ai, changeOrder, Field, 12 + 100, 136);
-        Add(ai, Button(Strings.ConnectAi, app.Connect), (int)(changeOrder.Right / scale) + 10, 12 + 100, 136);
+        var connect = Button(Strings.ConnectAi, app.Connect);
+        Add(ai, connect, (int)(changeOrder.Right / scale) + 10, 12 + 100, 136);
+        if (connect.Right > Px(Field + Wide))
+        {
+            // too wide in some languages: start both from the left edge
+            changeOrder.Left = Px(12);
+            connect.Left = changeOrder.Right + Px(10);
+        }
         modelLabel = Caption(Strings.ClaudeCliModel);
         model = Combo(() =>
         {
@@ -244,7 +251,7 @@ class SettingsDialog : Form
 
         var chain = settings.Chain();
         var names = settings.Options().ToDictionary(o => o.Entry, o => o.Label);
-        order.Text = string.Join("\n", chain.Select((e, i) => $"{i + 1}. {names[e]}"));
+        order.Text = string.Join("\n", chain.Select((e, i) => Native.Isolate($"{i + 1}. {names[e]}")));
         modelLabel.Visible = model.Visible = chain.Contains(Settings.Claude);
         model.SelectedIndex = Math.Max(0, Array.FindIndex(Settings.Models, m => m.Id == settings.Model));
         string first = settings.FirstProvider();
