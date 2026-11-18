@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="MouseScreen" xml:space="preserve">
+    <value>Экран с указателем мыши</value>
+  </data>
+  <data name="AllScreens" xml:space="preserve">
+    <value>Все экраны</value>
+  </data>
+  <data name="ActiveWindow" xml:space="preserve">
+    <value>Активное окно</value>
+  </data>
+  <data name="ScreenPlain" xml:space="preserve">
+    <value>Экран {0} ({1}x{2})</value>
+  </data>
+  <data name="ScreenPrimary" xml:space="preserve">
+    <value>Экран {0} ({1}x{2}, основной)</value>
+  </data>
+  <data name="AlreadyRunning" xml:space="preserve">
+    <value>Glance уже запущен. Нажмите {0}, чтобы считать экран.</value>
+  </data>
+  <data name="StartupFailed" xml:space="preserve">
+    <value>Не удалось изменить параметр автозагрузки Windows.</value>
+  </data>
+  <data name="Tooltip" xml:space="preserve">
+    <value>Glance (Чтение: {0}, Область: {1}, Закрытие: {2})</value>
+  </data>
+  <data name="KeyReadsScreen" xml:space="preserve">
+    <value>{0} (считывает экран)</value>
+  </data>
+  <data name="KeyReadsArea" xml:space="preserve">
+    <value>{0} (считывает область)</value>
+  </data>
+  <data name="KeyClosesAnswer" xml:space="preserve">
+    <value>{0} (закрывает ответ)</value>
+  </data>
+  <data name="KeyHidesAnswer" xml:space="preserve">
+    <value>{0} (скрывает текст ответа)</value>
+  </data>
+  <data name="ListJoin" xml:space="preserve">
+    <value> и </value>
+  </data>
+  <data name="KeysFailed" xml:space="preserve">
+    <value>{0} нельзя использовать: эта клавиша занята Windows или другой программой. Выберите другую клавишу в меню значка в области уведомлений.</value>
+  </data>
+  <data name="KeyOnlyHere" xml:space="preserve">
+    <value>Теперь {0} работает во всех программах только как клавиша «{1}». Чтобы вернуть прежнее назначение, измените её в меню значка в области уведомлений.</value>
+  </data>
+  <data name="SettingsNotSaved" xml:space="preserve">
+    <value>Не удалось сохранить файл настроек, поэтому этот выбор не сохранится после перезапуска.</value>
+  </data>
+  <data name="MenuReadNow" xml:space="preserve">
+    <value>Считать экран сейчас</value>
+  </data>
+  <data name="ReadArea" xml:space="preserve">
+    <value>Считать область</value>
+  </data>
+  <data name="MenuHideText" xml:space="preserve">
+    <value>Скрыть текст ответа</value>
+  </data>
+  <data name="ReadFrom" xml:space="preserve">
+    <value>Откуда считывать</value>
+  </data>
+  <data name="ShowAnswerOn" xml:space="preserve">
+    <value>Показывать ответ на экране</value>
+  </data>
+  <data name="PlainAnswer" xml:space="preserve">
+    <value>Простой чёрный ответ</value>
+  </data>
+  <data name="IdentifyScreens" xml:space="preserve">
+    <value>Определить экраны</value>
+  </data>
+  <data name="KeyMenu" xml:space="preserve">
+    <value>Клавиша «{0}» ({1})...</value>
+  </data>
+  <data name="KeyTitle" xml:space="preserve">
+    <value>Клавиша «{0}»</value>
+  </data>
+  <data name="JobRead" xml:space="preserve">
+    <value>Чтение</value>
+  </data>
+  <data name="JobArea" xml:space="preserve">
+    <value>Область</value>
+  </data>
+  <data name="JobClose" xml:space="preserve">
+    <value>Закрытие</value>
+  </data>
+  <data name="JobHide" xml:space="preserve">
+    <value>Скрытие</value>
+  </data>
+  <data name="StartWithWindows" xml:space="preserve">
+    <value>Запускать вместе с Windows</value>
+  </data>
+  <data name="RecentAnswers" xml:space="preserve">
+    <value>Недавние ответы</value>
+  </data>
+  <data name="KeepAnswers" xml:space="preserve">
+    <value>Сохранять ответы после закрытия</value>
+  </data>
+  <data name="ClearRecent" xml:space="preserve">
+    <value>Очистить недавние ответы</value>
+  </data>
+  <data name="MenuSettings" xml:space="preserve">
+    <value>Настройки...</value>
+  </data>
+  <data name="MenuExit" xml:space="preserve">
+    <value>Выход</value>
+  </data>
+  <data name="AnswerPosition" xml:space="preserve">
+    <value>Положение ответа</value>
+  </data>
+  <data name="BottomRight" xml:space="preserve">
+    <value>Справа внизу</value>
+  </data>
+  <data name="CenterOfScreen" xml:space="preserve">
+    <value>По центру экрана</value>
+  </data>
+  <data name="DrawnArea" xml:space="preserve">
+    <value>Выделенная область</value>
+  </data>
+  <data name="DrawAnswerArea" xml:space="preserve">
+    <value>Выделить область для ответа...</value>
+  </data>
+  <data name="TextOpacity" xml:space="preserve">
+    <value>Непрозрачность текста</value>
+  </data>
+  <data name="DragAnswerArea" xml:space="preserve">
+    <value>Выделите мышью область, где должны появляться ответы. Esc отменяет выбор.</value>
+  </data>
+  <data name="AnswersHere" xml:space="preserve">
+    <value>Ответы появятся здесь.</value>
+  </data>
+  <data name="AI" xml:space="preserve">
+    <value>ИИ</value>
+  </data>
+  <data name="ChangeOrder" xml:space="preserve">
+    <value>Изменить порядок...</value>
+  </data>
+  <data name="ConnectAi" xml:space="preserve">
+    <value>Подключить ИИ...</value>
+  </data>
+  <data name="ClaudeCliModel" xml:space="preserve">
+    <value>Модель Claude CLI</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>Режим</value>
+  </data>
+  <data name="EditModes" xml:space="preserve">
+    <value>Изменить режимы...</value>
+  </data>
+  <data name="WindowsLanguage" xml:space="preserve">
+    <value>Язык Windows ({0})</value>
+  </data>
+  <data name="TranslateTo" xml:space="preserve">
+    <value>Язык перевода</value>
+  </data>
+  <data name="DragReadArea" xml:space="preserve">
+    <value>Выделите мышью область для считывания. Esc отменяет выбор.</value>
+  </data>
+  <data name="Reading" xml:space="preserve">
+    <value>Считывание...</value>
+  </data>
+  <data name="AnswerEmpty" xml:space="preserve">
+    <value>Ответ пуст.</value>
+  </data>
+  <data name="QuestionPrefix" xml:space="preserve">
+    <value>В: </value>
+  </data>
+  <data name="Crashed" xml:space="preserve">
+    <value>Что-то пошло не так. Подробности в файле glance.log.</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Копировать</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Скопировано</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>Не удалось</value>
+  </data>
+  <data name="FollowUp" xml:space="preserve">
+    <value>Задать уточняющий вопрос</value>
+  </data>
+  <data name="PressKeyFor" xml:space="preserve">
+    <value>Нажмите клавишу для действия: {0}</value>
+  </data>
+  <data name="FnHint" xml:space="preserve">
+    <value>На большинстве ноутбуков клавиша Fn сама по себе не передаётся в Windows.</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="PurposeRead" xml:space="preserve">
+    <value>Считать экран</value>
+  </data>
+  <data name="PurposeClose" xml:space="preserve">
+    <value>Закрыть ответ</value>
+  </data>
+  <data name="PurposeHide" xml:space="preserve">
+    <value>Скрыть текст ответа, оставить экран чёрным</value>
+  </data>
+  <data name="WinKeyAlone" xml:space="preserve">
+    <value>Клавиша Windows сама по себе также открывает меню «Пуск». Добавьте к ней другую клавишу.</value>
+  </data>
+  <data name="KeyTaken" xml:space="preserve">
+    <value>{0} уже назначена клавишей «{1}».</value>
+  </data>
+  <data name="KeyHeld" xml:space="preserve">
+    <value>{0} нельзя использовать. Эта клавиша занята Windows или другой программой.</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Настройки Glance</value>
+  </data>
+  <data name="TabReading" xml:space="preserve">
+    <value>Чтение</value>
+  </data>
+  <data name="TabAnswer" xml:space="preserve">
+    <value>Ответ</value>
+  </data>
+  <data name="TabKeys" xml:space="preserve">
+    <value>Клавиши</value>
+  </data>
+  <data name="TabGeneral" xml:space="preserve">
+    <value>Общие</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Изменить...</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Порядок</value>
+  </data>
+  <data name="OpenLogFolder" xml:space="preserve">
+    <value>Открыть папку журнала</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="ConnectTitle" xml:space="preserve">
+    <value>Подключить ИИ</value>
+  </data>
+  <data name="SavedKeysCaption" xml:space="preserve">
+    <value>Сохранённые ключи, при исчерпании одного используется следующий</value>
+  </data>
+  <data name="ApiKey" xml:space="preserve">
+    <value>Ключ API</value>
+  </data>
+  <data name="BaseUrl" xml:space="preserve">
+    <value>Базовый URL</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Модель</value>
+  </data>
+  <data name="ConnectNote" xml:space="preserve">
+    <value>Снимки экрана, которые вы считываете, отправляются выбранному здесь ИИ.</value>
+  </data>
+  <data name="RemoveKey" xml:space="preserve">
+    <value>Удалить ключ</value>
+  </data>
+  <data name="LoadModels" xml:space="preserve">
+    <value>Загрузить модели</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="PasteAnotherKey" xml:space="preserve">
+    <value>Вставьте другой ключ, чтобы добавить его</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>Необязательно</value>
+  </data>
+  <data name="PasteKey" xml:space="preserve">
+    <value>Вставьте ключ API</value>
+  </data>
+  <data name="AddKey" xml:space="preserve">
+    <value>Добавить ключ</value>
+  </data>
+  <data name="ApiKeyOptional" xml:space="preserve">
+    <value>Ключ API (необязательно)</value>
+  </data>
+  <data name="LoadingModels" xml:space="preserve">
+    <value>Загрузка моделей...</value>
+  </data>
+  <data name="ModelsLoaded" xml:space="preserve">
+    <value>Загружено моделей: {0}. Ключ работает.</value>
+  </data>
+  <data name="ProviderTimeout" xml:space="preserve">
+    <value>Поставщик не ответил вовремя.</value>
+  </data>
+  <data name="SavedKeysUnreadable" xml:space="preserve">
+    <value>Не удаётся прочитать сохранённые ключи. Введите новый ключ или удалите их.</value>
+  </data>
+  <data name="EnterKey" xml:space="preserve">
+    <value>Введите ключ API.</value>
+  </data>
+  <data name="PickModel" xml:space="preserve">
+    <value>Выберите модель или введите её название. Кнопка «Загрузить модели» показывает модели, доступные для этого ключа.</value>
+  </data>
+  <data name="SavedKeyUnreadable" xml:space="preserve">
+    <value>Ключ {0} (не удаётся прочитать)</value>
+  </data>
+  <data name="SavedKeyEnding" xml:space="preserve">
+    <value>Ключ {0} (оканчивается на {1})</value>
+  </data>
+  <data name="SavedKey" xml:space="preserve">
+    <value>Ключ {0}</value>
+  </data>
+  <data name="OptKeyUnreadable" xml:space="preserve">
+    <value>не удаётся прочитать ключ</value>
+  </data>
+  <data name="OptKeyEnding" xml:space="preserve">
+    <value>ключ, оканчивающийся на {0}</value>
+  </data>
+  <data name="OptKey" xml:space="preserve">
+    <value>ключ</value>
+  </data>
+  <data name="CustomName" xml:space="preserve">
+    <value>Другой</value>
+  </data>
+  <data name="CustomHost" xml:space="preserve">
+    <value>Другой ({0})</value>
+  </data>
+  <data name="OrderTitle" xml:space="preserve">
+    <value>Порядок ИИ</value>
+  </data>
+  <data name="OrderNote" xml:space="preserve">
+    <value>Glance обращается к первому отмеченному ИИ. Когда у него заканчивается лимит или баланс, следующий отвечает без запроса. Через 30 минут Glance возвращается к первому.</value>
+  </data>
+  <data name="Up" xml:space="preserve">
+    <value>Вверх</value>
+  </data>
+  <data name="Down" xml:space="preserve">
+    <value>Вниз</value>
+  </data>
+  <data name="TickOne" xml:space="preserve">
+    <value>Отметьте хотя бы один.</value>
+  </data>
+  <data name="EditModesTitle" xml:space="preserve">
+    <value>Изменение режимов</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Добавить</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Сбросить</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="NewMode" xml:space="preserve">
+    <value>Новый режим</value>
+  </data>
+  <data name="PromptEmpty" xml:space="preserve">
+    <value>Запрос не может быть пустым. Чтобы вернуть запрос по умолчанию, нажмите «Сбросить».</value>
+  </data>
+  <data name="ModeNeedsBoth" xml:space="preserve">
+    <value>У режима должны быть название и запрос.</value>
+  </data>
+  <data name="ModeAnswer" xml:space="preserve">
+    <value>Ответить</value>
+  </data>
+  <data name="ModeExplain" xml:space="preserve">
+    <value>Объяснить</value>
+  </data>
+  <data name="ModeTranslate" xml:space="preserve">
+    <value>Перевести</value>
+  </data>
+  <data name="ModeSummarize" xml:space="preserve">
+    <value>Кратко изложить</value>
+  </data>
+  <data name="ConnectionLost" xml:space="preserve">
+    <value>Соединение с {0} потеряно.</value>
+  </data>
+  <data name="TookTooLong" xml:space="preserve">
+    <value>{0} слишком долго отвечает.</value>
+  </data>
+  <data name="NoAnswer" xml:space="preserve">
+    <value>{0} не вернул ответ.</value>
+  </data>
+  <data name="ReportedError" xml:space="preserve">
+    <value>{0} сообщил об ошибке.</value>
+  </data>
+  <data name="ReportedErrorDetail" xml:space="preserve">
+    <value>{0} сообщил об ошибке: {1}</value>
+  </data>
+  <data name="NoModelList" xml:space="preserve">
+    <value>{0} не прислал список моделей.</value>
+  </data>
+  <data name="ListedNoModels" xml:space="preserve">
+    <value>{0} не вернул ни одной модели.</value>
+  </data>
+  <data name="Filtered" xml:space="preserve">
+    <value>{0} отфильтровал ответ и не вернул текст.</value>
+  </data>
+  <data name="GeminiBlocked" xml:space="preserve">
+    <value>Gemini заблокировал снимок экрана ({0}) и не вернул текст.</value>
+  </data>
+  <data name="GeminiStopped" xml:space="preserve">
+    <value>Gemini остановился без ответа ({0}). Возможно, он заблокировал содержимое.</value>
+  </data>
+  <data name="Declined" xml:space="preserve">
+    <value>{0} отказался отвечать на этот запрос.</value>
+  </data>
+  <data name="NoAiUsable" xml:space="preserve">
+    <value>Ни один из ИИ в списке недоступен. Проверьте их в разделе «ИИ» меню значка в области уведомлений.</value>
+  </data>
+  <data name="SavedKeyUnusable" xml:space="preserve">
+    <value>Сохранённый ключ API не удаётся прочитать в этой учётной записи Windows. Подключите ИИ заново, чтобы ввести новый ключ.</value>
+  </data>
+  <data name="NeedsKey" xml:space="preserve">
+    <value>Для этого ИИ нужен ключ API.</value>
+  </data>
+  <data name="AllFailed" xml:space="preserve">
+    <value>Все варианты ({0}) завершились ошибкой. {1}</value>
+  </data>
+  <data name="CantReach" xml:space="preserve">
+    <value>Не удалось подключиться к {0}. Проверьте подключение и адрес.</value>
+  </data>
+  <data name="CantReachShort" xml:space="preserve">
+    <value>Не удалось подключиться к {0}. Проверьте подключение.</value>
+  </data>
+  <data name="Redirect" xml:space="preserve">
+    <value>{0} ответил перенаправлением. Glance не переходит по перенаправлениям, поэтому проверьте адрес.</value>
+  </data>
+  <data name="RedirectShort" xml:space="preserve">
+    <value>{0} ответил перенаправлением, по которому Glance не переходит.</value>
+  </data>
+  <data name="Http401" xml:space="preserve">
+    <value>{0} отклонил ключ API (401).</value>
+  </data>
+  <data name="Http402" xml:space="preserve">
+    <value>У этого ключа закончился баланс (402).</value>
+  </data>
+  <data name="Http403" xml:space="preserve">
+    <value>{0} отклонил запрос (403).</value>
+  </data>
+  <data name="Http404" xml:space="preserve">
+    <value>У {0} нет такой модели или такого адреса (404).</value>
+  </data>
+  <data name="Http404Model" xml:space="preserve">
+    <value>У {0} нет такой модели (404).</value>
+  </data>
+  <data name="Http429" xml:space="preserve">
+    <value>{0} ограничивает частоту запросов для этого ключа или его квота исчерпана (429).</value>
+  </data>
+  <data name="HttpServer" xml:space="preserve">
+    <value>Ошибка сервера {0} ({1}).</value>
+  </data>
+  <data name="HttpOther" xml:space="preserve">
+    <value>{0} вернул ошибку ({1}).</value>
+  </data>
+  <data name="LineTooLong" xml:space="preserve">
+    <value>В ответе была слишком длинная строка.</value>
+  </data>
+  <data name="BaseUrlScheme" xml:space="preserve">
+    <value>Базовый URL должен начинаться с http:// или https://.</value>
+  </data>
+  <data name="BaseUrlUser" xml:space="preserve">
+    <value>Удалите имя пользователя и пароль из базового URL.</value>
+  </data>
+  <data name="BaseUrlQuery" xml:space="preserve">
+    <value>Удалите из базового URL всё, начиная с ? или #.</value>
+  </data>
+  <data name="BaseUrlPlain" xml:space="preserve">
+    <value>Обычный адрес http передаёт ключ API без шифрования. Используйте https или адрес на этом компьютере.</value>
+  </data>
+  <data name="BadKeyChars" xml:space="preserve">
+    <value>В этом ключе есть символы, недопустимые для ключа API.</value>
+  </data>
+  <data name="CliNotFound" xml:space="preserve">
+    <value>Glance не находит команду claude. Установите Claude CLI, один раз запустите claude для входа и повторите попытку.</value>
+  </data>
+  <data name="CliTimedOut" xml:space="preserve">
+    <value>{0} слишком долго отвечает.</value>
+  </data>
+  <data name="CliError" xml:space="preserve">
+    <value>{0} сообщил об ошибке.</value>
+  </data>
+  <data name="CliExit" xml:space="preserve">
+    <value>{0} завершился с кодом {1}.</value>
+  </data>
+  <data name="CliNoAnswer" xml:space="preserve">
+    <value>{0} не вернул ответ.</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>Проверить наличие обновлений</value>
+  </data>
+  <data name="UpdateTo" xml:space="preserve">
+    <value>Обновить Glance до версии {0}</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Доступна версия Glance {0}.</value>
+  </data>
+  <data name="Effort" xml:space="preserve">
+    <value>Уровень рассуждения</value>
+  </data>
+  <data name="EffortDefault" xml:space="preserve">
+    <value>По умолчанию</value>
+  </data>
+  <data name="EffortMinimal" xml:space="preserve">
+    <value>Минимальный</value>
+  </data>
+  <data name="EffortLow" xml:space="preserve">
+    <value>Низкий</value>
+  </data>
+  <data name="EffortMedium" xml:space="preserve">
+    <value>Средний</value>
+  </data>
+  <data name="EffortHigh" xml:space="preserve">
+    <value>Высокий</value>
+  </data>
+  <data name="EffortXHigh" xml:space="preserve">
+    <value>Очень высокий</value>
+  </data>
+  <data name="EffortMax" xml:space="preserve">
+    <value>Максимальный</value>
+  </data>
+  <data name="CodexNotFound" xml:space="preserve">
+    <value>Glance не находит команду codex. Установите её командой npm install -g @openai/codex, выполните codex login для входа и повторите попытку.</value>
+  </data>
+  <data name="GeminiNotFound" xml:space="preserve">
+    <value>Glance не находит команду gemini. Установите её командой npm install -g @google/gemini-cli, один раз запустите gemini для входа и повторите попытку.</value>
+  </data>
+  <data name="AccountFound" xml:space="preserve">
+    <value>Найдено: {0}</value>
+  </data>
+  <data name="AccountMissing" xml:space="preserve">
+    <value>Не установлено. Установите командой: {0}</value>
+  </data>
+  <data name="SignedIn" xml:space="preserve">
+    <value>Вход выполнен</value>
+  </data>
+  <data name="NotSignedIn" xml:space="preserve">
+    <value>Вход не выполнен</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Войти</value>
+  </data>
+  <data name="AnswerGoesTo" xml:space="preserve">
+    <value>Куда направлять ответ</value>
+  </data>
+  <data name="ShowIt" xml:space="preserve">
+    <value>Показать</value>
+  </data>
+  <data name="ShowAndCopy" xml:space="preserve">
+    <value>Показать и скопировать</value>
+  </data>
+  <data name="CopyOnly" xml:space="preserve">
+    <value>Только скопировать</value>
+  </data>
+</root>

@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="MouseScreen" xml:space="preserve">
+    <value>Schermo con il mouse</value>
+  </data>
+  <data name="AllScreens" xml:space="preserve">
+    <value>Tutti gli schermi</value>
+  </data>
+  <data name="ActiveWindow" xml:space="preserve">
+    <value>Finestra attiva</value>
+  </data>
+  <data name="ScreenPlain" xml:space="preserve">
+    <value>Schermo {0} ({1}x{2})</value>
+  </data>
+  <data name="ScreenPrimary" xml:space="preserve">
+    <value>Schermo {0} ({1}x{2}, principale)</value>
+  </data>
+  <data name="AlreadyRunning" xml:space="preserve">
+    <value>Glance è già in esecuzione. Premi {0} per leggere lo schermo.</value>
+  </data>
+  <data name="StartupFailed" xml:space="preserve">
+    <value>Impossibile modificare l'impostazione di avvio di Windows.</value>
+  </data>
+  <data name="Tooltip" xml:space="preserve">
+    <value>Glance (Leggi: {0}, Area: {1}, Chiudi: {2})</value>
+  </data>
+  <data name="KeyReadsScreen" xml:space="preserve">
+    <value>{0} (legge lo schermo)</value>
+  </data>
+  <data name="KeyReadsArea" xml:space="preserve">
+    <value>{0} (legge un'area)</value>
+  </data>
+  <data name="KeyClosesAnswer" xml:space="preserve">
+    <value>{0} (chiude la risposta)</value>
+  </data>
+  <data name="KeyHidesAnswer" xml:space="preserve">
+    <value>{0} (nasconde il testo della risposta)</value>
+  </data>
+  <data name="ListJoin" xml:space="preserve">
+    <value> e </value>
+  </data>
+  <data name="KeysFailed" xml:space="preserve">
+    <value>Impossibile usare {0}: è già in uso da Windows o da un altro programma. Scegli un altro tasto dal menu nell'area di notifica.</value>
+  </data>
+  <data name="KeyOnlyHere" xml:space="preserve">
+    <value>{0} ora funziona solo come tasto {1} in ogni programma. Modificalo dal menu nell'area di notifica per riaverlo.</value>
+  </data>
+  <data name="SettingsNotSaved" xml:space="preserve">
+    <value>Impossibile salvare il file delle impostazioni, quindi questa scelta andrà persa al riavvio.</value>
+  </data>
+  <data name="MenuReadNow" xml:space="preserve">
+    <value>Leggi lo schermo ora</value>
+  </data>
+  <data name="ReadArea" xml:space="preserve">
+    <value>Leggi un'area</value>
+  </data>
+  <data name="MenuHideText" xml:space="preserve">
+    <value>Nascondi il testo della risposta</value>
+  </data>
+  <data name="ReadFrom" xml:space="preserve">
+    <value>Leggi da</value>
+  </data>
+  <data name="ShowAnswerOn" xml:space="preserve">
+    <value>Mostra la risposta su</value>
+  </data>
+  <data name="PlainAnswer" xml:space="preserve">
+    <value>Risposta semplice su nero</value>
+  </data>
+  <data name="IdentifyScreens" xml:space="preserve">
+    <value>Identifica gli schermi</value>
+  </data>
+  <data name="KeyMenu" xml:space="preserve">
+    <value>Tasto {0} ({1})...</value>
+  </data>
+  <data name="KeyTitle" xml:space="preserve">
+    <value>Tasto {0}</value>
+  </data>
+  <data name="JobRead" xml:space="preserve">
+    <value>Leggi</value>
+  </data>
+  <data name="JobArea" xml:space="preserve">
+    <value>Area</value>
+  </data>
+  <data name="JobClose" xml:space="preserve">
+    <value>Chiudi</value>
+  </data>
+  <data name="JobHide" xml:space="preserve">
+    <value>Nascondi</value>
+  </data>
+  <data name="StartWithWindows" xml:space="preserve">
+    <value>Avvia con Windows</value>
+  </data>
+  <data name="RecentAnswers" xml:space="preserve">
+    <value>Risposte recenti</value>
+  </data>
+  <data name="KeepAnswers" xml:space="preserve">
+    <value>Conserva le risposte dopo la chiusura</value>
+  </data>
+  <data name="ClearRecent" xml:space="preserve">
+    <value>Cancella le risposte recenti</value>
+  </data>
+  <data name="MenuSettings" xml:space="preserve">
+    <value>Impostazioni...</value>
+  </data>
+  <data name="MenuExit" xml:space="preserve">
+    <value>Esci</value>
+  </data>
+  <data name="AnswerPosition" xml:space="preserve">
+    <value>Posizione della risposta</value>
+  </data>
+  <data name="BottomRight" xml:space="preserve">
+    <value>In basso a destra</value>
+  </data>
+  <data name="CenterOfScreen" xml:space="preserve">
+    <value>Al centro dello schermo</value>
+  </data>
+  <data name="DrawnArea" xml:space="preserve">
+    <value>Area disegnata</value>
+  </data>
+  <data name="DrawAnswerArea" xml:space="preserve">
+    <value>Disegna l'area della risposta...</value>
+  </data>
+  <data name="TextOpacity" xml:space="preserve">
+    <value>Opacità del testo</value>
+  </data>
+  <data name="DragAnswerArea" xml:space="preserve">
+    <value>Trascina per indicare l'area in cui devono comparire le risposte. Esc per annullare.</value>
+  </data>
+  <data name="AnswersHere" xml:space="preserve">
+    <value>Le risposte compariranno qui.</value>
+  </data>
+  <data name="AI" xml:space="preserve">
+    <value>IA</value>
+  </data>
+  <data name="ChangeOrder" xml:space="preserve">
+    <value>Cambia ordine...</value>
+  </data>
+  <data name="ConnectAi" xml:space="preserve">
+    <value>Collega un'IA...</value>
+  </data>
+  <data name="ClaudeCliModel" xml:space="preserve">
+    <value>Modello di Claude CLI</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>Modalità</value>
+  </data>
+  <data name="EditModes" xml:space="preserve">
+    <value>Modifica modalità...</value>
+  </data>
+  <data name="WindowsLanguage" xml:space="preserve">
+    <value>Lingua di Windows ({0})</value>
+  </data>
+  <data name="TranslateTo" xml:space="preserve">
+    <value>Traduci in</value>
+  </data>
+  <data name="DragReadArea" xml:space="preserve">
+    <value>Trascina sull'area da leggere. Esc per annullare.</value>
+  </data>
+  <data name="Reading" xml:space="preserve">
+    <value>Lettura in corso...</value>
+  </data>
+  <data name="AnswerEmpty" xml:space="preserve">
+    <value>La risposta era vuota.</value>
+  </data>
+  <data name="QuestionPrefix" xml:space="preserve">
+    <value>D: </value>
+  </data>
+  <data name="Crashed" xml:space="preserve">
+    <value>Qualcosa è andato storto. I dettagli sono in glance.log.</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copia</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Copiato</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>Non riuscito</value>
+  </data>
+  <data name="FollowUp" xml:space="preserve">
+    <value>Fai un'altra domanda</value>
+  </data>
+  <data name="PressKeyFor" xml:space="preserve">
+    <value>Premi il tasto per: {0}</value>
+  </data>
+  <data name="FnHint" xml:space="preserve">
+    <value>Fn da solo non arriva a Windows sulla maggior parte dei portatili.</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annulla</value>
+  </data>
+  <data name="PurposeRead" xml:space="preserve">
+    <value>Leggere lo schermo</value>
+  </data>
+  <data name="PurposeClose" xml:space="preserve">
+    <value>Chiudere la risposta</value>
+  </data>
+  <data name="PurposeHide" xml:space="preserve">
+    <value>Nascondere il testo della risposta e tenere lo schermo nero</value>
+  </data>
+  <data name="WinKeyAlone" xml:space="preserve">
+    <value>Anche il tasto Windows da solo apre Start. Aggiungi un altro tasto.</value>
+  </data>
+  <data name="KeyTaken" xml:space="preserve">
+    <value>{0} è già il tasto {1}.</value>
+  </data>
+  <data name="KeyHeld" xml:space="preserve">
+    <value>Impossibile usare {0}. È già in uso da Windows o da un altro programma.</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Impostazioni di Glance</value>
+  </data>
+  <data name="TabReading" xml:space="preserve">
+    <value>Lettura</value>
+  </data>
+  <data name="TabAnswer" xml:space="preserve">
+    <value>Risposta</value>
+  </data>
+  <data name="TabKeys" xml:space="preserve">
+    <value>Tasti</value>
+  </data>
+  <data name="TabGeneral" xml:space="preserve">
+    <value>Generali</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Modifica...</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>Ordine</value>
+  </data>
+  <data name="OpenLogFolder" xml:space="preserve">
+    <value>Apri la cartella del registro</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Chiudi</value>
+  </data>
+  <data name="ConnectTitle" xml:space="preserve">
+    <value>Collega un'IA</value>
+  </data>
+  <data name="SavedKeysCaption" xml:space="preserve">
+    <value>Chiavi salvate, provate a turno quando una si esaurisce</value>
+  </data>
+  <data name="ApiKey" xml:space="preserve">
+    <value>Chiave API</value>
+  </data>
+  <data name="BaseUrl" xml:space="preserve">
+    <value>URL di base</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Modello</value>
+  </data>
+  <data name="ConnectNote" xml:space="preserve">
+    <value>Gli screenshot che leggi vengono inviati all'IA scelta qui.</value>
+  </data>
+  <data name="RemoveKey" xml:space="preserve">
+    <value>Rimuovi chiave</value>
+  </data>
+  <data name="LoadModels" xml:space="preserve">
+    <value>Carica modelli</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Salva</value>
+  </data>
+  <data name="PasteAnotherKey" xml:space="preserve">
+    <value>Incolla un'altra chiave per aggiungerla</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>Facoltativo</value>
+  </data>
+  <data name="PasteKey" xml:space="preserve">
+    <value>Incolla la chiave API</value>
+  </data>
+  <data name="AddKey" xml:space="preserve">
+    <value>Aggiungi una chiave</value>
+  </data>
+  <data name="ApiKeyOptional" xml:space="preserve">
+    <value>Chiave API (facoltativa)</value>
+  </data>
+  <data name="LoadingModels" xml:space="preserve">
+    <value>Caricamento dei modelli...</value>
+  </data>
+  <data name="ModelsLoaded" xml:space="preserve">
+    <value>{0} modelli caricati. La chiave funziona.</value>
+  </data>
+  <data name="ProviderTimeout" xml:space="preserve">
+    <value>Il provider non ha risposto in tempo.</value>
+  </data>
+  <data name="SavedKeysUnreadable" xml:space="preserve">
+    <value>Impossibile leggere le chiavi salvate. Inseriscine una nuova o rimuovile.</value>
+  </data>
+  <data name="EnterKey" xml:space="preserve">
+    <value>Inserisci la chiave API.</value>
+  </data>
+  <data name="PickModel" xml:space="preserve">
+    <value>Scegli o digita un modello. Carica modelli elenca quelli che questa chiave può usare.</value>
+  </data>
+  <data name="SavedKeyUnreadable" xml:space="preserve">
+    <value>Chiave {0} (illeggibile)</value>
+  </data>
+  <data name="SavedKeyEnding" xml:space="preserve">
+    <value>Chiave {0} (termina con {1})</value>
+  </data>
+  <data name="SavedKey" xml:space="preserve">
+    <value>Chiave {0}</value>
+  </data>
+  <data name="OptKeyUnreadable" xml:space="preserve">
+    <value>chiave illeggibile</value>
+  </data>
+  <data name="OptKeyEnding" xml:space="preserve">
+    <value>chiave che termina con {0}</value>
+  </data>
+  <data name="OptKey" xml:space="preserve">
+    <value>chiave</value>
+  </data>
+  <data name="CustomName" xml:space="preserve">
+    <value>Personalizzato</value>
+  </data>
+  <data name="CustomHost" xml:space="preserve">
+    <value>Personalizzato ({0})</value>
+  </data>
+  <data name="OrderTitle" xml:space="preserve">
+    <value>Ordine delle IA</value>
+  </data>
+  <data name="OrderNote" xml:space="preserve">
+    <value>Glance interroga la prima IA selezionata. Quando ha esaurito l'utilizzo o il credito, risponde la successiva senza chiedere. Dopo 30 minuti si torna alla prima.</value>
+  </data>
+  <data name="Up" xml:space="preserve">
+    <value>Su</value>
+  </data>
+  <data name="Down" xml:space="preserve">
+    <value>Giù</value>
+  </data>
+  <data name="TickOne" xml:space="preserve">
+    <value>Selezionane almeno una.</value>
+  </data>
+  <data name="EditModesTitle" xml:space="preserve">
+    <value>Modifica modalità</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Aggiungi</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Elimina</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>Ripristina</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="NewMode" xml:space="preserve">
+    <value>Nuova modalità</value>
+  </data>
+  <data name="PromptEmpty" xml:space="preserve">
+    <value>Il prompt non può essere vuoto. Usa Ripristina per quello predefinito.</value>
+  </data>
+  <data name="ModeNeedsBoth" xml:space="preserve">
+    <value>Una modalità richiede un nome e un prompt.</value>
+  </data>
+  <data name="ModeAnswer" xml:space="preserve">
+    <value>Rispondi</value>
+  </data>
+  <data name="ModeExplain" xml:space="preserve">
+    <value>Spiega</value>
+  </data>
+  <data name="ModeTranslate" xml:space="preserve">
+    <value>Traduci</value>
+  </data>
+  <data name="ModeSummarize" xml:space="preserve">
+    <value>Riassumi</value>
+  </data>
+  <data name="ConnectionLost" xml:space="preserve">
+    <value>La connessione a {0} è stata interrotta.</value>
+  </data>
+  <data name="TookTooLong" xml:space="preserve">
+    <value>{0} ha impiegato troppo tempo a rispondere.</value>
+  </data>
+  <data name="NoAnswer" xml:space="preserve">
+    <value>{0} non ha restituito alcuna risposta.</value>
+  </data>
+  <data name="ReportedError" xml:space="preserve">
+    <value>{0} ha segnalato un errore.</value>
+  </data>
+  <data name="ReportedErrorDetail" xml:space="preserve">
+    <value>{0} ha segnalato un errore: {1}</value>
+  </data>
+  <data name="NoModelList" xml:space="preserve">
+    <value>{0} non ha inviato un elenco di modelli.</value>
+  </data>
+  <data name="ListedNoModels" xml:space="preserve">
+    <value>{0} non ha elencato alcun modello.</value>
+  </data>
+  <data name="Filtered" xml:space="preserve">
+    <value>{0} ha filtrato la risposta e non ha restituito alcun testo.</value>
+  </data>
+  <data name="GeminiBlocked" xml:space="preserve">
+    <value>Gemini ha bloccato lo screenshot ({0}) e non ha restituito alcun testo.</value>
+  </data>
+  <data name="GeminiStopped" xml:space="preserve">
+    <value>Gemini si è fermato senza dare una risposta ({0}). Potrebbe aver bloccato il contenuto.</value>
+  </data>
+  <data name="Declined" xml:space="preserve">
+    <value>{0} ha rifiutato di rispondere a questa richiesta.</value>
+  </data>
+  <data name="NoAiUsable" xml:space="preserve">
+    <value>Nessuna delle IA nell'ordine può essere usata. Controllale in IA nel menu nell'area di notifica.</value>
+  </data>
+  <data name="SavedKeyUnusable" xml:space="preserve">
+    <value>La chiave API salvata non può essere letta da questo account Windows. Collega di nuovo l'IA per inserirne una nuova.</value>
+  </data>
+  <data name="NeedsKey" xml:space="preserve">
+    <value>Questa IA richiede una chiave API.</value>
+  </data>
+  <data name="AllFailed" xml:space="preserve">
+    <value>Nessuna delle {0} opzioni ha funzionato. {1}</value>
+  </data>
+  <data name="CantReach" xml:space="preserve">
+    <value>Impossibile raggiungere {0}. Controlla la connessione e l'indirizzo.</value>
+  </data>
+  <data name="CantReachShort" xml:space="preserve">
+    <value>Impossibile raggiungere {0}. Controlla la connessione.</value>
+  </data>
+  <data name="Redirect" xml:space="preserve">
+    <value>{0} ha risposto con un reindirizzamento. Glance non segue i reindirizzamenti, quindi controlla l'indirizzo.</value>
+  </data>
+  <data name="RedirectShort" xml:space="preserve">
+    <value>{0} ha risposto con un reindirizzamento, che Glance non segue.</value>
+  </data>
+  <data name="Http401" xml:space="preserve">
+    <value>{0} ha rifiutato la chiave API (401).</value>
+  </data>
+  <data name="Http402" xml:space="preserve">
+    <value>Questa chiave ha esaurito il credito (402).</value>
+  </data>
+  <data name="Http403" xml:space="preserve">
+    <value>{0} ha rifiutato la richiesta (403).</value>
+  </data>
+  <data name="Http404" xml:space="preserve">
+    <value>{0} non ha quel modello o indirizzo (404).</value>
+  </data>
+  <data name="Http404Model" xml:space="preserve">
+    <value>{0} non ha quel modello (404).</value>
+  </data>
+  <data name="Http429" xml:space="preserve">
+    <value>{0} sta limitando questa chiave, oppure la quota è esaurita (429).</value>
+  </data>
+  <data name="HttpServer" xml:space="preserve">
+    <value>{0} ha avuto un errore del server ({1}).</value>
+  </data>
+  <data name="HttpOther" xml:space="preserve">
+    <value>{0} ha restituito un errore ({1}).</value>
+  </data>
+  <data name="LineTooLong" xml:space="preserve">
+    <value>La risposta conteneva una riga eccessivamente lunga.</value>
+  </data>
+  <data name="BaseUrlScheme" xml:space="preserve">
+    <value>L'URL di base deve iniziare con http:// o https://.</value>
+  </data>
+  <data name="BaseUrlUser" xml:space="preserve">
+    <value>Rimuovi il nome utente e la password dall'URL di base.</value>
+  </data>
+  <data name="BaseUrlQuery" xml:space="preserve">
+    <value>Rimuovi dall'URL di base tutto ciò che inizia da ? o #.</value>
+  </data>
+  <data name="BaseUrlPlain" xml:space="preserve">
+    <value>Un indirizzo http semplice invierebbe la chiave API non cifrata. Usa https oppure un indirizzo su questo PC.</value>
+  </data>
+  <data name="BadKeyChars" xml:space="preserve">
+    <value>La chiave contiene caratteri non validi per una chiave API.</value>
+  </data>
+  <data name="CliNotFound" xml:space="preserve">
+    <value>Glance non trova il comando claude. Installa Claude CLI, esegui claude una volta per accedere, poi riprova.</value>
+  </data>
+  <data name="CliTimedOut" xml:space="preserve">
+    <value>{0} ha impiegato troppo tempo a rispondere.</value>
+  </data>
+  <data name="CliError" xml:space="preserve">
+    <value>{0} ha segnalato un errore.</value>
+  </data>
+  <data name="CliExit" xml:space="preserve">
+    <value>{0} è terminato con il codice {1}.</value>
+  </data>
+  <data name="CliNoAnswer" xml:space="preserve">
+    <value>{0} non ha restituito alcuna risposta.</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>Verifica aggiornamenti</value>
+  </data>
+  <data name="UpdateTo" xml:space="preserve">
+    <value>Aggiorna a Glance {0}</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Glance {0} è disponibile.</value>
+  </data>
+  <data name="Effort" xml:space="preserve">
+    <value>Impegno</value>
+  </data>
+  <data name="EffortDefault" xml:space="preserve">
+    <value>Predefinito</value>
+  </data>
+  <data name="EffortMinimal" xml:space="preserve">
+    <value>Minimo</value>
+  </data>
+  <data name="EffortLow" xml:space="preserve">
+    <value>Basso</value>
+  </data>
+  <data name="EffortMedium" xml:space="preserve">
+    <value>Medio</value>
+  </data>
+  <data name="EffortHigh" xml:space="preserve">
+    <value>Alto</value>
+  </data>
+  <data name="EffortXHigh" xml:space="preserve">
+    <value>Molto alto</value>
+  </data>
+  <data name="EffortMax" xml:space="preserve">
+    <value>Massimo</value>
+  </data>
+  <data name="CodexNotFound" xml:space="preserve">
+    <value>Glance non trova il comando codex. Installalo con npm install -g @openai/codex, esegui codex login per accedere, poi riprova.</value>
+  </data>
+  <data name="GeminiNotFound" xml:space="preserve">
+    <value>Glance non trova il comando gemini. Installalo con npm install -g @google/gemini-cli, esegui gemini una volta per accedere, poi riprova.</value>
+  </data>
+  <data name="AccountFound" xml:space="preserve">
+    <value>Trovato: {0}</value>
+  </data>
+  <data name="AccountMissing" xml:space="preserve">
+    <value>Non installato. Installa con: {0}</value>
+  </data>
+  <data name="SignedIn" xml:space="preserve">
+    <value>Accesso effettuato</value>
+  </data>
+  <data name="NotSignedIn" xml:space="preserve">
+    <value>Accesso non effettuato</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Accedi</value>
+  </data>
+  <data name="AnswerGoesTo" xml:space="preserve">
+    <value>La risposta va a</value>
+  </data>
+  <data name="ShowIt" xml:space="preserve">
+    <value>Mostrala</value>
+  </data>
+  <data name="ShowAndCopy" xml:space="preserve">
+    <value>Mostrala e copiala</value>
+  </data>
+  <data name="CopyOnly" xml:space="preserve">
+    <value>Solo copia</value>
+  </data>
+</root>

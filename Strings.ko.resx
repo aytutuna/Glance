@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="MouseScreen" xml:space="preserve">
+    <value>마우스가 있는 화면</value>
+  </data>
+  <data name="AllScreens" xml:space="preserve">
+    <value>모든 화면</value>
+  </data>
+  <data name="ActiveWindow" xml:space="preserve">
+    <value>활성 창</value>
+  </data>
+  <data name="ScreenPlain" xml:space="preserve">
+    <value>화면 {0}({1}x{2})</value>
+  </data>
+  <data name="ScreenPrimary" xml:space="preserve">
+    <value>화면 {0}({1}x{2}, 주 화면)</value>
+  </data>
+  <data name="AlreadyRunning" xml:space="preserve">
+    <value>Glance가 이미 실행 중입니다. {0} 키를 눌러 화면을 읽으세요.</value>
+  </data>
+  <data name="StartupFailed" xml:space="preserve">
+    <value>Windows 시작 설정을 변경할 수 없습니다.</value>
+  </data>
+  <data name="Tooltip" xml:space="preserve">
+    <value>Glance(읽기: {0}, 영역: {1}, 닫기: {2})</value>
+  </data>
+  <data name="KeyReadsScreen" xml:space="preserve">
+    <value>{0}(화면 읽기)</value>
+  </data>
+  <data name="KeyReadsArea" xml:space="preserve">
+    <value>{0}(영역 읽기)</value>
+  </data>
+  <data name="KeyClosesAnswer" xml:space="preserve">
+    <value>{0}(답변 닫기)</value>
+  </data>
+  <data name="KeyHidesAnswer" xml:space="preserve">
+    <value>{0}(답변 텍스트 숨기기)</value>
+  </data>
+  <data name="ListJoin" xml:space="preserve">
+    <value> 및 </value>
+  </data>
+  <data name="KeysFailed" xml:space="preserve">
+    <value>{0} 키를 사용할 수 없습니다. Windows 또는 다른 프로그램에서 사용 중입니다. 알림 영역 메뉴에서 다른 키를 선택하세요.</value>
+  </data>
+  <data name="KeyOnlyHere" xml:space="preserve">
+    <value>{0} 키는 이제 모든 프로그램에서 {1} 키로만 작동합니다. 되돌리려면 알림 영역 메뉴에서 변경하세요.</value>
+  </data>
+  <data name="SettingsNotSaved" xml:space="preserve">
+    <value>설정 파일을 저장할 수 없어 이 선택은 다시 시작하면 유지되지 않습니다.</value>
+  </data>
+  <data name="MenuReadNow" xml:space="preserve">
+    <value>지금 화면 읽기</value>
+  </data>
+  <data name="ReadArea" xml:space="preserve">
+    <value>영역 읽기</value>
+  </data>
+  <data name="MenuHideText" xml:space="preserve">
+    <value>답변 텍스트 숨기기</value>
+  </data>
+  <data name="ReadFrom" xml:space="preserve">
+    <value>읽을 화면</value>
+  </data>
+  <data name="ShowAnswerOn" xml:space="preserve">
+    <value>답변 표시 위치</value>
+  </data>
+  <data name="PlainAnswer" xml:space="preserve">
+    <value>검은 배경 답변</value>
+  </data>
+  <data name="IdentifyScreens" xml:space="preserve">
+    <value>화면 식별</value>
+  </data>
+  <data name="KeyMenu" xml:space="preserve">
+    <value>{0} 키({1})...</value>
+  </data>
+  <data name="KeyTitle" xml:space="preserve">
+    <value>{0} 키</value>
+  </data>
+  <data name="JobRead" xml:space="preserve">
+    <value>읽기</value>
+  </data>
+  <data name="JobArea" xml:space="preserve">
+    <value>영역</value>
+  </data>
+  <data name="JobClose" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="JobHide" xml:space="preserve">
+    <value>숨기기</value>
+  </data>
+  <data name="StartWithWindows" xml:space="preserve">
+    <value>Windows 시작 시 실행</value>
+  </data>
+  <data name="RecentAnswers" xml:space="preserve">
+    <value>최근 답변</value>
+  </data>
+  <data name="KeepAnswers" xml:space="preserve">
+    <value>닫은 후에도 답변 유지</value>
+  </data>
+  <data name="ClearRecent" xml:space="preserve">
+    <value>최근 답변 지우기</value>
+  </data>
+  <data name="MenuSettings" xml:space="preserve">
+    <value>설정...</value>
+  </data>
+  <data name="MenuExit" xml:space="preserve">
+    <value>종료</value>
+  </data>
+  <data name="AnswerPosition" xml:space="preserve">
+    <value>답변 위치</value>
+  </data>
+  <data name="BottomRight" xml:space="preserve">
+    <value>오른쪽 아래</value>
+  </data>
+  <data name="CenterOfScreen" xml:space="preserve">
+    <value>화면 가운데</value>
+  </data>
+  <data name="DrawnArea" xml:space="preserve">
+    <value>그린 영역</value>
+  </data>
+  <data name="DrawAnswerArea" xml:space="preserve">
+    <value>답변 영역 그리기...</value>
+  </data>
+  <data name="TextOpacity" xml:space="preserve">
+    <value>텍스트 불투명도</value>
+  </data>
+  <data name="DragAnswerArea" xml:space="preserve">
+    <value>답변이 표시될 영역을 드래그하세요. Esc 키를 누르면 취소됩니다.</value>
+  </data>
+  <data name="AnswersHere" xml:space="preserve">
+    <value>답변이 여기에 표시됩니다.</value>
+  </data>
+  <data name="AI" xml:space="preserve">
+    <value>AI</value>
+  </data>
+  <data name="ChangeOrder" xml:space="preserve">
+    <value>순서 변경...</value>
+  </data>
+  <data name="ConnectAi" xml:space="preserve">
+    <value>AI 연결...</value>
+  </data>
+  <data name="ClaudeCliModel" xml:space="preserve">
+    <value>Claude CLI 모델</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>모드</value>
+  </data>
+  <data name="EditModes" xml:space="preserve">
+    <value>모드 편집...</value>
+  </data>
+  <data name="WindowsLanguage" xml:space="preserve">
+    <value>Windows 언어({0})</value>
+  </data>
+  <data name="TranslateTo" xml:space="preserve">
+    <value>번역할 언어</value>
+  </data>
+  <data name="DragReadArea" xml:space="preserve">
+    <value>읽을 영역을 드래그하세요. Esc 키를 누르면 취소됩니다.</value>
+  </data>
+  <data name="Reading" xml:space="preserve">
+    <value>읽는 중...</value>
+  </data>
+  <data name="AnswerEmpty" xml:space="preserve">
+    <value>답변이 비어 있습니다.</value>
+  </data>
+  <data name="QuestionPrefix" xml:space="preserve">
+    <value>질문: </value>
+  </data>
+  <data name="Crashed" xml:space="preserve">
+    <value>문제가 발생했습니다. 자세한 내용은 glance.log에 있습니다.</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>복사</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>복사됨</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>실패</value>
+  </data>
+  <data name="FollowUp" xml:space="preserve">
+    <value>추가 질문하기</value>
+  </data>
+  <data name="PressKeyFor" xml:space="preserve">
+    <value>다음 기능에 사용할 키를 누르세요: {0}</value>
+  </data>
+  <data name="FnHint" xml:space="preserve">
+    <value>대부분의 노트북에서는 Fn 키만으로는 Windows에 전달되지 않습니다.</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="PurposeRead" xml:space="preserve">
+    <value>화면 읽기</value>
+  </data>
+  <data name="PurposeClose" xml:space="preserve">
+    <value>답변 닫기</value>
+  </data>
+  <data name="PurposeHide" xml:space="preserve">
+    <value>답변 텍스트를 숨기고 화면을 검게 유지</value>
+  </data>
+  <data name="WinKeyAlone" xml:space="preserve">
+    <value>Windows 키만 누르면 시작 메뉴도 열립니다. 다른 키를 함께 추가하세요.</value>
+  </data>
+  <data name="KeyTaken" xml:space="preserve">
+    <value>{0} 키는 이미 {1} 키입니다.</value>
+  </data>
+  <data name="KeyHeld" xml:space="preserve">
+    <value>{0} 키를 사용할 수 없습니다. Windows 또는 다른 프로그램에서 사용 중입니다.</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Glance 설정</value>
+  </data>
+  <data name="TabReading" xml:space="preserve">
+    <value>읽기</value>
+  </data>
+  <data name="TabAnswer" xml:space="preserve">
+    <value>답변</value>
+  </data>
+  <data name="TabKeys" xml:space="preserve">
+    <value>키</value>
+  </data>
+  <data name="TabGeneral" xml:space="preserve">
+    <value>일반</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>변경...</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>순서</value>
+  </data>
+  <data name="OpenLogFolder" xml:space="preserve">
+    <value>로그 폴더 열기</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="ConnectTitle" xml:space="preserve">
+    <value>AI 연결</value>
+  </data>
+  <data name="SavedKeysCaption" xml:space="preserve">
+    <value>저장된 키, 하나가 소진되면 순서대로 시도</value>
+  </data>
+  <data name="ApiKey" xml:space="preserve">
+    <value>API 키</value>
+  </data>
+  <data name="BaseUrl" xml:space="preserve">
+    <value>기본 URL</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>모델</value>
+  </data>
+  <data name="ConnectNote" xml:space="preserve">
+    <value>읽은 화면 캡처는 여기서 선택한 AI로 전송됩니다.</value>
+  </data>
+  <data name="RemoveKey" xml:space="preserve">
+    <value>키 제거</value>
+  </data>
+  <data name="LoadModels" xml:space="preserve">
+    <value>모델 불러오기</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>저장</value>
+  </data>
+  <data name="PasteAnotherKey" xml:space="preserve">
+    <value>다른 키를 붙여넣어 추가하세요</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>선택 사항</value>
+  </data>
+  <data name="PasteKey" xml:space="preserve">
+    <value>API 키를 붙여넣으세요</value>
+  </data>
+  <data name="AddKey" xml:space="preserve">
+    <value>키 추가</value>
+  </data>
+  <data name="ApiKeyOptional" xml:space="preserve">
+    <value>API 키(선택 사항)</value>
+  </data>
+  <data name="LoadingModels" xml:space="preserve">
+    <value>모델을 불러오는 중...</value>
+  </data>
+  <data name="ModelsLoaded" xml:space="preserve">
+    <value>모델 {0}개를 불러왔습니다. 키가 작동합니다.</value>
+  </data>
+  <data name="ProviderTimeout" xml:space="preserve">
+    <value>제공업체가 제시간에 응답하지 않았습니다.</value>
+  </data>
+  <data name="SavedKeysUnreadable" xml:space="preserve">
+    <value>저장된 키를 읽을 수 없습니다. 새 키를 입력하거나 제거하세요.</value>
+  </data>
+  <data name="EnterKey" xml:space="preserve">
+    <value>API 키를 입력하세요.</value>
+  </data>
+  <data name="PickModel" xml:space="preserve">
+    <value>모델을 선택하거나 입력하세요. 모델 불러오기를 누르면 이 키로 사용할 수 있는 모델이 표시됩니다.</value>
+  </data>
+  <data name="SavedKeyUnreadable" xml:space="preserve">
+    <value>키 {0}(읽을 수 없음)</value>
+  </data>
+  <data name="SavedKeyEnding" xml:space="preserve">
+    <value>키 {0}(끝자리 {1})</value>
+  </data>
+  <data name="SavedKey" xml:space="preserve">
+    <value>키 {0}</value>
+  </data>
+  <data name="OptKeyUnreadable" xml:space="preserve">
+    <value>읽을 수 없는 키</value>
+  </data>
+  <data name="OptKeyEnding" xml:space="preserve">
+    <value>끝자리 {0}인 키</value>
+  </data>
+  <data name="OptKey" xml:space="preserve">
+    <value>키</value>
+  </data>
+  <data name="CustomName" xml:space="preserve">
+    <value>사용자 지정</value>
+  </data>
+  <data name="CustomHost" xml:space="preserve">
+    <value>사용자 지정({0})</value>
+  </data>
+  <data name="OrderTitle" xml:space="preserve">
+    <value>AI 순서</value>
+  </data>
+  <data name="OrderNote" xml:space="preserve">
+    <value>Glance는 선택한 첫 번째 AI에 질문합니다. 사용량이나 크레딧이 소진되면 다음 AI가 묻지 않고 답변합니다. 30분 후에는 첫 번째 AI로 돌아갑니다.</value>
+  </data>
+  <data name="Up" xml:space="preserve">
+    <value>위로</value>
+  </data>
+  <data name="Down" xml:space="preserve">
+    <value>아래로</value>
+  </data>
+  <data name="TickOne" xml:space="preserve">
+    <value>하나 이상 선택하세요.</value>
+  </data>
+  <data name="EditModesTitle" xml:space="preserve">
+    <value>모드 편집</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>추가</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>삭제</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>재설정</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="NewMode" xml:space="preserve">
+    <value>새 모드</value>
+  </data>
+  <data name="PromptEmpty" xml:space="preserve">
+    <value>프롬프트는 비워 둘 수 없습니다. 기본값을 사용하려면 재설정을 누르세요.</value>
+  </data>
+  <data name="ModeNeedsBoth" xml:space="preserve">
+    <value>모드에는 이름과 프롬프트가 필요합니다.</value>
+  </data>
+  <data name="ModeAnswer" xml:space="preserve">
+    <value>답변</value>
+  </data>
+  <data name="ModeExplain" xml:space="preserve">
+    <value>설명</value>
+  </data>
+  <data name="ModeTranslate" xml:space="preserve">
+    <value>번역</value>
+  </data>
+  <data name="ModeSummarize" xml:space="preserve">
+    <value>요약</value>
+  </data>
+  <data name="ConnectionLost" xml:space="preserve">
+    <value>{0}과(와)의 연결이 끊어졌습니다.</value>
+  </data>
+  <data name="TookTooLong" xml:space="preserve">
+    <value>{0}이(가) 응답하는 데 너무 오래 걸렸습니다.</value>
+  </data>
+  <data name="NoAnswer" xml:space="preserve">
+    <value>{0}에서 답변을 반환하지 않았습니다.</value>
+  </data>
+  <data name="ReportedError" xml:space="preserve">
+    <value>{0}에서 오류가 보고되었습니다.</value>
+  </data>
+  <data name="ReportedErrorDetail" xml:space="preserve">
+    <value>{0}에서 오류가 보고되었습니다: {1}</value>
+  </data>
+  <data name="NoModelList" xml:space="preserve">
+    <value>{0}에서 모델 목록을 보내지 않았습니다.</value>
+  </data>
+  <data name="ListedNoModels" xml:space="preserve">
+    <value>{0}에 나열된 모델이 없습니다.</value>
+  </data>
+  <data name="Filtered" xml:space="preserve">
+    <value>{0}에서 답변을 필터링하여 텍스트를 반환하지 않았습니다.</value>
+  </data>
+  <data name="GeminiBlocked" xml:space="preserve">
+    <value>Gemini에서 스크린샷을 차단하여({0}) 텍스트를 반환하지 않았습니다.</value>
+  </data>
+  <data name="GeminiStopped" xml:space="preserve">
+    <value>Gemini가 답변 없이 중지되었습니다({0}). 콘텐츠를 차단했을 수 있습니다.</value>
+  </data>
+  <data name="Declined" xml:space="preserve">
+    <value>{0}에서 이 요청에 대한 답변을 거부했습니다.</value>
+  </data>
+  <data name="NoAiUsable" xml:space="preserve">
+    <value>순서에 있는 AI를 모두 사용할 수 없습니다. 알림 영역 메뉴의 AI에서 확인하세요.</value>
+  </data>
+  <data name="SavedKeyUnusable" xml:space="preserve">
+    <value>저장된 API 키를 이 Windows 계정에서 읽을 수 없습니다. AI를 다시 연결하여 새 키를 입력하세요.</value>
+  </data>
+  <data name="NeedsKey" xml:space="preserve">
+    <value>이 AI에는 API 키가 필요합니다.</value>
+  </data>
+  <data name="AllFailed" xml:space="preserve">
+    <value>{0}개 옵션이 모두 실패했습니다. {1}</value>
+  </data>
+  <data name="CantReach" xml:space="preserve">
+    <value>{0}에 연결할 수 없습니다. 연결 상태와 주소를 확인하세요.</value>
+  </data>
+  <data name="CantReachShort" xml:space="preserve">
+    <value>{0}에 연결할 수 없습니다. 연결 상태를 확인하세요.</value>
+  </data>
+  <data name="Redirect" xml:space="preserve">
+    <value>{0}에서 리디렉션으로 응답했습니다. Glance는 리디렉션을 따르지 않으므로 주소를 확인하세요.</value>
+  </data>
+  <data name="RedirectShort" xml:space="preserve">
+    <value>{0}에서 리디렉션으로 응답했으며, Glance는 이를 따르지 않습니다.</value>
+  </data>
+  <data name="Http401" xml:space="preserve">
+    <value>{0}에서 API 키를 거부했습니다(401).</value>
+  </data>
+  <data name="Http402" xml:space="preserve">
+    <value>이 키의 크레딧이 소진되었습니다(402).</value>
+  </data>
+  <data name="Http403" xml:space="preserve">
+    <value>{0}에서 요청을 거부했습니다(403).</value>
+  </data>
+  <data name="Http404" xml:space="preserve">
+    <value>{0}에 해당 모델 또는 주소가 없습니다(404).</value>
+  </data>
+  <data name="Http404Model" xml:space="preserve">
+    <value>{0}에 해당 모델이 없습니다(404).</value>
+  </data>
+  <data name="Http429" xml:space="preserve">
+    <value>{0}에서 이 키의 요청 한도에 도달했거나 할당량이 소진되었습니다(429).</value>
+  </data>
+  <data name="HttpServer" xml:space="preserve">
+    <value>{0}에 서버 오류가 발생했습니다({1}).</value>
+  </data>
+  <data name="HttpOther" xml:space="preserve">
+    <value>{0}에서 오류를 반환했습니다({1}).</value>
+  </data>
+  <data name="LineTooLong" xml:space="preserve">
+    <value>응답에 지나치게 긴 줄이 있었습니다.</value>
+  </data>
+  <data name="BaseUrlScheme" xml:space="preserve">
+    <value>기본 URL은 http:// 또는 https://로 시작해야 합니다.</value>
+  </data>
+  <data name="BaseUrlUser" xml:space="preserve">
+    <value>기본 URL에서 사용자 이름과 암호를 제거하세요.</value>
+  </data>
+  <data name="BaseUrlQuery" xml:space="preserve">
+    <value>기본 URL에서 ? 또는 # 이후의 내용을 모두 제거하세요.</value>
+  </data>
+  <data name="BaseUrlPlain" xml:space="preserve">
+    <value>일반 http 주소는 API 키를 암호화하지 않고 전송합니다. https를 사용하거나 이 PC의 주소를 사용하세요.</value>
+  </data>
+  <data name="BadKeyChars" xml:space="preserve">
+    <value>이 키에는 API 키에 사용할 수 없는 문자가 있습니다.</value>
+  </data>
+  <data name="CliNotFound" xml:space="preserve">
+    <value>Glance가 claude 명령을 찾을 수 없습니다. Claude CLI를 설치하고 claude를 한 번 실행하여 로그인한 다음 다시 시도하세요.</value>
+  </data>
+  <data name="CliTimedOut" xml:space="preserve">
+    <value>{0}이(가) 응답하는 데 너무 오래 걸렸습니다.</value>
+  </data>
+  <data name="CliError" xml:space="preserve">
+    <value>{0}에서 오류가 보고되었습니다.</value>
+  </data>
+  <data name="CliExit" xml:space="preserve">
+    <value>{0}이(가) 코드 {1}(으)로 종료되었습니다.</value>
+  </data>
+  <data name="CliNoAnswer" xml:space="preserve">
+    <value>{0}에서 답변을 반환하지 않았습니다.</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>업데이트 확인</value>
+  </data>
+  <data name="UpdateTo" xml:space="preserve">
+    <value>Glance {0}(으)로 업데이트</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Glance {0}을(를) 사용할 수 있습니다.</value>
+  </data>
+  <data name="Effort" xml:space="preserve">
+    <value>추론 수준</value>
+  </data>
+  <data name="EffortDefault" xml:space="preserve">
+    <value>기본값</value>
+  </data>
+  <data name="EffortMinimal" xml:space="preserve">
+    <value>최소</value>
+  </data>
+  <data name="EffortLow" xml:space="preserve">
+    <value>낮음</value>
+  </data>
+  <data name="EffortMedium" xml:space="preserve">
+    <value>보통</value>
+  </data>
+  <data name="EffortHigh" xml:space="preserve">
+    <value>높음</value>
+  </data>
+  <data name="EffortXHigh" xml:space="preserve">
+    <value>매우 높음</value>
+  </data>
+  <data name="EffortMax" xml:space="preserve">
+    <value>최대</value>
+  </data>
+  <data name="CodexNotFound" xml:space="preserve">
+    <value>Glance가 codex 명령을 찾을 수 없습니다. npm install -g @openai/codex로 설치하고 codex login으로 로그인한 다음 다시 시도하세요.</value>
+  </data>
+  <data name="GeminiNotFound" xml:space="preserve">
+    <value>Glance가 gemini 명령을 찾을 수 없습니다. npm install -g @google/gemini-cli로 설치하고 gemini를 한 번 실행하여 로그인한 다음 다시 시도하세요.</value>
+  </data>
+  <data name="AccountFound" xml:space="preserve">
+    <value>찾음: {0}</value>
+  </data>
+  <data name="AccountMissing" xml:space="preserve">
+    <value>설치되지 않음. 설치 방법: {0}</value>
+  </data>
+  <data name="SignedIn" xml:space="preserve">
+    <value>로그인됨</value>
+  </data>
+  <data name="NotSignedIn" xml:space="preserve">
+    <value>로그인되지 않음</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>로그인</value>
+  </data>
+  <data name="AnswerGoesTo" xml:space="preserve">
+    <value>답변 전달 방식</value>
+  </data>
+  <data name="ShowIt" xml:space="preserve">
+    <value>표시</value>
+  </data>
+  <data name="ShowAndCopy" xml:space="preserve">
+    <value>표시하고 복사</value>
+  </data>
+  <data name="CopyOnly" xml:space="preserve">
+    <value>복사만</value>
+  </data>
+</root>

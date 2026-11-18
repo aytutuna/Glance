@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="MouseScreen" xml:space="preserve">
+    <value>鼠标所在的显示器</value>
+  </data>
+  <data name="AllScreens" xml:space="preserve">
+    <value>所有显示器</value>
+  </data>
+  <data name="ActiveWindow" xml:space="preserve">
+    <value>活动窗口</value>
+  </data>
+  <data name="ScreenPlain" xml:space="preserve">
+    <value>显示器 {0}（{1}x{2}）</value>
+  </data>
+  <data name="ScreenPrimary" xml:space="preserve">
+    <value>显示器 {0}（{1}x{2}，主显示器）</value>
+  </data>
+  <data name="AlreadyRunning" xml:space="preserve">
+    <value>Glance 已在运行。按 {0} 读取屏幕。</value>
+  </data>
+  <data name="StartupFailed" xml:space="preserve">
+    <value>无法更改 Windows 启动设置。</value>
+  </data>
+  <data name="Tooltip" xml:space="preserve">
+    <value>Glance（读取：{0}，区域：{1}，关闭：{2}）</value>
+  </data>
+  <data name="KeyReadsScreen" xml:space="preserve">
+    <value>{0}（读取屏幕）</value>
+  </data>
+  <data name="KeyReadsArea" xml:space="preserve">
+    <value>{0}（读取区域）</value>
+  </data>
+  <data name="KeyClosesAnswer" xml:space="preserve">
+    <value>{0}（关闭回答）</value>
+  </data>
+  <data name="KeyHidesAnswer" xml:space="preserve">
+    <value>{0}（隐藏回答文字）</value>
+  </data>
+  <data name="ListJoin" xml:space="preserve">
+    <value>和</value>
+  </data>
+  <data name="KeysFailed" xml:space="preserve">
+    <value>无法使用 {0}：Windows 或其他程序已占用该按键。请从通知区域菜单中选择其他按键。</value>
+  </data>
+  <data name="KeyOnlyHere" xml:space="preserve">
+    <value>{0} 现在在所有程序中仅用作 {1} 键。请在通知区域菜单中更改以恢复。</value>
+  </data>
+  <data name="SettingsNotSaved" xml:space="preserve">
+    <value>无法保存设置文件，此选择在重新启动后将丢失。</value>
+  </data>
+  <data name="MenuReadNow" xml:space="preserve">
+    <value>立即读取屏幕</value>
+  </data>
+  <data name="ReadArea" xml:space="preserve">
+    <value>读取区域</value>
+  </data>
+  <data name="MenuHideText" xml:space="preserve">
+    <value>隐藏回答文字</value>
+  </data>
+  <data name="ReadFrom" xml:space="preserve">
+    <value>读取来源</value>
+  </data>
+  <data name="ShowAnswerOn" xml:space="preserve">
+    <value>回答显示在</value>
+  </data>
+  <data name="PlainAnswer" xml:space="preserve">
+    <value>纯黑色回答</value>
+  </data>
+  <data name="IdentifyScreens" xml:space="preserve">
+    <value>标识显示器</value>
+  </data>
+  <data name="KeyMenu" xml:space="preserve">
+    <value>{0} 键（{1}）...</value>
+  </data>
+  <data name="KeyTitle" xml:space="preserve">
+    <value>{0} 键</value>
+  </data>
+  <data name="JobRead" xml:space="preserve">
+    <value>读取</value>
+  </data>
+  <data name="JobArea" xml:space="preserve">
+    <value>区域</value>
+  </data>
+  <data name="JobClose" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="JobHide" xml:space="preserve">
+    <value>隐藏</value>
+  </data>
+  <data name="StartWithWindows" xml:space="preserve">
+    <value>随 Windows 启动</value>
+  </data>
+  <data name="RecentAnswers" xml:space="preserve">
+    <value>最近的回答</value>
+  </data>
+  <data name="KeepAnswers" xml:space="preserve">
+    <value>关闭后保留回答</value>
+  </data>
+  <data name="ClearRecent" xml:space="preserve">
+    <value>清除最近的回答</value>
+  </data>
+  <data name="MenuSettings" xml:space="preserve">
+    <value>设置...</value>
+  </data>
+  <data name="MenuExit" xml:space="preserve">
+    <value>退出</value>
+  </data>
+  <data name="AnswerPosition" xml:space="preserve">
+    <value>回答位置</value>
+  </data>
+  <data name="BottomRight" xml:space="preserve">
+    <value>右下角</value>
+  </data>
+  <data name="CenterOfScreen" xml:space="preserve">
+    <value>屏幕中央</value>
+  </data>
+  <data name="DrawnArea" xml:space="preserve">
+    <value>绘制的区域</value>
+  </data>
+  <data name="DrawAnswerArea" xml:space="preserve">
+    <value>绘制回答区域...</value>
+  </data>
+  <data name="TextOpacity" xml:space="preserve">
+    <value>文字不透明度</value>
+  </data>
+  <data name="DragAnswerArea" xml:space="preserve">
+    <value>拖动以选择回答显示的区域。按 Esc 取消。</value>
+  </data>
+  <data name="AnswersHere" xml:space="preserve">
+    <value>回答将显示在此处。</value>
+  </data>
+  <data name="AI" xml:space="preserve">
+    <value>AI</value>
+  </data>
+  <data name="ChangeOrder" xml:space="preserve">
+    <value>更改顺序...</value>
+  </data>
+  <data name="ConnectAi" xml:space="preserve">
+    <value>连接 AI...</value>
+  </data>
+  <data name="ClaudeCliModel" xml:space="preserve">
+    <value>Claude CLI 模型</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>模式</value>
+  </data>
+  <data name="EditModes" xml:space="preserve">
+    <value>编辑模式...</value>
+  </data>
+  <data name="WindowsLanguage" xml:space="preserve">
+    <value>Windows 语言（{0}）</value>
+  </data>
+  <data name="TranslateTo" xml:space="preserve">
+    <value>翻译为</value>
+  </data>
+  <data name="DragReadArea" xml:space="preserve">
+    <value>拖动以选择要读取的区域。按 Esc 取消。</value>
+  </data>
+  <data name="Reading" xml:space="preserve">
+    <value>正在读取...</value>
+  </data>
+  <data name="AnswerEmpty" xml:space="preserve">
+    <value>回答为空。</value>
+  </data>
+  <data name="QuestionPrefix" xml:space="preserve">
+    <value>问：</value>
+  </data>
+  <data name="Crashed" xml:space="preserve">
+    <value>出了点问题。详细信息请查看 glance.log。</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>复制</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>已复制</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>失败</value>
+  </data>
+  <data name="FollowUp" xml:space="preserve">
+    <value>继续提问</value>
+  </data>
+  <data name="PressKeyFor" xml:space="preserve">
+    <value>请按下用于“{0}”的按键</value>
+  </data>
+  <data name="FnHint" xml:space="preserve">
+    <value>在大多数笔记本电脑上，单独的 Fn 键无法传到 Windows。</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="PurposeRead" xml:space="preserve">
+    <value>读取屏幕</value>
+  </data>
+  <data name="PurposeClose" xml:space="preserve">
+    <value>关闭回答</value>
+  </data>
+  <data name="PurposeHide" xml:space="preserve">
+    <value>隐藏回答文字，保持屏幕为黑色</value>
+  </data>
+  <data name="WinKeyAlone" xml:space="preserve">
+    <value>单独按 Windows 键也会打开“开始”菜单。请再添加一个按键。</value>
+  </data>
+  <data name="KeyTaken" xml:space="preserve">
+    <value>{0} 已用作 {1} 键。</value>
+  </data>
+  <data name="KeyHeld" xml:space="preserve">
+    <value>无法使用 {0}。Windows 或其他程序已占用该按键。</value>
+  </data>
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Glance 设置</value>
+  </data>
+  <data name="TabReading" xml:space="preserve">
+    <value>读取</value>
+  </data>
+  <data name="TabAnswer" xml:space="preserve">
+    <value>回答</value>
+  </data>
+  <data name="TabKeys" xml:space="preserve">
+    <value>按键</value>
+  </data>
+  <data name="TabGeneral" xml:space="preserve">
+    <value>常规</value>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>更改...</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>顺序</value>
+  </data>
+  <data name="OpenLogFolder" xml:space="preserve">
+    <value>打开日志文件夹</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="ConnectTitle" xml:space="preserve">
+    <value>连接 AI</value>
+  </data>
+  <data name="SavedKeysCaption" xml:space="preserve">
+    <value>已保存的密钥，用完后依次尝试</value>
+  </data>
+  <data name="ApiKey" xml:space="preserve">
+    <value>API 密钥</value>
+  </data>
+  <data name="BaseUrl" xml:space="preserve">
+    <value>基础 URL</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>模型</value>
+  </data>
+  <data name="ConnectNote" xml:space="preserve">
+    <value>你读取的屏幕截图将发送到你在此选择的 AI。</value>
+  </data>
+  <data name="RemoveKey" xml:space="preserve">
+    <value>移除密钥</value>
+  </data>
+  <data name="LoadModels" xml:space="preserve">
+    <value>加载模型</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="PasteAnotherKey" xml:space="preserve">
+    <value>粘贴另一个密钥以添加</value>
+  </data>
+  <data name="Optional" xml:space="preserve">
+    <value>可选</value>
+  </data>
+  <data name="PasteKey" xml:space="preserve">
+    <value>粘贴 API 密钥</value>
+  </data>
+  <data name="AddKey" xml:space="preserve">
+    <value>添加密钥</value>
+  </data>
+  <data name="ApiKeyOptional" xml:space="preserve">
+    <value>API 密钥（可选）</value>
+  </data>
+  <data name="LoadingModels" xml:space="preserve">
+    <value>正在加载模型...</value>
+  </data>
+  <data name="ModelsLoaded" xml:space="preserve">
+    <value>已加载 {0} 个模型。密钥可用。</value>
+  </data>
+  <data name="ProviderTimeout" xml:space="preserve">
+    <value>提供商未在规定时间内响应。</value>
+  </data>
+  <data name="SavedKeysUnreadable" xml:space="preserve">
+    <value>无法读取已保存的密钥。请输入新密钥，或将其移除。</value>
+  </data>
+  <data name="EnterKey" xml:space="preserve">
+    <value>请输入 API 密钥。</value>
+  </data>
+  <data name="PickModel" xml:space="preserve">
+    <value>请选择或输入模型。“加载模型”会列出此密钥可用的模型。</value>
+  </data>
+  <data name="SavedKeyUnreadable" xml:space="preserve">
+    <value>密钥 {0}（无法读取）</value>
+  </data>
+  <data name="SavedKeyEnding" xml:space="preserve">
+    <value>密钥 {0}（末尾为 {1}）</value>
+  </data>
+  <data name="SavedKey" xml:space="preserve">
+    <value>密钥 {0}</value>
+  </data>
+  <data name="OptKeyUnreadable" xml:space="preserve">
+    <value>密钥无法读取</value>
+  </data>
+  <data name="OptKeyEnding" xml:space="preserve">
+    <value>末尾为 {0} 的密钥</value>
+  </data>
+  <data name="OptKey" xml:space="preserve">
+    <value>密钥</value>
+  </data>
+  <data name="CustomName" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="CustomHost" xml:space="preserve">
+    <value>自定义（{0}）</value>
+  </data>
+  <data name="OrderTitle" xml:space="preserve">
+    <value>AI 顺序</value>
+  </data>
+  <data name="OrderNote" xml:space="preserve">
+    <value>Glance 会先询问第一个勾选的 AI。当它的用量或额度用完时，下一个 AI 会直接接着回答。30 分钟后将回到第一个。</value>
+  </data>
+  <data name="Up" xml:space="preserve">
+    <value>上移</value>
+  </data>
+  <data name="Down" xml:space="preserve">
+    <value>下移</value>
+  </data>
+  <data name="TickOne" xml:space="preserve">
+    <value>请至少勾选一项。</value>
+  </data>
+  <data name="EditModesTitle" xml:space="preserve">
+    <value>编辑模式</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>添加</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>确定</value>
+  </data>
+  <data name="NewMode" xml:space="preserve">
+    <value>新模式</value>
+  </data>
+  <data name="PromptEmpty" xml:space="preserve">
+    <value>提示词不能为空。请使用“重置”恢复默认值。</value>
+  </data>
+  <data name="ModeNeedsBoth" xml:space="preserve">
+    <value>模式需要名称和提示词。</value>
+  </data>
+  <data name="ModeAnswer" xml:space="preserve">
+    <value>回答</value>
+  </data>
+  <data name="ModeExplain" xml:space="preserve">
+    <value>解释</value>
+  </data>
+  <data name="ModeTranslate" xml:space="preserve">
+    <value>翻译</value>
+  </data>
+  <data name="ModeSummarize" xml:space="preserve">
+    <value>总结</value>
+  </data>
+  <data name="ConnectionLost" xml:space="preserve">
+    <value>与 {0} 的连接已断开。</value>
+  </data>
+  <data name="TookTooLong" xml:space="preserve">
+    <value>{0} 响应时间过长。</value>
+  </data>
+  <data name="NoAnswer" xml:space="preserve">
+    <value>{0} 没有返回回答。</value>
+  </data>
+  <data name="ReportedError" xml:space="preserve">
+    <value>{0} 报告了错误。</value>
+  </data>
+  <data name="ReportedErrorDetail" xml:space="preserve">
+    <value>{0} 报告了错误：{1}</value>
+  </data>
+  <data name="NoModelList" xml:space="preserve">
+    <value>{0} 没有发送模型列表。</value>
+  </data>
+  <data name="ListedNoModels" xml:space="preserve">
+    <value>{0} 没有列出任何模型。</value>
+  </data>
+  <data name="Filtered" xml:space="preserve">
+    <value>{0} 过滤了回答，未返回任何文字。</value>
+  </data>
+  <data name="GeminiBlocked" xml:space="preserve">
+    <value>Gemini 拦截了该屏幕截图（{0}），未返回任何文字。</value>
+  </data>
+  <data name="GeminiStopped" xml:space="preserve">
+    <value>Gemini 已停止且没有回答（{0}）。可能是内容被拦截。</value>
+  </data>
+  <data name="Declined" xml:space="preserve">
+    <value>{0} 拒绝回答此问题。</value>
+  </data>
+  <data name="NoAiUsable" xml:space="preserve">
+    <value>顺序中的 AI 均无法使用。请在通知区域菜单的“AI”下检查。</value>
+  </data>
+  <data name="SavedKeyUnusable" xml:space="preserve">
+    <value>此 Windows 帐户无法读取已保存的 API 密钥。请重新连接 AI 并输入新密钥。</value>
+  </data>
+  <data name="NeedsKey" xml:space="preserve">
+    <value>此 AI 需要 API 密钥。</value>
+  </data>
+  <data name="AllFailed" xml:space="preserve">
+    <value>所有 {0} 个选项均失败。{1}</value>
+  </data>
+  <data name="CantReach" xml:space="preserve">
+    <value>无法连接到 {0}。请检查网络连接和地址。</value>
+  </data>
+  <data name="CantReachShort" xml:space="preserve">
+    <value>无法连接到 {0}。请检查网络连接。</value>
+  </data>
+  <data name="Redirect" xml:space="preserve">
+    <value>{0} 返回了重定向。Glance 不会跟随重定向，请检查地址。</value>
+  </data>
+  <data name="RedirectShort" xml:space="preserve">
+    <value>{0} 返回了重定向，Glance 不会跟随。</value>
+  </data>
+  <data name="Http401" xml:space="preserve">
+    <value>{0} 拒绝了 API 密钥（401）。</value>
+  </data>
+  <data name="Http402" xml:space="preserve">
+    <value>此密钥额度已用完（402）。</value>
+  </data>
+  <data name="Http403" xml:space="preserve">
+    <value>{0} 拒绝了该请求（403）。</value>
+  </data>
+  <data name="Http404" xml:space="preserve">
+    <value>{0} 没有该模型或地址（404）。</value>
+  </data>
+  <data name="Http404Model" xml:space="preserve">
+    <value>{0} 没有该模型（404）。</value>
+  </data>
+  <data name="Http429" xml:space="preserve">
+    <value>{0} 正在限制此密钥的请求频率，或其配额已用完（429）。</value>
+  </data>
+  <data name="HttpServer" xml:space="preserve">
+    <value>{0} 出现服务器错误（{1}）。</value>
+  </data>
+  <data name="HttpOther" xml:space="preserve">
+    <value>{0} 返回了错误（{1}）。</value>
+  </data>
+  <data name="LineTooLong" xml:space="preserve">
+    <value>回复中有一行过长。</value>
+  </data>
+  <data name="BaseUrlScheme" xml:space="preserve">
+    <value>基础 URL 必须以 http:// 或 https:// 开头。</value>
+  </data>
+  <data name="BaseUrlUser" xml:space="preserve">
+    <value>请从基础 URL 中删除用户名和密码。</value>
+  </data>
+  <data name="BaseUrlQuery" xml:space="preserve">
+    <value>请从基础 URL 中删除 ? 或 # 及其后的所有内容。</value>
+  </data>
+  <data name="BaseUrlPlain" xml:space="preserve">
+    <value>纯 http 地址会以未加密方式发送 API 密钥。请使用 https，或使用这台电脑上的地址。</value>
+  </data>
+  <data name="BadKeyChars" xml:space="preserve">
+    <value>该密钥包含 API 密钥不能使用的字符。</value>
+  </data>
+  <data name="CliNotFound" xml:space="preserve">
+    <value>Glance 找不到 claude 命令。请安装 Claude CLI，运行一次 claude 以登录，然后重试。</value>
+  </data>
+  <data name="CliTimedOut" xml:space="preserve">
+    <value>{0} 响应时间过长。</value>
+  </data>
+  <data name="CliError" xml:space="preserve">
+    <value>{0} 报告了错误。</value>
+  </data>
+  <data name="CliExit" xml:space="preserve">
+    <value>{0} 已退出，退出代码为 {1}。</value>
+  </data>
+  <data name="CliNoAnswer" xml:space="preserve">
+    <value>{0} 没有返回回答。</value>
+  </data>
+  <data name="CheckUpdates" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="UpdateTo" xml:space="preserve">
+    <value>更新到 Glance {0}</value>
+  </data>
+  <data name="UpdateReady" xml:space="preserve">
+    <value>Glance {0} 已可用。</value>
+  </data>
+  <data name="Effort" xml:space="preserve">
+    <value>推理强度</value>
+  </data>
+  <data name="EffortDefault" xml:space="preserve">
+    <value>默认</value>
+  </data>
+  <data name="EffortMinimal" xml:space="preserve">
+    <value>最低</value>
+  </data>
+  <data name="EffortLow" xml:space="preserve">
+    <value>低</value>
+  </data>
+  <data name="EffortMedium" xml:space="preserve">
+    <value>中</value>
+  </data>
+  <data name="EffortHigh" xml:space="preserve">
+    <value>高</value>
+  </data>
+  <data name="EffortXHigh" xml:space="preserve">
+    <value>超高</value>
+  </data>
+  <data name="EffortMax" xml:space="preserve">
+    <value>最大</value>
+  </data>
+  <data name="CodexNotFound" xml:space="preserve">
+    <value>Glance 找不到 codex 命令。请使用 npm install -g @openai/codex 安装，运行 codex login 登录，然后重试。</value>
+  </data>
+  <data name="GeminiNotFound" xml:space="preserve">
+    <value>Glance 找不到 gemini 命令。请使用 npm install -g @google/gemini-cli 安装，运行一次 gemini 以登录，然后重试。</value>
+  </data>
+  <data name="AccountFound" xml:space="preserve">
+    <value>已找到：{0}</value>
+  </data>
+  <data name="AccountMissing" xml:space="preserve">
+    <value>未安装。请使用以下命令安装：{0}</value>
+  </data>
+  <data name="SignedIn" xml:space="preserve">
+    <value>已登录</value>
+  </data>
+  <data name="NotSignedIn" xml:space="preserve">
+    <value>未登录</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>登录</value>
+  </data>
+  <data name="AnswerGoesTo" xml:space="preserve">
+    <value>回答发送到</value>
+  </data>
+  <data name="ShowIt" xml:space="preserve">
+    <value>显示</value>
+  </data>
+  <data name="ShowAndCopy" xml:space="preserve">
+    <value>显示并复制</value>
+  </data>
+  <data name="CopyOnly" xml:space="preserve">
+    <value>仅复制</value>
+  </data>
+</root>
