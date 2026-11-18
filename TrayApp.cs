@@ -56,6 +56,8 @@ class TrayApp : ApplicationContext
             e.Cancel = false;
         };
         tray.ContextMenuStrip = menu;
+        if (System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft)
+            menu.RightToLeft = RightToLeft.Yes;
         tray.Icon = idleIcon;
         UpdateTooltip();
         tray.MouseClick += (_, e) =>

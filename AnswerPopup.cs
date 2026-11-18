@@ -19,6 +19,7 @@ class AnswerPopup : OverlayForm
     Rectangle target;
     bool ask, activatable;
     readonly bool centered, plain;
+    readonly bool rtl = System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft;
     readonly double[]? area;
     Font? fit;
     IntPtr previous;
@@ -53,7 +54,7 @@ class AnswerPopup : OverlayForm
         panel = new Panel { Dock = DockStyle.Fill, AutoScroll = true, BackColor = BackColor };
         panel.Controls.Add(label);
         bar = new Panel { Dock = DockStyle.Top, BackColor = BackColor };
-        copy = NewButton(Strings.Copy, ContentAlignment.MiddleRight);
+        copy = NewButton(Strings.Copy, rtl ? ContentAlignment.MiddleLeft : ContentAlignment.MiddleRight);
         close = NewButton("×", ContentAlignment.MiddleCenter);
         copy.Click += (_, _) => CopyText();
         close.Click += (_, _) => CloseClicked?.Invoke();
@@ -68,6 +69,8 @@ class AnswerPopup : OverlayForm
             BorderStyle = BorderStyle.FixedSingle,
             PlaceholderText = Strings.FollowUp,
         };
+        if (rtl)
+            box.RightToLeft = RightToLeft.Yes;
         box.MouseDown += (_, _) => TakeFocus();
         box.KeyDown += BoxKeyDown;
         inputBar.Controls.Add(box);
@@ -379,10 +382,12 @@ class AnswerPopup : OverlayForm
         inputBar.Height = inputHeight;
         box.SetBounds(pad, (inputHeight - box.Height) / 2, width - 2 * pad, box.Height);
         int closeWidth = (int)(30 * Unit), copyWidth = (int)(90 * Unit);
-        close.SetBounds(width - pad - closeWidth, 0, closeWidth, barHeight);
-        copy.SetBounds(close.Left - copyWidth, 0, copyWidth, barHeight);
+        // the popup is not mirrored like the dialogs, since a drawn area is placed by screen coordinates
+        close.SetBounds(rtl ? pad : width - pad - closeWidth, 0, closeWidth, barHeight);
+        copy.SetBounds(rtl ? close.Right : close.Left - copyWidth, 0, copyWidth, barHeight);
 
         label.Text = text;
+        label.RightToLeft = Native.StartsRightToLeft(text) ? RightToLeft.Yes : RightToLeft.No;
         var at = plain ? new Point(room!.Value.X - b.X, room.Value.Y - b.Y) : Point.Empty;
         label.SetBounds(at.X + pad, at.Y + pad, inner, textHeight);
         // setting this turns scrolling back on
@@ -398,6 +403,8 @@ class AnswerPopup : OverlayForm
     int Measure(string text, int width)
     {
         var flags = TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix | TextFormatFlags.TextBoxControl;
+        if (Native.StartsRightToLeft(text))
+            flags |= TextFormatFlags.RightToLeft;
         return TextRenderer.MeasureText(text, TextFont, new Size(width, int.MaxValue), flags).Height + 2;
     }
 
