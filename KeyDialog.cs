@@ -30,42 +30,44 @@ class KeyDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
+        Native.Mirror(this);
         Text = string.Format(Strings.KeyTitle, JobName(job));
         StartPosition = FormStartPosition.Manual;
-        ClientSize = new Size(Px(380), Px(170));
-        var area = screen.WorkingArea;
-        Location = new Point(area.X + (area.Width - Width) / 2, area.Y + (area.Height - Height) / 2);
-
-        Controls.Add(new Label
+        var title = new Label
         {
             Text = string.Format(Strings.PressKeyFor, Purpose(job)),
             Font = new Font("Segoe UI", Px(16), GraphicsUnit.Pixel),
             AutoSize = false,
-            Bounds = new Rectangle(Px(16), Px(14), Px(348), Px(26)),
-        });
-        Controls.Add(new Label
+        };
+        title.Bounds = new Rectangle(Px(16), Px(14), Px(348), Native.TextHeight(title, Px(348), Px(26)));
+        var hint = new Label
         {
             Text = Strings.FnHint,
             Font = new Font("Segoe UI", Px(12), GraphicsUnit.Pixel),
             ForeColor = SystemColors.GrayText,
             AutoSize = false,
-            Bounds = new Rectangle(Px(16), Px(44), Px(348), Px(20)),
-        });
+        };
+        hint.Bounds = new Rectangle(Px(16), title.Bottom + Px(4), Px(348), Native.TextHeight(hint, Px(348), Px(20)));
         status = new Label
         {
             Font = new Font("Segoe UI", Px(12), GraphicsUnit.Pixel),
             ForeColor = Color.Firebrick,
             AutoSize = false,
-            Bounds = new Rectangle(Px(16), Px(70), Px(348), Px(52)),
+            Bounds = new Rectangle(Px(16), hint.Bottom + Px(6), Px(348), Px(44)),
         };
-        Controls.Add(status);
+        Controls.AddRange(new Control[] { title, hint, status });
         var cancel = new Button
         {
             Text = Strings.Cancel,
             Font = new Font("Segoe UI", Px(12), GraphicsUnit.Pixel),
             TabStop = false,
-            Bounds = new Rectangle(Px(264), Px(128), Px(100), Px(30)),
+            Bounds = new Rectangle(Px(264), Math.Max(Px(128), status.Bottom + Px(6)), Px(100), Px(30)),
         };
+        cancel.Width = Native.ButtonWidth(cancel, Px(100));
+        cancel.Left = Px(364) - cancel.Width;
+        ClientSize = new Size(Px(380), cancel.Bottom + Px(12));
+        var area = screen.WorkingArea;
+        Location = new Point(area.X + (area.Width - Width) / 2, area.Y + (area.Height - Height) / 2);
         cancel.Click += (_, _) =>
         {
             Chosen = null;

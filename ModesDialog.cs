@@ -37,6 +37,7 @@ class ModesDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
+        Native.Mirror(this);
         Text = Strings.EditModesTitle;
         StartPosition = FormStartPosition.Manual;
         font = new Font("Segoe UI", Px(13), GraphicsUnit.Pixel);
@@ -76,17 +77,21 @@ class ModesDialog : Form
 
         Controls.AddRange(new Control[] { list, add, delete, reset, name, prompt, status, save, cancel });
         int y = Px(16);
-        list.Bounds = new Rectangle(Px(16), y, Px(150), Px(250));
-        add.Bounds = new Rectangle(Px(16), y + Px(258), Px(70), Px(28));
-        delete.Bounds = new Rectangle(Px(96), y + Px(258), Px(70), Px(28));
-        name.Bounds = new Rectangle(Px(178), y, Px(Wide - 162), Px(24));
-        prompt.Bounds = new Rectangle(Px(178), y + Px(32), Px(Wide - 162), Px(218));
-        reset.Bounds = new Rectangle(Px(178), y + Px(258), Px(70), Px(28));
+        int addWidth = Native.ButtonWidth(add, Px(70)), deleteWidth = Native.ButtonWidth(delete, Px(70));
+        int left = Math.Max(Px(150), addWidth + deleteWidth + Px(10));
+        int right = Px(16) + left + Px(12);
+        list.Bounds = new Rectangle(Px(16), y, left, Px(250));
+        add.Bounds = new Rectangle(Px(16), y + Px(258), addWidth, Px(28));
+        delete.Bounds = new Rectangle(Px(16) + addWidth + Px(10), y + Px(258), deleteWidth, Px(28));
+        name.Bounds = new Rectangle(right, y, Px(16 + Wide) - right, Px(24));
+        prompt.Bounds = new Rectangle(right, y + Px(32), Px(16 + Wide) - right, Px(218));
+        reset.Bounds = new Rectangle(right, y + Px(258), Native.ButtonWidth(reset, Px(70)), Px(28));
         y += Px(296);
         status.Bounds = new Rectangle(Px(16), y, Px(Wide), Px(22));
         y += Px(28);
-        save.Bounds = new Rectangle(Px(16 + Wide - 208), y, Px(100), Px(30));
-        cancel.Bounds = new Rectangle(Px(16 + Wide - 100), y, Px(100), Px(30));
+        int ok = Math.Max(Native.ButtonWidth(save, Px(100)), Native.ButtonWidth(cancel, Px(100)));
+        save.Bounds = new Rectangle(Px(16 + Wide) - 2 * ok - Px(8), y, ok, Px(30));
+        cancel.Bounds = new Rectangle(Px(16 + Wide) - ok, y, ok, Px(30));
         ClientSize = new Size(Px(Wide + 32), y + Px(46));
         var area = screen.WorkingArea;
         Location = new Point(area.X + (area.Width - Width) / 2, area.Y + (area.Height - Height) / 2);

@@ -25,6 +25,7 @@ class OrderDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
+        Native.Mirror(this);
         Text = Strings.OrderTitle;
         StartPosition = FormStartPosition.Manual;
         font = new Font("Segoe UI", Px(13), GraphicsUnit.Pixel);
@@ -53,16 +54,19 @@ class OrderDialog : Form
 
         Controls.AddRange(new Control[] { note, list, up, down, status, save, cancel });
         int y = Px(14);
-        note.Bounds = new Rectangle(Px(16), y, Px(Wide), Px(54));
-        y += Px(60);
-        list.Bounds = new Rectangle(Px(16), y, Px(Wide - 92), Px(200));
-        up.Bounds = new Rectangle(Px(16 + Wide - 80), y, Px(80), Px(28));
-        down.Bounds = new Rectangle(Px(16 + Wide - 80), y + Px(36), Px(80), Px(28));
+        int noteHeight = Native.TextHeight(note, Px(Wide), Px(54));
+        note.Bounds = new Rectangle(Px(16), y, Px(Wide), noteHeight);
+        y += noteHeight + Px(6);
+        int move = Math.Max(Native.ButtonWidth(up, Px(80)), Native.ButtonWidth(down, Px(80)));
+        list.Bounds = new Rectangle(Px(16), y, Px(Wide) - move - Px(12), Px(200));
+        up.Bounds = new Rectangle(Px(16 + Wide) - move, y, move, Px(28));
+        down.Bounds = new Rectangle(Px(16 + Wide) - move, y + Px(36), move, Px(28));
         y += Px(208);
         status.Bounds = new Rectangle(Px(16), y, Px(Wide), Px(34));
         y += Px(40);
-        save.Bounds = new Rectangle(Px(16 + Wide - 208), y, Px(100), Px(30));
-        cancel.Bounds = new Rectangle(Px(16 + Wide - 100), y, Px(100), Px(30));
+        int ok = Math.Max(Native.ButtonWidth(save, Px(100)), Native.ButtonWidth(cancel, Px(100)));
+        save.Bounds = new Rectangle(Px(16 + Wide) - 2 * ok - Px(8), y, ok, Px(30));
+        cancel.Bounds = new Rectangle(Px(16 + Wide) - ok, y, ok, Px(30));
         ClientSize = new Size(Px(420), y + Px(44));
         var area = screen.WorkingArea;
         Location = new Point(area.X + (area.Width - Width) / 2, area.Y + (area.Height - Height) / 2);

@@ -34,6 +34,7 @@ class SettingsDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
+        Native.Mirror(this);
         Text = Strings.SettingsTitle;
         StartPosition = FormStartPosition.Manual;
         font = new Font("Segoe UI", Px(13), GraphicsUnit.Pixel);
@@ -113,26 +114,27 @@ class SettingsDialog : Form
         }
 
         order = new Label { AutoSize = false };
-        Add(ai, new Label { Text = Strings.Order, AutoSize = false }, 12, 12 + 5, 130);
+        Add(ai, Caption(Strings.Order), 12, 12 - 5, 130, 34);
         Add(ai, order, Field, 12 + 5, Wide, 88);
-        Add(ai, Button(Strings.ChangeOrder, app.ChangeOrder), Field, 12 + 100, 136);
-        Add(ai, Button(Strings.ConnectAi, app.Connect), Field + 146, 12 + 100, 136);
-        modelLabel = new Label { Text = Strings.ClaudeCliModel, AutoSize = false };
+        var changeOrder = Button(Strings.ChangeOrder, app.ChangeOrder);
+        Add(ai, changeOrder, Field, 12 + 100, 136);
+        Add(ai, Button(Strings.ConnectAi, app.Connect), (int)(changeOrder.Right / scale) + 10, 12 + 100, 136);
+        modelLabel = Caption(Strings.ClaudeCliModel);
         model = Combo(() =>
         {
             settings.Model = Settings.Models[model!.SelectedIndex].Id;
             app.SaveLook();
         });
         model.Items.AddRange(Settings.Models.Select(m => (object)m.Name).ToArray());
-        Add(ai, modelLabel, 12, 12 + 144 + 5, 130);
+        Add(ai, modelLabel, 12, 12 + 144 - 5, 130, 34);
         Add(ai, model, Field, 12 + 144, Wide);
-        effortLabel = new Label { Text = Strings.Effort, AutoSize = false };
+        effortLabel = Caption(Strings.Effort);
         effort = Combo(() =>
         {
             settings.Effort[settings.FirstProvider()] = levels[effort!.SelectedIndex];
             app.SaveLook();
         });
-        Add(ai, effortLabel, 12, 12 + 178 + 5, 130);
+        Add(ai, effortLabel, 12, 12 + 178 - 5, 130, 34);
         Add(ai, effort, Field, 12 + 178, Wide);
 
         autostart = new CheckBox { Text = Strings.StartWithWindows };
@@ -150,7 +152,7 @@ class SettingsDialog : Form
         Add(general, updates, 12, 12 + 2 * 34, Wide + Field);
         Add(general, Button(Strings.OpenLogFolder, OpenLogFolder), 12, 12 + 3 * 34, 160);
 
-        var tabs = new TabControl { Bounds = new Rectangle(Px(12), Px(12), Px(436), Px(290)) };
+        var tabs = new TabControl { Bounds = new Rectangle(Px(12), Px(12), Px(436), Px(290)), RightToLeftLayout = RightToLeftLayout };
         tabs.TabPages.AddRange(new[] { reading, answer, keys, ai, general });
         var close = Button(Strings.Close, Close);
         close.Bounds = new Rectangle(Px(348), Px(314), Px(100), Px(30));
@@ -176,21 +178,29 @@ class SettingsDialog : Form
 
     Button Button(string text, Action click)
     {
-        var button = new Button { Text = text };
+        var button = new Button { Text = text, Font = font };
         button.Click += (_, _) => click();
         return button;
     }
 
     void Row(TabPage page, int row, string text, Control control, int width = Wide)
     {
-        Add(page, new Label { Text = text, AutoSize = false }, 12, 12 + row * 34 + 5, 130);
+        Add(page, Caption(text), 12, 12 + row * 34 - 5, 130, 34);
         Add(page, control, Field, 12 + row * 34, width);
+    }
+
+    // two lines tall and centred on the control beside it, since translations run long
+    Label Caption(string text)
+    {
+        return new Label { Text = text, AutoSize = false, TextAlign = ContentAlignment.MiddleLeft };
     }
 
     void Add(TabPage page, Control control, int x, int y, int width, int height = 24)
     {
         control.Bounds = new Rectangle(Px(x), Px(y), Px(width), Px(height));
         page.Controls.Add(control);
+        if (control is Button button)
+            button.Width = Native.ButtonWidth(button, button.Width);
     }
 
     static void Fill(ComboBox box, IEnumerable<string> names, int selected)
@@ -198,6 +208,8 @@ class SettingsDialog : Form
         box.Items.Clear();
         box.Items.AddRange(names.Cast<object>().ToArray());
         box.SelectedIndex = selected;
+        int widest = box.Items.Cast<object>().Select(i => TextRenderer.MeasureText(i.ToString(), box.Font).Width).DefaultIfEmpty(0).Max();
+        box.DropDownWidth = Math.Max(box.Width, widest + SystemInformation.VerticalScrollBarWidth + 8);
     }
 
     void OpenLogFolder()

@@ -13,7 +13,7 @@ class ConnectDialog : Form
         [Settings.Codex] = ("codex", "npm install -g @openai/codex", "codex login"),
         [Settings.GeminiCli] = ("gemini", "npm install -g @google/gemini-cli", "gemini"),
     };
-    const int Wide = 388, Narrow = 276;
+    const int Wide = 388;
 
     readonly Settings settings;
     readonly double scale;
@@ -44,6 +44,7 @@ class ConnectDialog : Form
         MinimizeBox = false;
         ShowInTaskbar = false;
         TopMost = true;
+        Native.Mirror(this);
         Text = Strings.ConnectTitle;
         StartPosition = FormStartPosition.Manual;
         font = new Font("Segoe UI", Px(13), GraphicsUnit.Pixel);
@@ -80,6 +81,7 @@ class ConnectDialog : Form
         provider.SelectedIndexChanged += (_, _) => Pick();
 
         Controls.AddRange(new Control[] { providerLabel, provider, savedLabel, saved, remove, keyLabel, key, urlLabel, url, info, signIn, modelLabel, model, load, effortLabel, effort, note, status, save, cancel });
+        info.TextChanged += (_, _) => Arrange();
         Pick();
         var area = screen.WorkingArea;
         Location = new Point(area.X + (area.Width - Width) / 2, area.Y + (area.Height - Height) / 2);
@@ -143,30 +145,38 @@ class ConnectDialog : Form
     void Arrange()
     {
         bool account = Accounts.ContainsKey(Id);
+        int wide = Px(Wide), gap = Px(12);
+        // the buttons beside a field take what their text needs, and the field gives up the room
+        int side = Math.Max(Native.ButtonWidth(remove, Px(100)), Native.ButtonWidth(load, Px(100)));
+        int narrow = wide - side - gap;
         int y = Px(14);
-        y = Row(providerLabel, provider, y, Wide, true);
+        y = Row(providerLabel, provider, y, wide, true);
         bool stored = !account && settings.HasKey(Id);
-        y = Row(savedLabel, saved, y, Narrow, stored);
+        y = Row(savedLabel, saved, y, narrow, stored);
         remove.Visible = stored;
-        remove.Bounds = new Rectangle(Px(16 + Narrow + 12), saved.Top - Px(1), Px(Wide - Narrow - 12), Px(26));
-        y = Row(keyLabel, key, y, Wide, !account);
-        y = Row(urlLabel, url, y, Wide, Id == "custom");
+        remove.Bounds = new Rectangle(Px(16) + narrow + gap, saved.Top - Px(1), side, Px(26));
+        y = Row(keyLabel, key, y, wide, !account);
+        y = Row(urlLabel, url, y, wide, Id == "custom");
         info.Visible = signIn.Visible = account;
         if (account)
         {
-            info.Bounds = new Rectangle(Px(16), y, Px(Wide - 112), Px(34));
-            signIn.Bounds = new Rectangle(Px(16 + Wide - 100), y, Px(100), Px(26));
-            y += Px(46);
+            int sign = Native.ButtonWidth(signIn, Px(100));
+            int infoHeight = Native.TextHeight(info, wide - sign - gap, Px(34));
+            info.Bounds = new Rectangle(Px(16), y, wide - sign - gap, infoHeight);
+            signIn.Bounds = new Rectangle(Px(16) + wide - sign, y, sign, Px(26));
+            y += Math.Max(Px(46), infoHeight + Px(12));
         }
-        y = Row(modelLabel, model, y, Narrow, true);
+        y = Row(modelLabel, model, y, narrow, true);
         load.Visible = !account;
-        load.Bounds = new Rectangle(Px(16 + Narrow + 12), model.Top - Px(1), Px(Wide - Narrow - 12), Px(26));
-        y = Row(effortLabel, effort, y, Narrow, levels.Count > 1);
-        note.Bounds = new Rectangle(Px(16), y, Px(Wide), Px(34));
-        status.Bounds = new Rectangle(Px(16), y + Px(36), Px(Wide), Px(48));
-        y += Px(90);
-        save.Bounds = new Rectangle(Px(16 + Wide - 208), y, Px(100), Px(30));
-        cancel.Bounds = new Rectangle(Px(16 + Wide - 100), y, Px(100), Px(30));
+        load.Bounds = new Rectangle(Px(16) + narrow + gap, model.Top - Px(1), side, Px(26));
+        y = Row(effortLabel, effort, y, narrow, levels.Count > 1);
+        int noteHeight = Native.TextHeight(note, wide, Px(34));
+        note.Bounds = new Rectangle(Px(16), y, wide, noteHeight);
+        status.Bounds = new Rectangle(Px(16), y + noteHeight + Px(2), wide, Px(48));
+        y += noteHeight + Px(56);
+        int ok = Math.Max(Native.ButtonWidth(save, Px(100)), Native.ButtonWidth(cancel, Px(100)));
+        save.Bounds = new Rectangle(Px(16) + wide - 2 * ok - Px(8), y, ok, Px(30));
+        cancel.Bounds = new Rectangle(Px(16) + wide - ok, y, ok, Px(30));
         ClientSize = new Size(Px(420), y + Px(44));
     }
 
@@ -175,10 +185,11 @@ class ConnectDialog : Form
         label.Visible = field.Visible = show;
         if (!show)
             return y;
-        label.Bounds = new Rectangle(Px(16), y, Px(Wide), Px(18));
-        field.Location = new Point(Px(16), y + Px(20));
-        field.Width = Px(width);
-        return y + Px(20) + field.Height + Px(12);
+        int height = Native.TextHeight(label, Px(Wide), Px(18));
+        label.Bounds = new Rectangle(Px(16), y, Px(Wide), height);
+        field.Location = new Point(Px(16), y + height + Px(2));
+        field.Width = width;
+        return y + height + Px(2) + field.Height + Px(12);
     }
 
     async Task ShowAccount(string id, CancellationTokenSource cts)

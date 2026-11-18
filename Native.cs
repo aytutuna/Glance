@@ -191,4 +191,36 @@ static class Native
         var monitor = MonitorFromPoint(center, 2);
         return GetDpiForMonitor(monitor, 0, out uint dpi, out _) == 0 ? dpi / 96.0 : 1.0;
     }
+
+    public static int ButtonWidth(Button button, int min)
+    {
+        return Math.Max(min, TextRenderer.MeasureText(button.Text, button.Font).Width + button.Font.Height * 3 / 2);
+    }
+
+    public static int TextHeight(Label label, int width, int min)
+    {
+        var flags = TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix;
+        return Math.Max(min, TextRenderer.MeasureText(label.Text, label.Font, new Size(width, int.MaxValue), flags).Height + 2);
+    }
+
+    // an answer is in whatever language the screen was in, so its direction follows its first letter
+    public static bool StartsRightToLeft(string text)
+    {
+        foreach (char c in text)
+        {
+            if (!char.IsLetter(c))
+                continue;
+            return c is >= '\u0590' and <= '\u08FF' or >= '\uFB1D' and <= '\uFDFF' or >= '\uFE70' and <= '\uFEFF';
+        }
+        return false;
+    }
+
+    // the dialogs place controls by left-to-right coordinates, so the window mirrors them instead
+    public static void Mirror(Form form)
+    {
+        if (!System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft)
+            return;
+        form.RightToLeft = RightToLeft.Yes;
+        form.RightToLeftLayout = true;
+    }
 }
