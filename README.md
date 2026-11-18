@@ -41,7 +41,7 @@ The tray menu and the settings window cover the same ground:
 - Connect an AI and Change order: save several keys and providers; Glance moves to the next one when a key fails or a limit runs out.
 - Check for updates, Start with Windows (Open at login on a Mac).
 
-The interface is in English and Turkish.
+The interface is in English, Arabic, Chinese (Simplified), Dutch, French, German, Hindi, Indonesian, Italian, Japanese, Korean, Polish, Portuguese (Brazil), Russian, Spanish and Turkish.
 
 ## Building
 
