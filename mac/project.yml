@@ -27,6 +27,7 @@ targets:
       properties:
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+        CFBundleLocalizations: [en, tr, ar, de, es, fr, hi, id, it, ja, ko, nl, pl, pt-BR, ru, zh-Hans]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.aytutuna.glance
