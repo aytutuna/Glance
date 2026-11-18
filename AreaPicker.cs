@@ -134,12 +134,13 @@ class AreaPicker : Form
         }
         else if (!dragging)
         {
-            var size = TextRenderer.MeasureText(hint, font);
+            var direction = Native.StartsRightToLeft(hint) ? TextFormatFlags.RightToLeft : TextFormatFlags.Default;
+            var size = TextRenderer.MeasureText(hint, font, Size.Empty, direction);
             int pad = size.Height / 2;
             var box = new Rectangle((all.Width - size.Width) / 2 - pad, all.Height / 8, size.Width + 2 * pad, size.Height + pad);
             using var back = new SolidBrush(Color.FromArgb(32, 32, 32));
             g.FillRectangle(back, box);
-            TextRenderer.DrawText(g, hint, font, box, Color.FromArgb(240, 240, 240), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+            TextRenderer.DrawText(g, hint, font, box, Color.FromArgb(240, 240, 240), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | direction);
         }
     }
 
