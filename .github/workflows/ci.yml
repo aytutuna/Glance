@@ -60,6 +60,11 @@ jobs:
           echo "$RUNNER_TEMP/xcodegen-$XCODEGEN_VERSION/xcodegen/bin" >> "$GITHUB_PATH"
       - run: xcodegen generate --spec mac/project.yml
       - run: xcodebuild build-for-testing -project mac/Glance.xcodeproj -scheme GlanceUI -destination 'platform=macOS' -derivedDataPath build CODE_SIGN_IDENTITY=-
+      - name: Check the app has every language
+        run: |
+          for l in en tr ar de es fr hi id it ja ko nl pl pt-BR ru zh-Hans; do
+            test -d "build/Build/Products/Debug/Glance.app/Contents/Resources/$l.lproj" || { echo "missing $l.lproj"; exit 1; }
+          done
       - name: Run the UI tests
         run: |
           mkdir -p ui
